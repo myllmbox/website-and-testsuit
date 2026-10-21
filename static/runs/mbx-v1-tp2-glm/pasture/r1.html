@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pasture</title>
+<style>
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#5C9C46}
+  svg{display:block;width:100%;height:100%}
+  .bouncer{will-change:transform}
+  .hop1{animation:hop .85s ease-in-out infinite}
+  .hop2{animation:hop 1.05s -.4s ease-in-out infinite}
+  .hop3{animation:hop .75s -.55s ease-in-out infinite}
+  .hop4{animation:hop .95s -.25s ease-in-out infinite}
+  @keyframes hop{0%,100%{transform:translateY(0)}42%{transform:translateY(-16px)}58%{transform:translateY(-13px)}}
+  .shadow{transform-box:fill-box;transform-origin:50% 50%;fill:#2E5B28;opacity:.26}
+  .sh1{animation:shade .85s ease-in-out infinite}
+  .sh2{animation:shade 1.05s -.4s ease-in-out infinite}
+  .sh3{animation:shade .75s -.55s ease-in-out infinite}
+  .sh4{animation:shade .95s -.25s ease-in-out infinite}
+  @keyframes shade{0%,100%{transform:scaleX(1);opacity:.26}42%{transform:scaleX(.7);opacity:.12}58%{transform:scaleX(.76);opacity:.15}}
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1600 900" preserveAspectRatio="none" aria-label="Animated pasture with a cow, sheep, pig and horse">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6FB9E8"/>
+      <stop offset=".55" stop-color="#A8D8F5"/>
+      <stop offset="1" stop-color="#E8F5FD"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8FC763"/>
+      <stop offset="1" stop-color="#5C9C46"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#FFF3B0" stop-opacity=".95"/>
+      <stop offset=".45" stop-color="#FFE98F" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#FFE98F" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="cowclip"><ellipse cx="0" cy="-78" rx="92" ry="50"/></clipPath>
+    <g id="tuft" stroke="#3F7D33" stroke-width="3" stroke-linecap="round" fill="none">
+      <path d="M0 0C-2 -7 -6 -9 -8 -14"/>
+      <path d="M0 0C0 -8 0 -13 1 -17"/>
+      <path d="M0 0C3 -7 6 -10 9 -13"/>
+    </g>
+    <g id="flower">
+      <circle cx="0" cy="-4" r="3" fill="#FFFFFF"/>
+      <circle cx="4" cy="-1" r="3" fill="#FFFFFF"/>
+      <circle cx="2.5" cy="3.5" r="3" fill="#FFFFFF"/>
+      <circle cx="-2.5" cy="3.5" r="3" fill="#FFFFFF"/>
+      <circle cx="-4" cy="-1" r="3" fill="#FFFFFF"/>
+      <circle cx="0" cy="0" r="2.6" fill="#FFD34D"/>
+    </g>
+  </defs>
+
+  <!-- sky (upper 65%) -->
+  <rect x="0" y="0" width="1600" height="585" fill="url(#sky)"/>
+
+  <!-- sun with halo and rotating rays -->
+  <circle cx="1330" cy="130" r="100" fill="url(#glow)"/>
+  <circle cx="1330" cy="130" r="52" fill="#FFD84D"/>
+  <circle cx="1330" cy="130" r="41" fill="#FFE47A" opacity=".85"/>
+  <g stroke="#FFC94D" stroke-width="7" stroke-linecap="round" opacity=".9">
+    <animateTransform attributeName="transform" type="rotate" from="0 1330 130" to="360 1330 130" dur="60s" repeatCount="indefinite"/>
+    <line x1="1330" y1="68" x2="1330" y2="36"/>
+    <line x1="1330" y1="68" x2="1330" y2="36" transform="rotate(45 1330 130)"/>
+    <line x1="1330" y1="68" x2="1330" y2="36" transform="rotate(90 1330 130)"/>
+    <line x1="1330" y1="68" x2="1330" y2="36" transform="rotate(135 1330 130)"/>
+    <line x1="1330" y1="68" x2="1330" y2="36" transform="rotate(180 1330 130)"/>
+    <line x1="1330" y1="68" x2="1330" y2="36" transform="rotate(225 1330 130)"/>
+    <line x1="1330" y1="68" x2="1330" y2="36" transform="rotate(270 1330 130)"/>
+    <line x1="1330" y1="68" x2="1330" y2="36" transform="rotate(315 1330 130)"/>
+  </g>
+
+  <!-- drifting clouds (moved + wrapped by script) -->
+  <g class="cloud" fill="#FFFFFF" opacity=".93">
+    <circle cx="0" cy="0" r="36"/><circle cx="34" cy="8" r="27"/><circle cx="-36" cy="9" r="25"/>
+    <circle cx="62" cy="16" r="19"/><circle cx="-64" cy="15" r="17"/><ellipse cx="0" cy="20" rx="82" ry="18"/>
+  </g>
+  <g class="cloud" fill="#FFFFFF" opacity=".9">
+    <circle cx="0" cy="0" r="30"/><circle cx="28" cy="-10" r="24"/><circle cx="-30" cy="-4" r="22"/>
+    <circle cx="52" cy="6" r="17"/><circle cx="-54" cy="8" r="15"/><ellipse cx="0" cy="14" rx="70" ry="15"/>
+  </g>
+  <g class="cloud" fill="#FFFFFF" opacity=".95">
+    <circle cx="0" cy="0" r="42"/><circle cx="40" cy="10" r="30"/><circle cx="-42" cy="12" r="28"/>
+    <circle cx="72" cy="20" r="20"/><circle cx="-72" cy="20" r="19"/><circle cx="10" cy="-22" r="26"/>
+    <ellipse cx="0" cy="26" rx="95" ry="20"/>
+  </g>
+
+  <!-- birds -->
+  <g class="bird" stroke="#44525E" stroke-width="3.5" fill="none" stroke-linecap="round">
+    <path d="M-18 0Q-9 -10 0 -1Q9 -10 18 0"/>
+  </g>
+  <g class="bird" stroke="#44525E" stroke-width="3.5" fill="none" stroke-linecap="round">
+    <path d="M-18 0Q-9 -10 0 -1Q9 -10 18 0"/>
+  </g>
+
+  <!-- distant hills on the horizon -->
+  <path d="M-60 585Q220 500 520 585Z" fill="#A9D78E"/>
+  <path d="M880 585Q1200 512 1580 585Z" fill="#9FCF83"/>
+
+  <!-- grass (lower 35%) -->
+  <rect x="0" y="585" width="1600" height="315" fill="url(#grass)"/>
+  <rect x="0" y="583" width="1600" height="3.5" fill="#D7EDB9" opacity=".85"/>
+
+  <!-- grass texture -->
+  <ellipse cx="470" cy="770" rx="130" ry="15" fill="#A4D67F" opacity=".28"/>
+  <ellipse cx="1030" cy="865" rx="150" ry="17" fill="#A4D67F" opacity=".25"/>
+  <ellipse cx="820" cy="640" rx="110" ry="12" fill="#B9E393" opacity=".3"/>
+  <ellipse cx="1330" cy="880" rx="120" ry="15" fill="#A4D67F" opacity=".22"/>
+  <use href="#tuft" transform="translate(300 662)" opacity=".7"/>
+  <use href="#tuft" transform="translate(560 688) scale(.9)" opacity=".6"/>
+  <use href="#tuft" transform="translate(655 862) scale(1.15)" opacity=".8"/>
+  <use href="#tuft" transform="translate(895 642) scale(.85)" opacity=".6"/>
+  <use href="#tuft" transform="translate(1005 878) scale(1.1)" opacity=".8"/>
+  <use href="#tuft" transform="translate(1178 856)" opacity=".7"/>
+  <use href="#tuft" transform="translate(1360 668) scale(1.05)" opacity=".7"/>
+  <use href="#tuft" transform="translate(245 872) scale(1.2)" opacity=".8"/>
+  <use href="#tuft" transform="translate(1445 700) scale(.9)" opacity=".6"/>
+  <use href="#tuft" transform="translate(735 796) scale(.8)" opacity=".6"/>
+  <use href="#flower" transform="translate(392 848) scale(1.2)"/>
+  <use href="#flower" transform="translate(922 872)"/>
+  <use href="#flower" transform="translate(1130 694) scale(1.2)"/>
+  <use href="#flower" transform="translate(612 880)"/>
+
+  <!-- tree 1 -->
+  <g transform="translate(190 760)">
+    <ellipse cx="0" cy="2" rx="80" ry="13" fill="#2E5B28" opacity=".22"/>
+    <path d="M-14 0C-12 -60 -10 -120 -6 -170L10 -170C12 -120 14 -60 18 0Z" fill="#7A4E2D"/>
+    <g>
+      <animateTransform attributeName="transform" type="rotate" values="-1.6 0 -170;1.6 0 -170;-1.6 0 -170" keyTimes="0;.5;1" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1" dur="5.5s" repeatCount="indefinite"/>
+      <circle cx="0" cy="-195" r="58" fill="#4E9648"/>
+      <circle cx="-48" cy="-165" r="42" fill="#4E9648"/>
+      <circle cx="48" cy="-168" r="44" fill="#4E9648"/>
+      <circle cx="-26" cy="-135" r="36" fill="#4E9648"/>
+      <circle cx="28" cy="-138" r="38" fill="#4E9648"/>
+      <circle cx="-14" cy="-190" r="30" fill="#66B058" opacity=".85"/>
+      <circle cx="26" cy="-176" r="24" fill="#66B058" opacity=".8"/>
+    </g>
+  </g>
+
+  <!-- tree 2 -->
+  <g transform="translate(1470 815)">
+    <ellipse cx="0" cy="2" rx="95" ry="15" fill="#2E5B28" opacity=".22"/>
+    <path d="M-16 0C-13 -70 -10 -140 -7 -200L9 -200C12 -140 15 -70 20 0Z" fill="#7A4E2D"/>
+    <g>
+      <animateTransform attributeName="transform" type="rotate" values="1.5 0 -200;-1.5 0 -200;1.5 0 -200" keyTimes="0;.5;1" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1" dur="6.5s" repeatCount="indefinite"/>
+      <circle cx="0" cy="-230" r="64" fill="#4E9648"/>
+      <circle cx="-54" cy="-196" r="46" fill="#4E9648"/>
+      <circle cx="56" cy="-200" r="48" fill="#4E9648"/>
+      <circle cx="-28" cy="-160" r="40" fill="#4E9648"/>
+      <circle cx="30" cy="-164" r="42" fill="#4E9648"/>
+      <circle cx="-16" cy="-224" r="32" fill="#66B058" opacity=".85"/>
+      <circle cx="28" cy="-208" r="26" fill="#66B058" opacity=".8"/>
+    </g>
+  </g>
+
+  <!-- SHEEP (furthest back) -->
+  <g transform="translate(720 730)">
+    <ellipse class="shadow sh2" cx="0" cy="1" rx="100" ry="9"/>
+    <g class="bouncer hop2">
+      <rect x="-52" y="-52" width="10" height="52" fill="#3D3E42"/>
+      <rect x="40" y="-52" width="10" height="52" fill="#3D3E42"/>
+      <g fill="#F5F1E6">
+        <circle cx="-52" cy="-88" r="34"/><circle cx="-18" cy="-102" r="38"/><circle cx="20" cy="-98" r="36"/>
+        <circle cx="52" cy="-78" r="30"/><circle cx="-42" cy="-62" r="30"/><circle cx="-4" cy="-64" r="34"/>
+        <circle cx="40" cy="-58" r="26"/><circle cx="66" cy="-70" r="22"/>
+      </g>
+      <rect x="-38" y="-54" width="11" height="54" fill="#54555A"/>
+      <rect x="52" y="-54" width="11" height="54" fill="#54555A"/>
+      <rect x="-38" y="-8" width="11" height="8" fill="#2C2C2E"/>
+      <rect x="52" y="-8" width="11" height="8" fill="#2C2C2E"/>
+      <g transform="translate(92 -84)">
+        <ellipse cx="-20" cy="-6" rx="11" ry="6" fill="#6E7075" transform="rotate(-30 -20 -6)"/>
+        <ellipse cx="17" cy="-9" rx="11" ry="6" fill="#6E7075" transform="rotate(28 17 -9)"/>
+        <ellipse cx="0" cy="0" rx="23" ry="20" fill="#4A4B4F"/>
+        <circle cx="-2" cy="-15" r="13" fill="#F5F1E6"/>
+        <circle cx="8" cy="-13" r="9" fill="#F5F1E6"/>
+        <ellipse cx="13" cy="5" rx="9" ry="7" fill="#5D5E63"/>
+        <circle cx="17" cy="5" r="1.8" fill="#333"/>
+        <circle cx="-4" cy="-5" r="4" fill="#FFFFFF"/>
+        <circle cx="9" cy="-4" r="4" fill="#FFFFFF"/>
+        <circle cx="-3" cy="-5" r="2" fill="#1A1A1A"/>
+        <circle cx="10" cy="-4" r="2" fill="#1A1A1A"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- HORSE -->
+  <g transform="translate(1200 745)">
+    <ellipse class="shadow sh4" cx="0" cy="1" rx="150" ry="10"/>
+    <g class="bouncer hop4">
+      <rect x="-68" y="-70" width="14" height="70" fill="#6E4630"/>
+      <rect x="52" y="-70" width="14" height="70" fill="#6E4630"/>
+      <rect x="-68" y="-11" width="14" height="11" fill="#352418"/>
+      <rect x="52" y="-11" width="14" height="11" fill="#352418"/>
+      <path d="M-92 -115C-124 -102 -132 -60 -122 -22" stroke="#5A3A24" stroke-width="11" fill="none" stroke-linecap="round"/>
+      <path d="M-96 -108C-120 -92 -126 -58 -120 -30" stroke="#4A2F1D" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <ellipse cx="0" cy="-100" rx="104" ry="48" fill="#8B5A3C"/>
+      <rect x="-84" y="-70" width="15" height="70" fill="#8B5A3C"/>
+      <rect x="68" y="-70" width="15" height="70" fill="#8B5A3C"/>
+      <rect x="-84" y="-12" width="15" height="12" fill="#3E2A1C"/>
+      <rect x="68" y="-12" width="15" height="12" fill="#3E2A1C"/>
+      <path d="M52 -72C60 -120 74 -158 100 -186L140 -158C118 -136 104 -108 96 -64Z" fill="#8B5A3C"/>
+      <path d="M100 -196C84 -160 70 -128 56 -98" stroke="#5A3A24" stroke-width="13" fill="none" stroke-linecap="round"/>
+      <g transform="translate(116 -188)">
+        <polygon points="-8,-13 2,-15 -4,-33" fill="#7A4E33"/>
+        <polygon points="10,-14 20,-12 16,-32" fill="#7A4E33"/>
+        <ellipse cx="6" cy="0" rx="30" ry="17" fill="#8B5A3C"/>
+        <ellipse cx="27" cy="5" rx="14" ry="11" fill="#A5714B"/>
+        <ellipse cx="33" cy="5" rx="2.3" ry="3.4" fill="#4A2F1D"/>
+        <circle cx="0" cy="-6" r="4" fill="#241812"/>
+        <circle cx="14" cy="-7" r="4" fill="#241812"/>
+        <circle cx="-1" cy="-7.5" r="1.3" fill="#FFFFFF"/>
+        <circle cx="13" cy="-8.5" r="1.3" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- COW -->
+  <g transform="translate(450 805)">
+    <ellipse class="shadow sh1" cx="0" cy="1" rx="110" ry="9"/>
+    <g class="bouncer hop1">
+      <rect x="-38" y="-60" width="13" height="60" fill="#DCD5C6"/>
+      <rect x="54" y="-60" width="13" height="60" fill="#DCD5C6"/>
+      <rect x="-38" y="-10" width="13" height="10" fill="#5A5248"/>
+      <rect x="54" y="-10" width="13" height="10" fill="#5A5248"/>
+      <path d="M80 -92C104 -86 110 -56 104 -28" stroke="#EFE8D8" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <ellipse cx="104" cy="-26" rx="8" ry="12" fill="#3B3B3B"/>
+      <ellipse cx="0" cy="-78" rx="92" ry="50" fill="#F7F2E6"/>
+      <g clip-path="url(#cowclip)" fill="#3B3B3B">
+        <ellipse cx="-38" cy="-100" rx="34" ry="24"/>
+        <ellipse cx="45" cy="-70" rx="30" ry="26"/>
+        <ellipse cx="-5" cy="-46" rx="26" ry="17"/>
+      </g>
+      <ellipse cx="8" cy="-30" rx="17" ry="13" fill="#F2B8C6"/>
+      <circle cx="2" cy="-20" r="2.5" fill="#E39CB0"/>
+      <circle cx="14" cy="-20" r="2.5" fill="#E39CB0"/>
+      <rect x="-62" y="-58" width="15" height="58" fill="#F7F2E6"/>
+      <rect x="34" y="-58" width="15" height="58" fill="#F7F2E6"/>
+      <rect x="-62" y="-11" width="15" height="11" fill="#4A4238"/>
+      <rect x="34" y="-11" width="15" height="11" fill="#4A4238"/>
+      <g transform="translate(-98 -96)">
+        <ellipse cx="-24" cy="-16" rx="11" ry="6" fill="#EFE8D8" transform="rotate(-35 -24 -16)"/>
+        <ellipse cx="22" cy="-18" rx="11" ry="6" fill="#EFE8D8" transform="rotate(30 22 -18)"/>
+        <path d="M-14 -24C-22 -28 -26 -38 -20 -44C-14 -40 -11 -31 -10 -25Z" fill="#E8D5A4"/>
+        <path d="M10 -26C12 -37 18 -43 24 -40C22 -32 17 -27 13 -23Z" fill="#E8D5A4"/>
+        <ellipse cx="0" cy="0" rx="30" ry="27" fill="#F7F2E6"/>
+        <ellipse cx="-14" cy="10" rx="19" ry="13" fill="#F2B9C6"/>
+        <ellipse cx="-19" cy="10" rx="2.4" ry="3.4" fill="#D4849A"/>
+        <ellipse cx="-9" cy="10" rx="2.4" ry="3.4" fill="#D4849A"/>
+        <circle cx="-14" cy="-8" r="4.5" fill="#2B2B2B"/>
+        <circle cx="2" cy="-10" r="4.5" fill="#2B2B2B"/>
+        <circle cx="-15.5" cy="-9.5" r="1.4" fill="#FFFFFF"/>
+        <circle cx="0.5" cy="-11.5" r="1.4" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- PIG (front) -->
+  <g transform="translate(975 835)">
+    <ellipse class="shadow sh3" cx="0" cy="1" rx="72" ry="8"/>
+    <g class="bouncer hop3">
+      <rect x="-40" y="-32" width="11" height="32" fill="#DE8FA5"/>
+      <rect x="30" y="-32" width="11" height="32" fill="#DE8FA5"/>
+      <rect x="-40" y="-7" width="11" height="7" fill="#B96E87"/>
+      <rect x="30" y="-7" width="11" height="7" fill="#B96E87"/>
+      <path d="M50 -54C64 -60 70 -46 60 -42C52 -39 52 -50 60 -49" stroke="#E08CA3" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="0" cy="-52" rx="56" ry="34" fill="#F2A5B8"/>
+      <rect x="-52" y="-40" width="12" height="40" fill="#F2A5B8"/>
+      <rect x="44" y="-40" width="12" height="40" fill="#F2A5B8"/>
+      <rect x="-52" y="-9" width="12" height="9" fill="#C97B93"/>
+      <rect x="44" y="-9" width="12" height="9" fill="#C97B93"/>
+      <g transform="translate(-58 -58)">
+        <polygon points="-15,-17 -5,-20 -13,-33" fill="#E08CA3"/>
+        <polygon points="3,-20 13,-17 10,-33" fill="#E08CA3"/>
+        <circle cx="0" cy="0" r="25" fill="#F2A5B8"/>
+        <ellipse cx="-16" cy="6" rx="12" ry="9" fill="#E8899F"/>
+        <ellipse cx="-20" cy="6" rx="2.3" ry="3.6" fill="#C4657E"/>
+        <ellipse cx="-12" cy="6" rx="2.3" ry="3.6" fill="#C4657E"/>
+        <circle cx="-11" cy="-6" r="3.5" fill="#2B2B2B"/>
+        <circle cx="1" cy="-7" r="3.5" fill="#2B2B2B"/>
+        <circle cx="-12" cy="-7.2" r="1.1" fill="#FFFFFF"/>
+        <circle cx="0" cy="-8.2" r="1.1" fill="#FFFFFF"/>
+      </g>
+    </g>
+  </g>
+</svg>
+<script>
+(function(){
+  var clouds=[].slice.call(document.querySelectorAll('.cloud')).map(function(el,i){
+    return {el:el,x:[200,760,1240][i],y:[115,235,168][i],v:[14,22,9][i]};
+  });
+  var birds=[].slice.call(document.querySelectorAll('.bird')).map(function(el,i){
+    return {el:el,x:[420,1150][i],y:[205,158][i],v:[26,20][i],s:[1,.8][i],ph:i*2.1};
+  });
+  function cloudT(c){c.el.setAttribute('transform','translate('+c.x+' '+c.y+')');}
+  function birdT(b,t){b.el.setAttribute('transform','translate('+b.x+' '+(b.y+Math.sin(t*1.6+b.ph)*7)+') scale('+b.s+')');}
+  clouds.forEach(cloudT);
+  birds.forEach(function(b){birdT(b,0);});
+  var last=null;
+  function frame(ts){
+    if(last===null)last=ts;
+    var dt=Math.min((ts-last)/1000,.05);
+    last=ts;
+    for(var i=0;i<clouds.length;i++){
+      var c=clouds[i];
+      c.x+=c.v*dt;
+      if(c.x>1830)c.x=-270;
+      cloudT(c);
+    }
+    for(var j=0;j<birds.length;j++){
+      var b=birds[j];
+      b.x-=b.v*dt;
+      if(b.x<-50)b.x=1650;
+      birdT(b,ts/1000);
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Underwater Scene</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#01243a}
+#scene{display:block;width:100vw;height:100vh}
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#c9f7ff"/>
+<stop offset="0.45" stop-color="#2897cf"/>
+<stop offset="1" stop-color="#051f35"/>
+</linearGradient>
+<linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#e8d193"/>
+<stop offset="0.45" stop-color="#bd9356"/>
+<stop offset="1" stop-color="#6c4c2b"/>
+</linearGradient>
+<linearGradient id="fa" gradientUnits="userSpaceOnUse" x1="0" y1="-55" x2="0" y2="55">
+<stop offset="0" stop-color="#ffe28a"/>
+<stop offset="1" stop-color="#ff7b18"/>
+</linearGradient>
+<linearGradient id="fb" gradientUnits="userSpaceOnUse" x1="0" y1="-25" x2="0" y2="25">
+<stop offset="0" stop-color="#b7f5ff"/>
+<stop offset="1" stop-color="#5f51e8"/>
+</linearGradient>
+<radialGradient id="bubble" cx="35%" cy="30%" r="72%">
+<stop offset="0" stop-color="#ffffff" stop-opacity="0.88"/>
+<stop offset="0.4" stop-color="#d7f6ff" stop-opacity="0.33"/>
+<stop offset="1" stop-color="#9fd9ff" stop-opacity="0.12"/>
+</radialGradient>
+</defs>
+<rect width="100%" height="100%" fill="url(#water)"/>
+<g id="plants"></g>
+<path id="floor" fill="url(#sand)" stroke="#6f5030" stroke-width="2"/>
+<g id="fish">
+<g id="fishA" fill="url(#fa)">
+<polygon points="55,0 115,-45 115,45"/>
+<ellipse cx="0" cy="0" rx="62" ry="46" stroke="#c35800" stroke-width="3"/>
+<path d="M-10,-34 Q12,-82 46,-46 Q22,-40 -10,-34 Z" fill="#cd5600"/>
+<path d="M-12,10 Q-24,36 18,30 Q1,16 -12,10 Z" fill="#b23c00"/>
+<circle cx="-36" cy="-13" r="10" fill="#fff"/>
+<circle cx="-39" cy="-12" r="4.5" fill="#102027"/>
+<path d="M-60 3 Q-50 13 -40 5" fill="none" stroke="#7d3100" stroke-width="4" stroke-linecap="round"/>
+</g>
+<g id="fishB" fill="url(#fb)">
+<polygon points="58,0 98,-30 98,30"/>
+<path d="M-66,0 Q-52,-22 -8,-20 Q50,-16 66,0 Q50,16 -8,20 Q-52,22 -66,0 Z" stroke="#3b2bbf" stroke-width="2.5"/>
+<path d="M-10,-19 Q10,-52 36,-22 Q16,-17 -10,-19 Z" fill="#4035d0"/>
+<path d="M-18,9 Q-26,32 12,28 Q-3,15 -18,9 Z" fill="#2b23a3"/>
+<circle cx="-45" cy="-6" r="7" fill="#fff"/>
+<circle cx="-47" cy="-5" r="3.1" fill="#102027"/>
+<path d="M-66 2 Q-57 11 -49 4" fill="none" stroke="#111f3a" stroke-width="3" stroke-linecap="round"/>
+</g>
+</g>
+<g id="bubbles"></g>
+</svg>
+<script>
+(function(){
+ var NS = 'http://www.w3.org/2000/svg';
+ var svg = document.getElementById('scene');
+ var floor = document.getElementById('floor');
+ var plantsG = document.getElementById('plants');
+ var bubblesG = document.getElementById('bubbles');
+ var fishA = document.getElementById('fishA');
+ var fishB = document.getElementById('fishB');
+ var W = Math.max(1, Math.round(window.innerWidth || 1));
+ var H = Math.max(1, Math.round(window.innerHeight || 1));
+ var floorLine = Math.max(1, Math.min(H * 0.9 - 4, H - 12));
+ var plants = [], bubbles = [], fishes = [];
+ function rand(a,b){return Math.random()*(b-a)+a;}
+ function clamp(v,a,b){return v<a?a:(v>b?b:v);}
+ function create(name, attrs){ var node = document.createElementNS(NS, name); if(attrs){ for(var k in attrs) node.setAttribute(k, attrs[k]); } return node; }
+ function resetBubble(b){ var range = Math.min(35, Math.max(8, floorLine * 0.15)); b.x = rand(0, W); b.y = Math.max(1, floorLine - rand(0, range)); }
+ function layout(){
+  W = Math.max(1, Math.round(window.innerWidth || 1));
+  H = Math.max(1, Math.round(window.innerHeight || 1));
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  floorLine = Math.max(1, Math.min(H * 0.9 - 4, H - 12));
+  var amp = clamp(H * 0.012, 5, 14);
+  var d = 'M 0 ' + H + ' L 0 ' + floorLine.toFixed(1);
+  var steps = 14;
+  for(var i=1; i<=steps; i++){
+   d += ' L ' + (W * i / steps).toFixed(1) + ' ' + (floorLine + Math.sin(i * 1.3 + 2) * amp).toFixed(1);
+  }
+  d += ' L ' + W + ' ' + H + ' Z';
+  floor.setAttribute('d', d);
+
+  var fishScale = clamp(Math.min(W, H) / 800, 0.3, 1.15);
+  var speedScale = clamp(W / 1000, 0.6, 1.8);
+  for(i=0; i<fishes.length; i++){
+   var f = fishes[i];
+   f.scale = fishScale;
+   f.speed = f.baseSpeed * speedScale;
+   var hw = f.hwBase * f.scale;
+   if(f.x > W + hw || f.x < -hw){ f.x = rand(W * 0.25, W * 0.75); }
+  }
+  var brange = Math.min(35, Math.max(8, floorLine * 0.15));
+  for(i=0; i<bubbles.length; i++){
+   var b = bubbles[i];
+   if(b.y > floorLine){ b.y = Math.max(1, floorLine - rand(0, brange)); }
+   if(b.x < 0 || b.x > W){ b.x = rand(0, W); }
+  }
+ }
+
+ var plantD = 'M 0 0 C -12 -35 12 -55 0 -90 C -15 -120 14 -145 0 -180 C -12 -210 9 -235 0 -255';
+ var plantDefs = [{fx:0.18, ph:0.4, c:'#2fa157', flip:1}, {fx:0.83, ph:2.3, c:'#39c073', flip:-1}];
+ for(var p=0; p<plantDefs.length; p++){
+  var def = plantDefs[p];
+  var path = create('path', {d:plantD, fill:'none', stroke:def.c, 'stroke-width':'13', 'stroke-linecap':'round', 'stroke-linejoin':'round'});
+  plantsG.appendChild(path);
+  plants.push({el:path, fx:def.fx, ph:def.ph, flip:def.flip});
+ }
+
+ layout();
+
+ fishes = [
+  {el:fishA, baseSpeed:55, baseX:0.35, dir:1, hwBase:115, baseY:0.40, bob:12, ph:0.8, scale:1, speed:0},
+  {el:fishB, baseSpeed:122, baseX:0.70, dir:-1, hwBase:100, baseY:0.60, bob:9, ph:2.7, scale:1, speed:0}
+ ];
+ for(var fi=0; fi<fishes.length; fi++){ fishes[fi].x = W * fishes[fi].baseX; }
+ layout();
+
+ for(var bi=0; bi<9; bi++){
+  var r = rand(3.5, 12.5);
+  var g = create('g');
+  var circle = create('circle', {r:r.toFixed(2), fill:'url(#bubble)', stroke:'#e8fbff', 'stroke-width':Math.max(0.7, r * 0.11).toFixed(2)});
+  var shine = create('circle', {cx:(-r * 0.32).toFixed(2), cy:(-r * 0.35).toFixed(2), r:Math.max(1, r * 0.22).toFixed(2), fill:'#ffffff', 'fill-opacity':'0.68'});
+  g.appendChild(circle);
+  g.appendChild(shine);
+  bubblesG.appendChild(g);
+  var bubble = {el:g, x:rand(0, W), y:rand(1, Math.max(2, floorLine)), r:r, v:16 + 650 / (r + 4), ph:rand(0, 6.283)};
+  bubbles.push(bubble);
+  g.setAttribute('transform', 'translate(' + bubble.x.toFixed(2) + ',' + bubble.y.toFixed(2) + ')');
+ }
+ layout();
+
+ window.addEventListener('resize', layout);
+ if(!window.requestAnimationFrame){ window.requestAnimationFrame = function(cb){ return setTimeout(function(){ cb(Date.now()); }, 16); }; }
+
+ var last = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+ function tick(now){
+  var t = now * 0.001;
+  var dt = (now - last) * 0.001;
+  last = now;
+  if(dt < 0){ dt = 0; }
+  if(dt > 0.05){ dt = 0.05; }
+
+  for(var i=0; i<fishes.length; i++){
+   var f = fishes[i];
+   f.x += f.speed * f.dir * dt;
+   var hw = f.hwBase * f.scale;
+   if(f.x > W + hw){ f.x = -hw; }
+   else if(f.x < -hw){ f.x = W + hw; }
+
+   var y = H * f.baseY + Math.sin(t * 1.3 + f.ph) * f.bob;
+   var s = f.scale;
+   var sx = f.dir > 0 ? -s : s;
+   f.el.setAttribute('transform', 'translate(' + f.x.toFixed(2) + ',' + y.toFixed(2) + ') scale(' + sx.toFixed(2) + ',' + s.toFixed(2) + ')');
+  }
+
+  var ps = clamp(H * 0.18 / 255, 0.3, 1.15);
+  for(var j=0; j<plants.length; j++){
+   var pl = plants[j];
+   var ang = Math.sin(t * 1.05 + pl.ph) * 5.5;
+   var s = ps * (1 + Math.sin(t + pl.ph) * 0.03);
+   pl.el.setAttribute('transform', 'translate(' + (pl.fx * W).toFixed(1) + ',' + (floorLine + 18).toFixed(1) + ') rotate(' + ang.toFixed(2) + ') scale(' + (pl.flip * s).toFixed(3) + ',' + s.toFixed(3) + ')');
+  }
+
+  for(var k=0; k<bubbles.length; k++){
+   var b = bubbles[k];
+   b.y -= b.v * dt;
+   b.x += Math.sin(t * 1.7 + b.ph) * 11 * dt;
+   if(b.x < -20){ b.x = W + 15; }
+   else if(b.x > W + 20){ b.x = -15; }
+   if(b.y + b.r < 0 || b.y > floorLine + 40){ resetBubble(b); }
+   b.el.setAttribute('transform', 'translate(' + b.x.toFixed(2) + ',' + b.y.toFixed(2) + ')');
+  }
+  window.requestAnimationFrame(tick);
+ }
+ tick(last);
+})();
+</script>
+</body>
+</html>

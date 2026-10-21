@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Underwater Scene</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#022c48}
+svg{display:block;width:100vw;height:100vh}
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#71eaff"/><stop offset=".55" stop-color="#1c8fc5"/><stop offset="1" stop-color="#023756"/>
+</linearGradient>
+<linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#e8c98b"/><stop offset="1" stop-color="#704f31"/>
+</linearGradient>
+<linearGradient id="f1b" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ffd66f"/><stop offset="1" stop-color="#f18810"/>
+</linearGradient>
+<linearGradient id="f2b" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#78ebff"/><stop offset="1" stop-color="#0984b3"/>
+</linearGradient>
+<radialGradient id="bubble" cx=".35" cy=".30" r=".75">
+<stop offset="0" stop-color="#ffffff" stop-opacity=".95"/><stop offset=".6" stop-color="#cff5ff" stop-opacity=".35"/><stop offset="1" stop-color="#8ad9ff" stop-opacity=".05"/>
+</radialGradient>
+</defs>
+<rect id="bg" x="0" y="0" width="100%" height="100%" fill="url(#water)"/>
+<path id="sand" fill="url(#sand)"/>
+<g id="weeds">
+<g id="w1">
+<path d="M0 0 C 16 -34 -15 -62 9 -94 C 23 -116 -7 -136 7 -156" stroke="#2f8b45" stroke-width="11" fill="none" stroke-linecap="round"/>
+<ellipse cx="9" cy="-38" rx="13" ry="5" fill="#41b159" transform="rotate(-18 9 -38)"/>
+<ellipse cx="-4" cy="-78" rx="14" ry="5" fill="#41b159" transform="rotate(14 -4 -78)"/>
+<ellipse cx="12" cy="-128" rx="11" ry="4" fill="#41b159" transform="rotate(-24 12 -128)"/>
+</g>
+<g id="w2">
+<path d="M0 0 C -15 -28 13 -53 -9 -81 C -21 -101 8 -116 1 -135" stroke="#268341" stroke-width="8" fill="none" stroke-linecap="round"/>
+<ellipse cx="-8" cy="-28" rx="11" ry="4" fill="#38a54f" transform="rotate(17 -8 -28)"/>
+<ellipse cx="9" cy="-63" rx="12" ry="4" fill="#38a54f" transform="rotate(-13 9 -63)"/>
+<ellipse cx="-4" cy="-106" rx="9" ry="4" fill="#38a54f" transform="rotate(24 -4 -106)"/>
+</g>
+</g>
+<g id="fish1">
+<polygon points="-98,0 -168,-74 -168,74" fill="#e17911"/>
+<ellipse rx="105" ry="78" fill="url(#f1b)"/>
+<polygon points="28,-70 -18,-106 -6,-58" fill="#df760e"/>
+<polygon points="-28,36 -58,78 18,46" fill="#df760e"/>
+<circle cx="60" cy="-20" r="17" fill="#ffffff"/>
+<circle cx="64" cy="-20" r="7" fill="#11303c"/>
+<path d="M93 15 Q101 26 109 15" fill="none" stroke="#8b4808" stroke-width="5" stroke-linecap="round"/>
+</g>
+<g id="fish2">
+<polygon points="-70,0 -130,-44 -130,44" fill="#076c99"/>
+<ellipse rx="88" ry="18" fill="url(#f2b)"/>
+<polygon points="18,-15 -10,-36 -16,-11" fill="#07739f"/>
+<circle cx="58" cy="-4" r="7" fill="#ffffff"/>
+<circle cx="60" cy="-4" r="3" fill="#0d1f2b"/>
+<path d="M71 3 Q78 10 86 3" fill="none" stroke="#054d71" stroke-width="3" stroke-linecap="round"/>
+</g>
+<g id="bubbles"></g>
+</svg>
+<script>
+const svg=document.getElementById('scene');
+const bg=document.getElementById('bg');
+const sand=document.getElementById('sand');
+const w1=document.getElementById('w1'), w2=document.getElementById('w2');
+const weeds=[w1,w2];
+const bubblesLayer=document.getElementById('bubbles');
+const f1=document.getElementById('fish1'), f2=document.getElementById('fish2');
+const NS='http://www.w3.org/2000/svg';
+let W=innerWidth, H=innerHeight, floorY=H*.88, sc=1, ws=1;
+
+const fish=[
+{el:f1,dir:1,x:W*.3,y:floorY*.4,sp:65,half:165,ys:.40},
+{el:f2,dir:-1,x:W*.75,y:floorY*.7,sp:140,half:115,ys:.70}
+];
+
+const bub=[];
+for(let i=0;i<7;i++){
+const c=document.createElementNS(NS,'circle');
+c.setAttribute('fill','url(#bubble)');
+c.setAttribute('stroke','#e9fdff');
+c.setAttribute('stroke-opacity','0.55');
+c.setAttribute('stroke-width','1.2');
+bubblesLayer.appendChild(c);
+bub.push({el:c,base:Math.random()*Math.max(1,W),y:Math.random()*Math.max(1,H),phase:Math.random()*6.283,br:5+Math.random()*12,r:8,sp:40});
+}
+
+function resize(){
+W=Math.max(1,innerWidth);
+H=Math.max(1,innerHeight);
+const side=Math.min(W,H);
+sc=Math.max(.35,Math.min(1.15,side/700));
+ws=Math.max(.35,Math.min(1.45,side/650));
+
+svg.setAttribute('viewBox','0 0 '+W+' '+H);
+bg.setAttribute('x','0');
+bg.setAttribute('y','0');
+bg.setAttribute('width',W);
+bg.setAttribute('height',H);
+
+floorY=H*.88;
+const e=Math.max(3,Math.min(10,H*.007));
+sand.setAttribute('d','M0 '+(floorY+e)+' C '+(W*.15)+' '+(floorY-e)+', '+(W*.35)+' '+(floorY+e)+', '+(W*.55)+' '+(floorY-e)+' C '+(W*.75)+' '+(floorY+e)+', '+(W*.9)+' '+(floorY-e)+', '+W+' '+(floorY+e)+' L '+W+' '+H+' L 0 '+H+' Z');
+
+weeds[0].setAttribute('transform','translate('+(W*.18)+' '+floorY+') scale('+ws+' '+ws+')');
+weeds[1].setAttribute('transform','translate('+(W*.72)+' '+floorY+') scale('+ws+' '+ws+')');
+
+for(const b of bub){
+b.r=Math.max(3,b.br*sc);
+b.el.setAttribute('r',b.r);
+b.sp=25+700/(b.r+7);
+if(b.base < b.r+1 || b.base > W-b.r-1) b.base=b.r+2+Math.random()*Math.max(1,W-2*b.r-4);
+const minY=b.r+1, maxY=Math.max(minY,floorY-b.r);
+if(b.y < minY || b.y > maxY) b.y=minY+Math.random()*Math.max(0,maxY-minY);
+if(b.y > maxY) b.y=maxY;
+}
+
+for(const f of fish){
+f.y=floorY*f.ys;
+const half=f.half*sc+20;
+if(f.x < -half) f.x=-half;
+if(f.x > W+half) f.x=W+half;
+}
+}
+window.addEventListener('resize',resize);
+resize();
+
+let last=performance.now();
+function tick(now){
+const dt=Math.max(0,Math.min(.05,(now-last)/1000));
+last=now;
+
+for(const f of fish){
+f.x+=f.dir*f.sp*sc*dt;
+const half=f.half*sc+30;
+const span=W+half*2;
+let p=(f.x+half)%span;
+if(p<0)p+=span;
+f.x=p-half;
+f.el.setAttribute('transform','translate('+f.x+' '+f.y+') scale('+(f.dir*sc)+' '+sc+')');
+}
+
+for(const b of bub){
+b.y-=b.sp*dt;
+if(b.y + b.r < 0){
+const minY=b.r+1, maxY=Math.max(minY,floorY-b.r);
+if(maxY < minY) b.y=floorY/2;
+else b.y=Math.max(minY,Math.min(maxY,floorY-b.r-6-Math.random()*28));
+b.base=b.r+5+Math.random()*Math.max(1,W-2*b.r-10);
+}
+const amp=Math.min(15,7+b.r*.7);
+let cx=b.base+Math.sin(b.y*.012+b.phase)*amp;
+const minX=b.r, maxX=W-b.r;
+if(maxX > minX){
+if(cx < minX) cx=minX;
+if(cx > maxX) cx=maxX;
+} else cx=W*.5;
+b.el.setAttribute('cx',cx);
+b.el.setAttribute('cy',b.y);
+}
+
+const t=now/1000;
+weeds[0].setAttribute('transform','translate('+(W*.18)+' '+floorY+') rotate('+(Math.sin(t*1.1+1)*4)+') scale('+ws+' '+ws+')');
+weeds[1].setAttribute('transform','translate('+(W*.72)+' '+floorY+') rotate('+(Math.sin(t*.8+2)*5)+') scale('+ws+' '+ws+')');
+
+requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

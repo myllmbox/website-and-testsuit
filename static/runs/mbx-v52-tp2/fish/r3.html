@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coral Cove — SVG Underwater Scene</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#02101a}
+  #scene{display:block;width:100vw;height:100vh}
+  .ray{animation:glow 12s ease-in-out infinite}
+  .ray.r2{animation-duration:17s;animation-delay:-5s}
+  .ray.r3{animation-duration:21s;animation-delay:-11s}
+  @keyframes glow{0%,100%{opacity:.045}50%{opacity:.16}}
+  #caustic{animation:caust 15s ease-in-out infinite}
+  @keyframes caust{0%,100%{opacity:.07}50%{opacity:.17}}
+</style>
+</head>
+<body>
+<svg id="scene" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Animated underwater scene with two fish, rising bubbles, seaweed and a sandy floor">
+  <defs>
+    <linearGradient id="gWater" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#83ddf7"/>
+      <stop offset=".16" stop-color="#3fabdf"/>
+      <stop offset=".44" stop-color="#1574ad"/>
+      <stop offset=".72" stop-color="#083c66"/>
+      <stop offset="1" stop-color="#021220"/>
+    </linearGradient>
+    <linearGradient id="gSand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8e5b6"/>
+      <stop offset=".28" stop-color="#e5c78d"/>
+      <stop offset=".66" stop-color="#c4955c"/>
+      <stop offset="1" stop-color="#7a5230"/>
+    </linearGradient>
+    <linearGradient id="gLip" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff6da"/>
+      <stop offset=".5" stop-color="#fdeeba"/>
+      <stop offset="1" stop-color="#f6dda6"/>
+    </linearGradient>
+    <linearGradient id="gRock" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#93a4b0"/>
+      <stop offset="1" stop-color="#39454f"/>
+    </linearGradient>
+    <radialGradient id="gBub" cx="34%" cy="30%" r="72%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>
+      <stop offset=".38" stop-color="#ffffff" stop-opacity=".1"/>
+      <stop offset=".88" stop-color="#cfeeff" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#eafaff" stop-opacity=".55"/>
+    </radialGradient>
+    <linearGradient id="gBodyA" x1=".1" y1="0" x2=".85" y2="1">
+      <stop offset="0" stop-color="#ffd190"/>
+      <stop offset=".45" stop-color="#fb9a34"/>
+      <stop offset="1" stop-color="#e05d10"/>
+    </linearGradient>
+    <linearGradient id="gTailA" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0" stop-color="#ffbe6b"/>
+      <stop offset="1" stop-color="#dd5312"/>
+    </linearGradient>
+    <linearGradient id="gBodyB" x1=".1" y1="0" x2=".85" y2="1">
+      <stop offset="0" stop-color="#c6f6ff"/>
+      <stop offset=".4" stop-color="#49b8ef"/>
+      <stop offset="1" stop-color="#1170bd"/>
+    </linearGradient>
+    <linearGradient id="gTailB" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0" stop-color="#8be7f6"/>
+      <stop offset="1" stop-color="#0d5f9e"/>
+    </linearGradient>
+    <linearGradient id="gWeed1" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#1a5c2e"/>
+      <stop offset=".6" stop-color="#39924c"/>
+      <stop offset="1" stop-color="#63bb63"/>
+    </linearGradient>
+    <linearGradient id="gWeed2" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#124f44"/>
+      <stop offset=".6" stop-color="#1f9069"/>
+      <stop offset="1" stop-color="#4cc98e"/>
+    </linearGradient>
+    <linearGradient id="gWeed3" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#1c5336"/>
+      <stop offset="1" stop-color="#86c552"/>
+    </linearGradient>
+    <linearGradient id="gCoralA" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#7c2b53"/>
+      <stop offset="1" stop-color="#d76a99"/>
+    </linearGradient>
+    <linearGradient id="gCoralB" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#8a3a1e"/>
+      <stop offset="1" stop-color="#f0985a"/>
+    </linearGradient>
+    <radialGradient id="gVig" cx=".5" cy=".34" r=".85">
+      <stop offset=".45" stop-color="#00131f" stop-opacity="0"/>
+      <stop offset="1" stop-color="#00070d" stop-opacity=".55"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="700" fill="url(#gWater)"/>
+
+  <g id="rays" fill="#dff5ff">
+    <polygon class="ray" points="130,-140 208,-140 470,780 300,780"/>
+    <polygon class="ray r2" points="565,-140 618,-140 768,780 668,780"/>
+    <polygon class="ray r3" points="905,-140 1000,-140 1200,780 962,780"/>
+  </g>
+
+  <g id="caustic" fill="none" stroke="#eafeff" stroke-width="6" stroke-linecap="round">
+    <path d="M-70 74 Q120 62 300 78 T660 72 T1020 80 T1320 68"/>
+    <path d="M-70 156 Q140 144 340 158 T700 150 T1060 158 T1330 146"/>
+    <path d="M-70 246 Q160 236 380 250 T740 240 T1120 250 T1340 238"/>
+  </g>
+
+  <g id="floorGrp">
+    <path d="M0 700 L0 610 C110 600 210 590 320 600 C420 609 470 606 560 596 C650 586 760 600 880 600 C990 600 1110 609 1200 596 L1200 700 Z" fill="url(#gSand)"/>
+    <path d="M0 610 C110 600 210 590 320 600 C420 609 470 606 560 596 C650 586 760 600 880 600 C990 600 1110 609 1200 596" fill="none" stroke="url(#gLip)" stroke-width="6" opacity=".65"/>
+    <g fill="none" stroke="#93693a" stroke-width="4" stroke-linecap="round" opacity=".3">
+      <path d="M70 646 Q190 638 300 650"/>
+      <path d="M430 676 Q560 666 700 676"/>
+      <path d="M760 640 Q880 632 1000 644"/>
+    </g>
+    <g>
+      <ellipse cx="250" cy="612" rx="58" ry="24" fill="url(#gRock)" opacity=".95"/>
+      <ellipse cx="188" cy="622" rx="28" ry="14" fill="#59666f"/>
+      <ellipse cx="772" cy="606" rx="70" ry="20" fill="url(#gRock)" opacity=".9"/>
+      <ellipse cx="836" cy="615" rx="24" ry="11" fill="#4e5b64"/>
+      <ellipse cx="1112" cy="618" rx="64" ry="22" fill="url(#gRock)" opacity=".92"/>
+      <ellipse cx="470" cy="626" rx="17" ry="8" fill="#8b7250"/>
+      <ellipse cx="565" cy="634" rx="12" ry="6" fill="#93784f"/>
+      <ellipse cx="660" cy="660" rx="15" ry="7" fill="#7d6443"/>
+      <ellipse cx="350" cy="652" rx="11" ry="5" fill="#8a7049"/>
+    </g>
+  </g>
+
+  <g id="corals">
+    <g transform="translate(66,614)">
+      <ellipse cx="0" cy="6" rx="26" ry="9" fill="#2d2138" opacity=".55"/>
+      <path d="M0 0 L-18 -26 M0 0 L-7 -32 M0 0 L4 -30 M0 0 L15 -27 M0 0 L23 -16 M0 0 L-24 -13 M0 0 L-14 8" stroke="#c65a86" stroke-width="6" stroke-linecap="round" opacity=".8"/>
+      <circle cx="0" cy="1" r="11" fill="#8e3f66"/>
+    </g>
+    <g transform="translate(707,601)">
+      <path d="M0 0 C-24 -14 -40 -40 -38 -70 M0 0 C-8 -24 -14 -46 -10 -78 M0 0 C14 -16 26 -36 26 -66 M0 0 C26 -8 46 -24 54 -46" stroke="url(#gCoralA)" stroke-width="7" fill="none" stroke-linecap="round" opacity=".85"/>
+      <path d="M-30 -58 Q-2 -72 22 -58" stroke="#e082ab" stroke-width="4" fill="none" opacity=".55"/>
+    </g>
+    <g transform="translate(0,0)">
+      <ellipse cx="300" cy="598" rx="30" ry="13" fill="#4a3221" opacity=".8"/>
+      <rect x="276" y="558" width="14" height="44" rx="7" fill="url(#gCoralB)"/>
+      <rect x="294" y="542" width="12" height="60" rx="6" fill="url(#gCoralB)"/>
+      <rect x="308" y="562" width="11" height="40" rx="5.5" fill="url(#gCoralB)"/>
+    </g>
+    <g transform="translate(960,599)">
+      <path d="M0 0 C-18 -12 -26 -34 -22 -56 M0 0 C-4 -20 -2 -42 4 -60 M0 0 C16 -14 26 -30 24 -54" stroke="url(#gCoralA)" stroke-width="6" fill="none" stroke-linecap="round" opacity=".7"/>
+    </g>
+  </g>
+
+  <g id="weeds"></g>
+  <g id="stack"></g>
+  <g id="bubbles"></g>
+
+  <!-- Fish A: large, round-bodied orange fish, facing right -->
+  <g id="fishA">
+    <polygon points="-74,0 -150,-48 -150,48" fill="url(#gTailA)"/>
+    <polygon points="-74,0 -126,-28 -126,28" fill="#d1550f" opacity=".32"/>
+    <path d="M-14 -52 Q8 -110 62 -66 Q34 -54 -14 -52 Z" fill="#ea6a0c"/>
+    <ellipse cx="0" cy="0" rx="80" ry="56" fill="url(#gBodyA)"/>
+    <path d="M-34 34 Q-20 62 4 44 Q-14 36 -34 34 Z" fill="#ea6a0c" opacity=".8"/>
+    <g stroke="#b8450d" fill="none" opacity=".3">
+      <path d="M4 -50 Q16 0 4 50" stroke-width="7"/>
+      <path d="M-20 -44 Q-12 0 -20 44" stroke-width="6"/>
+      <path d="M-42 -32 Q-36 0 -42 32" stroke-width="5"/>
+    </g>
+    <ellipse cx="-16" cy="-31" rx="34" ry="11" fill="#ffffff" opacity=".2" transform="rotate(-11 -16 -31)"/>
+    <path d="M30 -47 Q46 0 30 47" stroke="#ffe0b4" stroke-width="4" fill="none" opacity=".45"/>
+    <path d="M20 12 Q48 42 20 58 Q8 34 20 12 Z" fill="#fb8c1f" stroke="#b8450d" stroke-width="1.5"/>
+    <circle cx="50" cy="-18" r="14" fill="#ffffff"/>
+    <circle cx="53" cy="-18" r="6.5" fill="#132330"/>
+    <path d="M64 13 Q73 19 78 9" stroke="#a63d0c" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Fish B: small, slender blue fish (mirrored to swim left) -->
+  <g id="fishB">
+    <polygon points="-50,0 -114,-31 -114,31" fill="url(#gTailB)"/>
+    <polygon points="-50,0 -96,-17 -96,17" fill="#0d5f9e" opacity=".35"/>
+    <path d="M-16 -19 Q2 -47 30 -21 Q8 -17 -16 -19 Z" fill="#1c74c8"/>
+    <path d="M62 0 C60 -12 40 -21 8 -21 C-18 -21 -44 -12 -58 0 C-44 12 -18 21 8 21 C40 21 60 12 62 0 Z" fill="url(#gBodyB)"/>
+    <ellipse cx="-8" cy="-11" rx="25" ry="5" fill="#ffffff" opacity=".24"/>
+    <path d="M-20 16 Q-8 33 -2 16 Q-10 12 -20 16 Z" fill="#1c74c8" opacity=".75"/>
+    <path d="M18 9 Q33 26 16 35 Q8 18 18 9 Z" fill="#2c86d6" stroke="#0d5f9e" stroke-width="1.2"/>
+    <path d="M36 -18 Q38 -3 36 12" stroke="#d8f6ff" stroke-width="2.5" fill="none" opacity=".4"/>
+    <circle cx="42" cy="-7" r="9.5" fill="#ffffff"/>
+    <circle cx="44" cy="-7" r="4.5" fill="#0d2030"/>
+    <path d="M55 4 Q61 9 62 1" stroke="#0a5486" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <rect x="0" y="0" width="1200" height="700" fill="url(#gVig)" style="pointer-events:none"/>
+</svg>
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg", W=1200, H=700, FLOOR=605;
+function rnd(a,b){return a+Math.random()*(b-a);}
+function n(id){return document.getElementById(id);}
+function ce(t){return document.createElementNS(NS,t);}
+function f2(v){return Math.round(v*100)/100;}
+
+/* ---------- FISH ---------- */
+var fish=[
+  {n:n("fishA"), x:300, v:55,  d:1,  s:1,    y0:298, ba:14, bw:0.00095, hw:152},
+  {n:n("fishB"), x:935, v:106, d:-1, s:0.66, y0:449, ba:11, bw:0.00175, hw:80}
+];
+function moveFish(t,dt){
+  for(var i=0;i<fish.length;i++){
+    var f=fish[i];
+    f.x += f.v*f.d*dt;
+    var ph=t*f.bw;
+    var y=f.y0 + f.ba*Math.sin(ph);
+    var vy=f.ba*f.bw*1000*Math.cos(ph);
+    var delta=Math.atan2(vy, f.v*f.d)*57.2958 - (f.d<0?180:0);
+    f.n.setAttribute("transform","translate("+f2(f.x)+","+f2(y)+") scale("+f2(f.d*f.s)+","+f2(f.s)+") rotate("+f2(delta*f.d)+")");
+    if(f.d>0){ if(f.x-f.hw>W) f.x=-f.hw; }
+    else    { if(f.x+f.hw<0) f.x=W+f.hw; }
+  }
+}
+
+/* ---------- BUBBLES ---------- */
+var vents=[{x:152,w:22},{x:452,w:16},{x:770,w:20},{x:898,w:28},{x:1118,w:14}];
+var bLayer=n("bubbles"), bs=[], NB=17;
+function resetB(b,spread){
+  var v=vents[(Math.random()*vents.length)|0];
+  var r=rnd(2,9.5);
+  b.r=r; b.bx=v.x+rnd(-v.w,v.w);
+  b.v=52*(7.2/(r+3.6))*rnd(.8,1.25);
+  b.ph=Math.random()*6.283; b.amp=rnd(3,13); b.ws=rnd(.7,1.6);
+  b.y=spread? rnd(18,FLOOR-10) : FLOOR+rnd(-3,17);
+  b.c.setAttribute("r",f2(r));
+  b.c.setAttribute("stroke-width", f2(.6+r*.12));
+  b.h.setAttribute("r", f2(Math.max(.8,r*.3)));
+  b.h.setAttribute("cx", f2(-r*.32));
+  b.h.setAttribute("cy", f2(-r*.34));
+}
+for(var i=0;i<NB;i++){
+  var g=ce("g"), c=ce("circle"), h=ce("circle");
+  c.setAttribute("fill","url(#gBub)");
+  c.setAttribute("stroke","rgba(255,255,255,.55)");
+  h.setAttribute("fill","#ffffff");
+  h.setAttribute("fill-opacity",".7");
+  g.appendChild(c); g.appendChild(h); bLayer.appendChild(g);
+  var b={g:g,c:c,h:h}; resetB(b,i>3); bs.push(b);
+}
+function moveBubbles(t,dt){
+  for(var i=0;i<bs.length;i++){
+    var b=bs[i];
+    b.y -= b.v*dt*60*(dt?1:0);
+    b.y -= 0; /* (kept simple below) */
+    if(b.y+b.r<2) resetB(b,false);
+    var x=b.bx + Math.sin(t*0.0011*b.ws+b.ph)*b.amp;
+    b.g.setAttribute("transform","translate("+f2(x)+","+f2(b.y)+")");
+    b.g.setAttribute("opacity", f2(Math.min(1,(FLOOR-b.y+12)/26)));
+  }
+}
+
+/* ---------- SEAWEED ---------- */
+var weedsGroup=n("weeds"), weeds=[];
+var wdefs=[
+  {x:170,h:216,amp:26,ph:0.0,sp:1.00,w:15,g:"gWeed1"},
+  {x:217,h:142,amp:19,ph:1.4,sp:1.30,w:9, g:"gWeed2"},
+  {x:608,h:118,amp:15,ph:1.9,sp:1.45,w:11,g:"gWeed2"},
+  {x:884,h:252,amp:30,ph:2.2,sp:0.85,w:16,g:"gWeed1"},
+  {x:934,h:176,amp:23,ph:0.8,sp:1.18,w:10,g:"gWeed3"},
+  {x:398,h:152,amp:20,ph:2.8,sp:1.10,w:12,g:"gWeed3"}
+];
+for(var j=0;j<wdefs.length;j++){
+  var p=ce("path");
+  p.setAttribute("fill","url(#"+wdefs[j].g+")");
+  p.setAttribute("fill-opacity",".93");
+  weedsGroup.appendChild(p);
+  weeds.push({d:wdefs[j],el:p});
+}
+function smooth(P){
+  var s="M"+f2(P[0].x)+","+f2(P[0].y), i;
+  for(i=1;i<P.length-1;i++){
+    s+="Q"+f2(P[i].x)+","+f2(P[i].y)+" "+f2((P[i].x+P[i+1].x)/2)+","+f2((P[i].y+P[i+1].y)/2);
+  }
+  s+="Q"+f2(P[P.length-2].x)+","+f2(P[P.length-2].y)+" "+f2(P[P.length-1].x)+","+f2(P[P.length-1].y);
+  return s;
+}
+function drawWeeds(t){
+  for(var k=0;k<weeds.length;k++){
+    var d=weeds[k].d, N=8, P=[], i, f;
+    for(i=0;i<=N;i++){
+      f=i/N;
+      P.push({x:d.x+Math.sin(t*0.001*d.sp+d.ph+f*2.5)*d.amp*f*f, y:FLOOR+7-f*d.h});
+    }
+    var L=[], R=[];
+    for(i=0;i<=N;i++){
+      var a=P[i>0?i-1:0], b=P[i<N?i+1:N];
+      var dx=b.x-a.x, dy=b.y-a.y, ln=Math.sqrt(dx*dx+dy*dy)||1;
+      dx/=ln; dy/=ln;
+      f=i/N;
+      var hw=d.w*(1-0.78*f*f);
+      L.push({x:P[i].x-dy*hw, y:P[i].y+dx*hw});
+      R.push({x:P[i].x+dy*hw, y:P[i].y-dx*hw});
+    }
+    weeds[k].el.setAttribute("d", smooth(L.concat(R.reverse()))+"Z");
+  }
+}
+
+/* ---------- kelp stack (overlapping ellipses) ---------- */
+var stackGroup=n("stack"), puffs=[], sx=1092;
+for(var q=0;q<7;q++){
+  var e=ce("ellipse"), fr=q/6;
+  e.setAttribute("rx", f2(20-11*fr));
+  e.setAttribute("ry", f2(11-4*fr));
+  e.setAttribute("fill","url(#gWeed2)");
+  e.setAttribute("fill-opacity",".9");
+  stackGroup.appendChild(e);
+  puffs.push({el:e,f:fr});
+}
+function drawStack(t){
+  for(var i=0;i<puffs.length;i++){
+    var fr=puffs[i].f;
+    var x=sx+Math.sin(t*0.0011+2.2+fr*2.2)*16*fr*fr;
+    puffs[i].el.setAttribute("transform","translate("+f2(x)+","+f2(FLOOR+4-fr*128)+") rotate("+f2(Math.sin(t*0.0011+fr*2.5)*7*fr)+")");
+  }
+}
+
+/* ---------- main loop ---------- */
+var last=performance.now(), T=0;
+function frame(now){
+  var dt=(now-last)/1000; if(dt<0) dt=0; if(dt>0.05) dt=0.05;
+  last=now; T+=dt*1000;
+  var i;
+  moveFish(T,dt);
+  for(i=0;i<bs.length;i++){ bs[i].y -= bs[i].v*dt*26; }
+  moveBubbles(T,dt);
+  drawWeeds(T);
+  drawStack(T);
+  n("caustic").setAttribute("transform","translate("+f2(Math.sin(T*0.00013)*17)+",0)");
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

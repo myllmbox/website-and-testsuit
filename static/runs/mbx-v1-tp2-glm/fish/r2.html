@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Underwater</title>
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0a2b47}
+#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+.ray{animation:shimmer 9s ease-in-out infinite alternate}
+.r2{animation-duration:13s;animation-delay:-4s}
+@keyframes shimmer{from{opacity:.03}to{opacity:.09}}
+.weed{transform-box:fill-box;transform-origin:50% 100%;animation:sway 6s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-4deg)}to{transform:rotate(5deg)}}
+</style>
+</head>
+<body>
+<svg id="scene" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Animated underwater scene with two fish, rising bubbles and swaying seaweed">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#79cde4"/><stop offset=".3" stop-color="#3f97bd"/><stop offset=".62" stop-color="#1c5f8a"/><stop offset="1" stop-color="#0a2b47"/>
+</linearGradient>
+<linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#dcbd85"/><stop offset=".6" stop-color="#c39a63"/><stop offset="1" stop-color="#96703f"/>
+</linearGradient>
+<linearGradient id="fo" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ffb968"/><stop offset=".45" stop-color="#f6932f"/><stop offset="1" stop-color="#e5771a"/>
+</linearGradient>
+<linearGradient id="ft" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#63ddcb"/><stop offset=".45" stop-color="#2fb2a0"/><stop offset="1" stop-color="#178c7c"/>
+</linearGradient>
+</defs>
+
+<rect width="1200" height="800" fill="url(#water)"/>
+<rect y="700" width="1200" height="100" fill="url(#sand)"/>
+<ellipse cx="250" cy="712" rx="90" ry="26" fill="#8f7248"/>
+<ellipse cx="302" cy="718" rx="58" ry="19" fill="#7a5f3c"/>
+<ellipse cx="760" cy="714" rx="108" ry="28" fill="#94794e"/>
+<ellipse cx="826" cy="722" rx="66" ry="20" fill="#7c6340"/>
+<circle cx="140" cy="742" r="7" fill="#b08a58"/><circle cx="158" cy="748" r="4.5" fill="#c9a26b"/>
+<circle cx="522" cy="738" r="6" fill="#b08a58"/><circle cx="540" cy="745" r="4" fill="#c9a26b"/>
+<circle cx="972" cy="742" r="6.5" fill="#b08a58"/><circle cx="990" cy="749" r="4.5" fill="#c9a26b"/>
+<path transform="translate(1085 752) rotate(-14)" d="M0 -24L5.9 -8.1L22.8 -7.4L9.5 3.1L14.1 19.4L0 10L-14.1 19.4L-9.5 3.1L-22.8 -7.4L-5.9 -8.1Z" fill="#cf6a4c" stroke="#a84f35" stroke-width="1.5" stroke-linejoin="round"/>
+
+<polygon class="ray" points="210,-40 350,-40 590,810 330,810" fill="#ffffff" opacity=".05"/>
+<polygon class="ray r2" points="660,-40 770,-40 1040,810 840,810" fill="#ffffff" opacity=".04"/>
+
+<g transform="translate(205 736)"><g class="weed" style="animation-duration:5.5s">
+<path d="M0 0C-18 -50 22 -92 -8 -150C-28 -196 12 -236 -6 -284" fill="none" stroke="#2f8f5b" stroke-width="11" stroke-linecap="round"/>
+<path d="M14 4C36 -42 -2 -96 24 -152C42 -192 8 -226 22 -262" fill="none" stroke="#41ad6c" stroke-width="9" stroke-linecap="round"/>
+<path d="M-14 2C-40 -36 -8 -82 -30 -132C-46 -170 -14 -202 -26 -230" fill="none" stroke="#27794a" stroke-width="8" stroke-linecap="round"/>
+</g></g>
+
+<g transform="translate(885 738)"><g class="weed" style="animation-duration:7s;animation-delay:-2.5s">
+<path d="M0 0C-20 -60 26 -112 -10 -186C-34 -240 16 -292 -8 -346" fill="none" stroke="#2f8f5b" stroke-width="12" stroke-linecap="round"/>
+<path d="M16 4C42 -52 2 -116 28 -182C48 -230 12 -272 26 -312" fill="none" stroke="#46b273" stroke-width="9" stroke-linecap="round"/>
+<path d="M-16 2C-44 -42 -6 -96 -32 -152C-50 -192 -16 -226 -30 -258" fill="none" stroke="#256d44" stroke-width="8" stroke-linecap="round"/>
+</g></g>
+
+<g id="bubbles"></g>
+
+<g id="fish1" transform="translate(250 380)">
+<g id="tail1"><polygon points="-56,0 -100,-32 -100,32" fill="#d96f14"/></g>
+<polygon points="-4,-42 14,-80 32,-42" fill="#e0761f"/>
+<ellipse rx="72" ry="50" fill="url(#fo)"/>
+<ellipse cx="4" cy="22" rx="56" ry="26" fill="#ffce8f" opacity=".5"/>
+<circle cx="-20" cy="-10" r="7" fill="#d96f14" opacity=".45"/><circle cx="2" cy="8" r="5" fill="#d96f14" opacity=".4"/><circle cx="-40" cy="14" r="6" fill="#d96f14" opacity=".45"/>
+<path d="M22 -26Q12 0 22 24" fill="none" stroke="#c9640f" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+<polygon points="4,4 36,26 2,30" fill="#e0761f" opacity=".92"/>
+<circle cx="40" cy="-14" r="9" fill="#ffffff"/><circle cx="42.5" cy="-14" r="4" fill="#1b2733"/><circle cx="44" cy="-15.5" r="1.3" fill="#ffffff"/>
+<path d="M69 6Q61 15 50 13" fill="none" stroke="#a34e0a" stroke-width="3" stroke-linecap="round"/>
+</g>
+
+<g id="fish2" transform="translate(950 560) scale(-1 1)">
+<g id="tail2"><polygon points="-48,0 -86,-22 -86,22" fill="#148476"/></g>
+<polygon points="-16,-15 -2,-33 14,-16" fill="#148476"/>
+<ellipse rx="58" ry="20" fill="url(#ft)"/>
+<ellipse cx="2" cy="8" rx="44" ry="10" fill="#bdf2e6" opacity=".45"/>
+<path d="M-46 3Q0 7 48 -3" fill="none" stroke="#cff5ea" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+<path d="M20 -11Q14 0 20 11" fill="none" stroke="#0f6d61" stroke-width="2.5" stroke-linecap="round" opacity=".5"/>
+<polygon points="0,3 20,15 -2,17" fill="#148476" opacity=".95"/>
+<circle cx="36" cy="-6" r="6.5" fill="#ffffff"/><circle cx="38" cy="-6" r="3" fill="#14232b"/><circle cx="39.3" cy="-7.3" r="1" fill="#ffffff"/>
+<path d="M54 2Q47 8 39 6" fill="none" stroke="#0c5a50" stroke-width="2.5" stroke-linecap="round"/>
+</g>
+
+<g transform="translate(92 746)"><g class="weed" style="animation-duration:8.5s;animation-delay:-1s">
+<ellipse cx="-2" cy="-16" rx="26" ry="19" fill="#2f8f5b"/>
+<ellipse cx="3" cy="-44" rx="21" ry="16" fill="#3a9f63"/>
+<ellipse cx="-3" cy="-68" rx="16" ry="13" fill="#46b273"/>
+<ellipse cx="2" cy="-88" rx="11" ry="10" fill="#52bc7d"/>
+<ellipse cx="0" cy="-105" rx="7" ry="7" fill="#5fc788"/>
+</g></g>
+</svg>
+
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg",W=1200;
+var bl=document.getElementById("bubbles"),bubbles=[];
+function rnd(a,b){return a+Math.random()*(b-a);}
+function reset(b,init){
+  b.r=rnd(2.5,10);
+  b.x=rnd(50,1150);
+  b.y=init?rnd(140,740):rnd(765,830);
+  b.sp=50+(10.5-b.r)*9.5;
+  b.ph=rnd(0,6.283);
+  b.wf=rnd(.7,1.9);
+  b.wa=rnd(5,16);
+  b.c.setAttribute("r",b.r);
+  b.h.setAttribute("r",Math.max(1,b.r*.28));
+  b.h.setAttribute("cx",(-b.r*.35).toFixed(2));
+  b.h.setAttribute("cy",(-b.r*.35).toFixed(2));
+}
+for(var i=0;i<8;i++){
+  var g=document.createElementNS(NS,"g"),
+      c=document.createElementNS(NS,"circle"),
+      h=document.createElementNS(NS,"circle");
+  c.setAttribute("fill","rgba(215,240,255,0.16)");
+  c.setAttribute("stroke","rgba(235,250,255,0.65)");
+  c.setAttribute("stroke-width","1.5");
+  h.setAttribute("fill","rgba(255,255,255,0.75)");
+  g.appendChild(c);g.appendChild(h);bl.appendChild(g);
+  var b={g:g,c:c,h:h};
+  reset(b,true);
+  bubbles.push(b);
+}
+var f1={g:document.getElementById("fish1"),tail:document.getElementById("tail1"),x:250,base:380,dir:1,sp:46,amp:14,bf:1.15,ph:0,m:118,tf:1.05},
+    f2={g:document.getElementById("fish2"),tail:document.getElementById("tail2"),x:950,base:560,dir:-1,sp:118,amp:10,bf:1.8,ph:2.1,m:100,tf:1.6};
+var last=performance.now(),t=0;
+function step(f,dt){
+  f.x+=f.dir*f.sp*dt;
+  if(f.dir>0&&f.x>W+f.m)f.x=-f.m;
+  else if(f.dir<0&&f.x<-f.m)f.x=W+f.m;
+  var y=f.base+Math.sin(t*f.bf+f.ph)*f.amp,
+      a=Math.sin(t*f.tf+f.ph)*4.5,
+      fast=f.sp>80;
+  f.g.setAttribute("transform","translate("+f.x.toFixed(1)+" "+y.toFixed(1)+") rotate("+a.toFixed(2)+")"+(f.dir<0?" scale(-1 1)":""));
+  f.tail.setAttribute("transform","rotate("+(Math.sin(t*(fast?11.5:8.5))*(fast?18:16)).toFixed(2)+" "+(fast?-48:-56)+" 0)");
+}
+function frame(now){
+  var dt=Math.min((now-last)/1000,.05);last=now;t+=dt;
+  step(f1,dt);step(f2,dt);
+  for(var i=0;i<bubbles.length;i++){
+    var b=bubbles[i];
+    b.y-=b.sp*dt;
+    if(b.y<-30)reset(b,false);
+    var X=b.x+Math.sin(t*b.wf+b.ph)*b.wa,
+        s=1+Math.max(0,740-b.y)/1600;
+    b.g.setAttribute("transform","translate("+X.toFixed(1)+" "+b.y.toFixed(1)+") scale("+s.toFixed(3)+")");
+    b.g.setAttribute("opacity",Math.max(0,Math.min(1,(770-b.y)/70)).toFixed(2));
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

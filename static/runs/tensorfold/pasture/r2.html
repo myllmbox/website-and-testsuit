@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pasture — bouncing herd</title>
+<style>
+  html,body{height:100%;margin:0;overflow:hidden;background:#cfeafa;
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  #stage{position:fixed;inset:0;width:100%;height:100%;display:block}
+  .bounce{animation:bounce .72s infinite alternate ease-in-out}
+  @keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-14px)}}
+  .glow{animation:glow 6.4s infinite alternate ease-in-out}
+  @keyframes glow{from{opacity:.72}to{opacity:1}}
+  .rays{animation:spin 150s linear infinite}
+  .hud{position:fixed;z-index:6;pointer-events:none;text-shadow:0 1px 4px rgba(20,45,20,.45)}
+  #tag{top:14px;left:16px;color:#fff;font-size:12px;letter-spacing:.24em;opacity:.9}
+  #tag i{display:block;font-style:normal;letter-spacing:.14em;font-size:10px;opacity:.66;margin-top:5px}
+  .lbl{position:fixed;transform:translate(-50%,-50%);z-index:6;pointer-events:none;
+    font-size:11px;letter-spacing:.3em;opacity:0;transition:opacity .5s ease;
+    color:#fff;background:rgba(22,52,28,.52);padding:5px 11px;border-radius:999px}
+</style>
+</head>
+<body>
+<svg id="stage" preserveAspectRatio="none" aria-label="Animated pasture scene with a bouncing cow, sheep, pig and horse">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a9d9f5"/><stop offset=".55" stop-color="#d3ebf9"/>
+      <stop offset=".82" stop-color="#eaf6fa"/><stop offset="1" stop-color="#f9fbf2"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#82c161"/><stop offset=".42" stop-color="#61a548"/>
+      <stop offset="1" stop-color="#458a3b"/>
+    </linearGradient>
+    <linearGradient id="trunk" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#8a5a37"/><stop offset="1" stop-color="#5c3a21"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#fff9c8" stop-opacity=".95"/>
+      <stop offset=".42" stop-color="#fff27a" stop-opacity=".48"/>
+      <stop offset="1" stop-color="#ffee90" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sunG" cx=".4" cy=".34" r=".72">
+      <stop offset="0" stop-color="#fffce4"/><stop offset=".52" stop-color="#ffe64f"/>
+      <stop offset="1" stop-color="#ffc71c"/>
+    </radialGradient>
+  </defs>
+</svg>
+<div class="hud" id="tag">PASTURE &mdash; BOUNCE LOOP<i>svg primitives &middot; no external assets</i></div>
+<div class="hud lbl" id="lbl-horse">HORSE</div>
+<div class="hud lbl" id="lbl-cow">COW</div>
+<div class="hud lbl" id="lbl-pig">PIG</div>
+<div class="hud lbl" id="lbl-sheep">SHEEP</div>
+<script>
+(function(){
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+const svg=document.getElementById("stage");
+const mk=(t,a,p)=>{const e=document.createElementNS(SVGNS,t);
+  if(a)for(const k in a){const v=a[k];if(v==null||v===""||(typeof v==="number"&&!isFinite(v)))continue;e.setAttribute(k,v);}
+  if(p)p.appendChild(e);return e;};
+const A=(p,t,a)=>mk(t,a,p);
+const P=(p,d,a)=>{a=a||{};a.d=d;return mk("path",a,p);};
+const O=(p,x,y,rx,ry,f,a)=>{a=a||{};a.cx=x;a.cy=y;a.rx=rx;a.ry=ry;a.fill=f;return mk("ellipse",a,p);};
+const C=(p,x,y,r,f,a)=>{a=a||{};a.cx=x;a.cy=y;a.r=r;a.fill=f;return mk("circle",a,p);};
+const R=(p,x,y,w,h,rx,f,a)=>{a=a||{};a.x=x;a.y=y;a.width=w;a.height=h;a.rx=rx;a.fill=f;return mk("rect",a,p);};
+
+let uid=0, root, anims=[], clouds=[], frame=0, last=0;
+
+const STOPS=[[16,27,42],[255,255,255],[104,62,42],[31,44,25],[246,214,172],[242,172,186],
+             [188,116,132],[255,208,222],[243,199,148],[64,42,26],[74,44,24],[90,66,46]];
+const S2=a=>{const c=STOPS[a];return "rgb("+c[0]+","+c[1]+","+c[2]+")";};
+const STIFF={animationIterationCount:"infinite",animationDirection:"alternate",animationTimingFunction:"ease-in-out"};
+
+/* ---------- COW ---------- */
+function cow(p){
+  const id="cp"+(++uid);
+  const clip=A(p,"clipPath",{id:id,clipPathUnits:"userSpaceOnUse"});
+  O(clip,94,64,60,40);
+  A(p,"path",{d:"M30 10 Q62 -2 98 0 L98 36 L30 36 Z",fill:"#1e2124"});            /* far eye + head patch */
+  A(p,"path",{d:"M6 6 Q12 -6 25 -2 Q27 9 15 13 Z",fill:"#c19c82"});
+  A(p,"path",{d:"M58 10 Q53 -3 64 -2 Q71 3 69 13 Q64 17 58 10 Z",fill:"#c19c82"});
+  A(p,"path",{d:"M172 52 c14 2 18 18 12 32 c-3 8 -11 11 -15 6",fill:"none",stroke:"#e0dcd2","stroke-width":5,"stroke-linecap":"round"});
+  A(p,"path",{d:"M182 92 c-6 -6 -10 -12 -7 -19 c2 -6 9 -6 11 0 c2 6 6 12 3 19 z",fill:"#26282b"});
+  A(p,"g",{fill:"#e7e3d8"},[56,74,150,166]).forEach(x=>R(p,x,98,13,44,5,x<100?"#e7e3d8":"#f3efe4"));
+  A(p,"g",{fill:"#574d45"},[[58,138,9,5],[76,138,9,5],[152,138,9,5],[168,138,9,5]]).forEach(h=>R(p,h[0],h[1],h[2],h[3],2,h[4]));
+  O(p,94,64,60,40,"url(#cowBody)");
+  A(p,"g",{"clip-path":"url(#cp)"});
+  A(p,"g",{fill:"#f6f1e6"},[[56,28,17,12],[84,60,27,15],[116,38,19,13]]);
+  O(p,64,96,13,9,"#f7a5ba");
+  A(p,"g",{fill:"#f08fae"},[[60,103,3,5],[69,103,3,5]]).forEach(c=>O(p,c[0],c[1],c[2],c[3],c[4]));
+  A(p,"g",{transform:"rotate(-8 40 50)"});
+  O(p,40,52,25,21,"url(#cowHead)");
+  O(p,14,58,15,12,"#f7a5ba");
+  A(p,"g",{fill:"#2b2e31"},[[10,56,2.4],[18,56,2.4]]).forEach(n=>O(p,n[0],n[1],n[2],n[2]*1.25,"#2b2e31"));
+  O(p,46,46,3.6,4.4,"#26282b");O(p,32,48,3.4,4.2,"#26282b");
+  return p;
+}
+
+/* ---------- SHEEP ---------- */
+function sheep(p){
+  const W1="#efece1", W2="#fbf9f3";
+  A(p,"g",{fill:"#46352c"},[[22,62,7,40,3],[32,62,7,40,3],[96,62,7,40,3],[106,62,7,40,3]]).forEach(l=>{
+    R(p,l[0],l[1],l[2],l[3],l[4],l[0]<40?"#46352c":"#3a2c24");});
+  A(p,"g",{fill:"#2b2119"},[[23,98,5,4],[33,98,5,4],[97,98,5,4],[107,98,5,4]]).forEach(h=>R(p,h[0],h[1],h[2],h[3],2,h[4]));
+  A(p,"g",{fill:W1},[[24,58,22],[48,44,26],[76,42,26],[102,52,20],[36,26,22],[62,20,24],[88,26,22]]);
+  A(p,"g",{fill:W2},[[44,60,21],[70,58,23],[94,60,18],[58,34,20],[80,32,19],[30,40,14]]);
+  O(p,122,46,18,15,"url(#sheepFace)");
+  A(p,"g",{transform:"rotate(14 126 52)"});
+  O(p,131,57,12,10,"#454a53");
+  A(p,"g",{fill:"#23262a",opacity:".8"},[[128,54,1.7],[134,55,1.7]]).forEach(n=>O(p,n[0],n[1],n[2],n[2],"#23262a",{opacity:".8"}));
+  A(p,"g",{transform:"rotate(-8 118 42)"});
+  O(p,118,42,8,13,"#565b64");
+  O(p,140,42,8,13,"#4d525a");
+  O(p,102,30,18,13,W2);
+  A(p,"path",{d:"M112 32 c9 -6 15 2 10 8 c-4 5 -12 2 -11 -3",fill:"none",stroke:"#e6e2d6","stroke-width":3,"stroke-linecap":"round"});
+  return p;
+}
+
+/* ---------- PIG ---------- */
+function pig(p){
+  A(p,"g",{fill:"#ea92a4"},[[50,72,8,28,4],[66,72,8,28,4],[108,72,8,28,4],[124,72,8,28,4]]).forEach(l=>
+    R(p,l[0],l[1],l[2],l[3],l[4],l[0]<80?"#ea92a4":"#e8909f"));
+  A(p,"g",{fill:"#cf7590"},[[51,96,6,4],[67,96,6,4],[109,96,6,4],[125,96,6,4]]).forEach(h=>R(p,h[0],h[1],h[2],h[3],2,h[4]));
+  P(p,"M142 44 c12 -6 14 8 4 10 c-9 1 -12 -7 -4 -9",{fill:"none",stroke:"#dd8699","stroke-width":4,"stroke-linecap":"round"});
+  O(p,86,44,52,38,"url(#pigBody)");
+  O(p,50,52,26,22,"url(#pigBody)");
+  P(p,"M18 44 C28 30 44 24 66 24 L112 34 C128 38 134 46 132 56 C124 64 96 60 66 54 C44 49 26 52 18 44 Z","#ee9fb1");
+  O(p,34,54,26,22,"url(#pigHead)");
+  A(p,"path",{d:"M26 28 q-9 -16 6 -15 q11 3 8 15 z",fill:"#e8909f"});
+  A(p,"path",{d:"M42 26 q2 -16 14 -11 q7 7 -1 15 z",fill:"#e8909f"});
+  A(p,"path",{d:"M29 25 q4 -9 11 -7",fill:"none",stroke:"#c76c88","stroke-width":2.6,"stroke-linecap":"round"});
+  R(p,12,44,30,22,9,"#f3b0bf",{stroke:"#dd8699","stroke-width":1.1});
+  A(p,"g",{fill:"#c56d86"},[[21,53,2.5,3.4],[31,53,2.5,3.4]]).forEach(n=>O(p,n[0],n[1],n[2],n[3],"#c56d86"));
+  O(p,24,44,2.7,3.2,"#2b2024");O(p,42,44,2.7,3.2,"#2b2024");
+  O(p,30,54,8,5,"#ff9db2",{opacity:".6"});O(p,48,58,6,4,"#ff9db2",{opacity:".5"});
+  return p;
+}
+
+/* ---------- HORSE ---------- */
+function horse(p){
+  A(p,"path",{d:"M148 52 c20 2 33 24 30 46 c-2 14 -9 21 -14 27 l-9 -2 c7 -12 11 -22 6 -33 c-6 -13 -19 -21 -29 -24 z",fill:"#6f4130"});
+  A(p,"path",{d:"M176 62 c18 10 26 36 20 56 c-4 14 -13 21 -18 25 l-10 -4 c9 -11 14 -23 10 -35 c-5 -14 -14 -24 -24 -30 z",fill:"#8a5138"});
+  A(p,"g",{fill:"none",stroke:"#7a4630","stroke-width":13,"stroke-linecap":"round"},
+    [[70,94,68,112,66,134,66,144],[64,96,78,112,80,134,82,144],[140,104,138,124,142,144,144,152],[150,102,156,122,154,144,150,152]]).forEach(l=>
+    A(p,"path",{d:"M"+l[1]+" "+l[2]+" L"+l[3]+" "+l[4]+" L"+l[5]+" "+l[6]+" L"+l[7]+" "+l[8],fill:"none",stroke:"#7a4630","stroke-width":13,"stroke-linecap":"round"}));
+  P(p,"M34 48 C48 32 74 30 96 33 C114 35 128 39 140 48 a58 44 0 0 1 12 8 a64 52 0 0 1 -52 30 C72 88 46 82 36 74 C28 66 28 54 34 48 Z","url(#horseBody)");
+  A(p,"g",{fill:"none",stroke:"#8a5138","stroke-width":13,"stroke-linecap":"round",opacity:".95"},
+    [[38,94,44,112,42,134,40,144],[24,96,20,112,22,134,24,144],[158,104,156,124,160,144,162,152],[168,102,174,122,172,144,168,152]]).forEach(l=>
+    A(p,"path",{d:"M"+l[1]+" "+l[2]+" L"+l[3]+" "+l[4]+" L"+l[5]+" "+l[6]+" L"+l[7]+" "+l[8],fill:"none",stroke:"#8a5138","stroke-width":13,"stroke-linecap":"round"}));
+  A(p,"g",{fill:"#30201b"},[[36,142,7,4],[42,142,7,4],[162,150,7,4],[172,150,7,4]]).forEach(h=>{
+    h[4]=h[4]||0;R(p,h[0],h[1],h[2]||6,h[3]||5,2,"#30201b");});
+  A(p,"path",{d:"M58 30 L82 24 L88 36 L62 42 Z",fill:"#5e3623"});
+  A(p,"path",{d:"M62 36 C52 18 44 4 42 -6 C36 4 34 20 30 36 C36 44 50 44 62 42 Z",fill:"#8a5138"});
+  A(p,"path",{d:"M42 6 C52 16 60 30 62 42 L56 44 C48 30 42 18 34 10 Z",fill:"#4a2f1c"});
+  A(p,"path",{d:"M164 58 c16 -2 26 18 24 40 c-1 10 -5 16 -9 20 c-4 -2 -5 -8 -2 -14 c4 -9 2 -18 -4 -24 c-6 -6 -12 -10 -16 -14 z",fill:"#4a2f1c"});
+  return p;
+}
+
+/* ---------- TREES ---------- */
+function pine(p){
+  P(p,"M-9 0 c0 -14 -7 -24 -11 -34 c-6 -14 -1 -26 7 -38 c-4 -12 -1 -20 3 -28 l6 0 c4 8 8 16 4 28 c8 12 13 24 7 38 c-4 10 -6 20 -6 34 z",2,"url(#trunk)");
+  A(p,"g",{fill:"#2e6b41"},[[-16,-58,22],[16,-58,22],[0,-98,26]]);
+  A(p,"g",{fill:"#3f8854"},[[-13,-44,18],[13,-46,18],[0,-76,25],[0,-124,17]]);
+  A(p,"g",{fill:"#4f9c63",opacity:".55"},[[-10,-64,5],[9,-86,4],[2,-104,4]]);
+  return p;
+}
+function round(p){
+  P(p,"M-7 0 C-6 -26 -13 -44 -11 -64 c7 -18 6 -34 3 -52 l18 0 c-4 20 -1 38 6 54 c3 18 -3 34 -3 62 z",2,"url(#trunk)");
+  A(p,"g",{fill:"none",stroke:"#5c3a21","stroke-width":5,"stroke-linecap":"round"},["M-2 -66 L-14 -84","M2 -66 L14 -80"]);
+  A(p,"g",{fill:"#3f8854"},[[0,-116,32],[-26,-100,25],[26,-100,25]]);
+  A(p,"g",{fill:"#4a9a5d"},[[-22,-128,24],[20,-130,22],[-4,-148,24],[4,-162,17],[0,-104,22]]);
+  A(p,"g",{fill:"#63b172",opacity:".55"},[[-14,-140,7],[10,-152,6],[18,-122,6],[-22,-112,5],[2,-126,5]]);
+  return p;
+}
+
+/* ---------- SPECIES TABLE ---------- */
+const SPECIES=[
+  {name:"horse",w:268,h:172,bottom:178,f:0.20,fy:0.24,ox:-64,oy:12,build:horse,d:"0.70s",dl:"-0.45s"},
+  {name:"cow",  w:178,h:150,bottom:146,f:0.49,fy:0.30,ox:-14,oy:14,build:cow,  d:"0.86s",dl:"-0.12s"},
+  {name:"pig",  w:152,h:112,bottom:100,f:0.70,fy:0.33,ox:-8, oy:12,build:pig,  d:"0.62s",dl:"-0.30s"},
+  {name:"sheep",w:148,h:104,bottom:102,f:0.89,fy:0.36,ox:-14,oy:10,build:sheep,d:"0.78s",dl:"-0.58s"}
+];
+
+function clamp(x,a,b){return x<a?a:(x>b?b:x);}
+
+/* ---------- SCENE ASSEMBLY ---------- */
+function rebuild(){
+  const W=Math.max(320,window.innerWidth||document.documentElement.clientWidth);
+  const H=Math.max(240,window.innerHeight||document.documentElement.clientHeight);
+  const gy=Math.round(H*0.65), grassH=H-gy, S=Math.min(W,H)/1300, S2=Math.max(0.32,S);
+
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  svg.innerHTML="";
+  root=A(svg,"g",{});
+  anims=[];clouds=[];
+
+  const defs=svg.querySelector("defs");
+
+  /* sky */
+  A(svg,"rect",{x:-4,y:-4,width:W+8,height:gy+6,fill:"url(#sky)"});
+
+  /* sun */
+  const sunX=W*0.085, sunY=H*0.185, sr=46*Math.min(1.06,S2);
+  const sg=A(svg,"g",{});
+  const halo=A(sg,"circle",{cx:sunX,cy:sunY,r:sr*2.15,fill:"url(#glow)"});
+  halo.style.animation="glow 6.4s infinite alternate ease-in-out";
+  const rg=A(sg,"g",{transform:"translate("+sunX+" "+sunY+")"});
+  rg.classList.add("rays");
+  rg.style.transformBox="view-box";
+  rg.style.transformOrigin=sunX+"px "+sunY+"px";
+  for(let i=0;i<12;i++){
+    const ang=i*30, w=7, len=18*(i%2?0.78:1), r0=sr-6;
+    A(rg,"polygon",{points:"0,-"+(r0+2)+" "+w+","+(-r0-len*0.75)+" -"+w+","+(-r0-len*0.75),
+      transform:"rotate("+ang+")",fill:"#ffe767",opacity:".75"});
+  }
+  for(let i=0;i<12;i++){
+    const a=(i*30+15)*Math.PI/180, rr=sr+20;
+    C(rg,(Math.cos(a)*rr).toFixed(2),(Math.sin(a)*rr).toFixed(2),2.8,"#fff28a",{opacity:".75"});
+  }
+  C(sg,sunX,sunY,sr,"url(#sunG)",{stroke:"#f8cf3d","stroke-width":1.4,opacity:".97"});
+
+  /* clouds (each = a cluster of overlapping ellipses) */
+  const CLD=[
+    {x:0.30,y:0.055,s:Math.min(1.06,S2),v:26,p:[["e",0,0,54,22,1],["e",-38,7,36,17,1],["e",34,5,40,19,1],["e",6,-16,36,21,1],["e",-16,-10,28,15,1]]},
+    {x:0.46,y:0.155,s:Math.min(1.06,S2),v:17,p:[["e",0,0,46,20,1],["e",-32,6,30,15,1],["e",30,4,32,16,1],["e",4,-14,30,17,1]]},
+    {x:0.68,y:0.095,s:Math.min(1.06,S2),v:22,p:[["e",0,0,50,21,1],["e",-36,5,32,16,1],["e",34,6,34,16,1],["e",0,-15,32,18,1],["e",18,-9,24,13,1]]},
+    {x:0.84,y:0.235,s:Math.min(1.06,S2),v:31,p:[["e",0,0,42,18,1],["e",-28,5,26,13,1],["e",26,4,28,14,1],["e",2,-12,26,15,1]]},
+    {x:0.15,y:0.275,s:Math.min(1.06,S2),v:19,p:[["e",0,0,44,18,1],["e",-30,4,28,14,1],["e",28,5,30,15,1],["e",0,-13,26,14,1]]}
+  ];
+  for(const c of CLD){
+    let minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9;
+    for(const q of c.p){minx=Math.min(minx,q[1]-q[2]);maxx=Math.max(maxx,q[1]+q[2]);miny=Math.min(miny,q[3]);maxy=Math.max(maxy,q[4]);}
+    const cxp=(minx+maxx)/2, cyp=(miny+maxy)/2;
+    const g=A(svg,"g",{fill:"#fdfefe",opacity:".92"});
+    for(const q of c.p) A(g,"ellipse",{cx:(q[1]-cxp).toFixed(1),cy:(q[3]-cyp).toFixed(1),rx:(q[2]*c.s).toFixed(1),ry:(q[3]*0+c.s).toFixed(1)&&0});
+    for(const q of c.p) g.lastChild.remove();
+    for(const q of c.p){
+      A(g,"ellipse",{cx:((q[1]-cxp)*c.s).toFixed(1),cy:((q[3]-cyp)*c.s).toFixed(1),rx:(q[2]*c.s).toFixed(1),ry:(q[4]*c.s).toFixed(1),opacity:q[5]});
+    }
+    const g2=A(svg,"g",{fill:"#ffffff",opacity:".55"});
+    for(const q of c.p) if(q[0]==="e"){}
+    const w=(maxx-minx)*c.s, h=(maxy-miny)*c.s;
+    clouds.push({g:g,w:w,h:h,cx:W*c.x,cy:H*c.y-cyp*c.s,vx:c.v});
+  }
+
+  /* ground */
+  A(svg,"rect",{x:-4,y:gy-2,width:W+8,height:grassH+8,fill:"url(#grass)"});
+  A(svg,"path",{d:"M0 "+gy+" H"+W,stroke:"#3a7c47","stroke-width":1.6,fill:"none",opacity:".35"});
+  A(svg,"path",{d:"M0 "+(gy+5)+" H"+W,stroke:"#8ecb71","stroke-width":1.2,fill:"none",opacity:".35"});
+
+  /* meadow texture: shrubs, tufts, flowers (behind the trees) */
+  for(let x=18;x<W;x+=Math.max(44,W/26)){
+    const yy=gy+grassH*(0.03+0.12*(Math.abs(Math.sin(x*0.041))));
+    A(svg,"g",{fill:"#4a9050",opacity:".5"});
+    const gg=A(svg,"g",{fill:"#4a9050",opacity:".5",transform:"translate("+Math.round(x)+" "+Math.round(yy)+")"});
+    A(gg,"circle",{cx:-7,cy:0,r:6});A(gg,"circle",{cx:0,cy:-4,r:8});A(gg,"circle",{cx:7,cy:0,r:6});
+    const tt=A(svg,"g",{transform:"translate("+Math.round(x+22)+" "+Math.round(yy+6)+")",
+      stroke:"#2f7340","stroke-width":2,fill:"none","stroke-linecap":"round",opacity:".75"});
+    A(tt,"path",{d:"M0 0 v-9 M5 1 v-11 M10 0 v-8"});
+  }
+  for(let x=48;x<W;x+=Math.max(150,W/9)){
+    const yy=gy+grassH*(0.18+0.14*Math.abs(Math.sin(x*0.033)));
+    const f=A(svg,"g",{transform:"translate("+Math.round(x)+" "+Math.round(yy)+")"});
+    const col=(x%3===0)?"#ffe475":"#ff8ba1";
+    A(f,"path",{d:"M0 0 v-8",stroke:"#3a8548","stroke-width":2,fill:"none"});
+    A(f,"g",{fill:col},[[-4,-11],[4,-11],[0,-15],[0,-7]]).forEach(()=>{});
+    [[-4,-11],[4,-11],[0,-15],[0,-7]].forEach(q=>C(f,q[0],q[1],2.4,col));
+    C(f,0,-11,1.9,"#ffd34e");
+  }
+
+  /* trees */
+  function addTree(x,y,kind,sc,flip,dur,dl){
+    const g=A(svg,"g",{transform:"translate("+Math.round(x)+" "+Math.round(y)+")"});
+    g.classList.add("tree");
+    g.style.transformBox="view-box";
+    g.style.transformOrigin=Math.round(x)+"px "+Math.round(y)+"px";
+    g.style.animation="sway "+dur+"s infinite alternate ease-in-out";
+    g.style.animationDelay=dl;
+    const i=A(g,"g",{transform:(flip?"scale("+(-sc)+","+sc+")":"scale("+sc+")")});
+    if(kind==="pine") pine(i); else round(i);
+    const c1=A(g,"g",{transform:"translate(0 -6)",fill:"#2f7a45"});
+    A(c1,"ellipse",{cx:-13,cy:1,rx:8,ry:5,opacity:".55"});A(c1,"ellipse",{cx:9,cy:2,rx:7,ry:4,opacity:".45"});
+  }
+  addTree(W*0.06, gy+grassH*0.34, "pine", Math.max(0.5,0.78*S2), false, "6.2s", "-2.1s");
+  addTree(W*0.37, gy+grassH*0.96, "round", Math.max(0.55,0.86*S2), true, "5.6s", "-1.2s");
+  addTree(W*0.595, gy+grassH*0.34, "round", Math.max(0.5,0.70*S2), false, "6.8s", "-3.4s");
+
+  /* animals */
+  for(const s of SPECIES){
+    const sc=Math.max(0.3,S), w=s.w*sc, h=s.h*sc, base=s.bottom*sc;
+    const cx=clamp(W*s.f, w/2+8, W-w/2-8);
+    const gy2=gy+grassH*s.fy;
+    const sx=Math.round(cx-w/2), sy=Math.round(gy2-base);
+    const sh=A(svg,"ellipse",{cx:Math.round(cx),cy:Math.round(gy2+2),rx:Math.round(w*0.44),ry:Math.round(7*sc),fill:"#24512e"});
+    sh.style.animation="shad "+s.d+" infinite alternate ease-in-out";
+    sh.style.animationDelay=s.dl;
+    const g=A(svg,"g",{transform:"translate("+sx+" "+sy+")"});
+    g.classList.add("bounce");
+    g.style.animationDuration=s.d;
+    g.style.animationDelay=s.dl;
+    const inner=A(g,"g",{transform:"translate("+s.ox+" "+s.oy+")"});
+    s.build(inner);
+    const lbl=document.getElementById("lbl-"+s.name);
+    if(lbl){lbl.style.left=cx+"px";lbl.style.top=(gy2+18)+"px";lbl.style.opacity="0.9";lbl.style.fontSize=Math.max(9,11*S2)+"px";}
+  }
+}
+
+/* ---------- LOOP ---------- */
+let prev=performance.now();
+function tick(now){
+  const dt=Math.min(0.05,(now-prev)/1000);prev=now;
+  const W=parseFloat(svg.getAttribute("viewBox").split(" ")[2]);
+  for(const c of clouds){
+    c.cx+=c.vx*dt;
+    if(c.cx-c.w/2>W+220) c.cx=-c.w-220;
+    c.g.style.transform="translate("+c.cx.toFixed(1)+"px,"+c.cy.toFixed(1)+"px)";
+  }
+  if(++frame%3===0){
+    for(const a of anims) a.g.style.transform="translate("+a.x+"px,"+a.y+"px)";
+  }
+  requestAnimationFrame(tick);
+}
+
+const styleTag=document.createElement("style");
+styleTag.textContent="@keyframes sway{from{transform:rotate(-.55deg)}to{transform:rotate(.55deg)}}"+
+  "@keyframes shad{from{opacity:.34}to{opacity:.14}}"+
+  "@keyframes spin{to{transform:rotate(360deg)}}";
+document.head.appendChild(styleTag);
+
+let rid=null;
+rebuild();
+requestAnimationFrame(t=>{prev=t;tick(t);});
+window.addEventListener("resize",()=>{
+  clearTimeout(rid);
+  rid=setTimeout(()=>{rebuild();},110);
+});
+})();
+</script>
+</body>
+</html>

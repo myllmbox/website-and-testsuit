@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Underwater Scene</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#06213d}
+svg{display:block;width:100vw;height:100vh}
+#bubbles circle{fill:url(#bubble);stroke:#e9feff;stroke-opacity:0.65;stroke-width:1.2}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" preserveAspectRatio="none" width="100%" height="100%">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#79d4ff"/>
+<stop offset="0.35" stop-color="#1f7fc2"/>
+<stop offset="1" stop-color="#052641"/>
+</linearGradient>
+<linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ebd9a7"/>
+<stop offset="0.2" stop-color="#cda868"/>
+<stop offset="1" stop-color="#684827"/>
+</linearGradient>
+<linearGradient id="weed" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#75d674"/>
+<stop offset="1" stop-color="#1f5b28"/>
+</linearGradient>
+<linearGradient id="fish1Body" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ffd77c"/>
+<stop offset="0.55" stop-color="#ff971d"/>
+<stop offset="1" stop-color="#c64d18"/>
+</linearGradient>
+<linearGradient id="fish1Tail" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ff9f33"/>
+<stop offset="1" stop-color="#b94611"/>
+</linearGradient>
+<linearGradient id="fish2Body" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#b9f2ff"/>
+<stop offset="0.5" stop-color="#22b2d9"/>
+<stop offset="1" stop-color="#095f8b"/>
+</linearGradient>
+<linearGradient id="fish2Tail" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#68d7ef"/>
+<stop offset="1" stop-color="#0a709a"/>
+</linearGradient>
+<radialGradient id="bubble" cx="35%" cy="30%" r="70%">
+<stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
+<stop offset="0.45" stop-color="#cbf1ff" stop-opacity="0.35"/>
+<stop offset="0.8" stop-color="#ffffff" stop-opacity="0.6"/>
+<stop offset="1" stop-color="#ffffff" stop-opacity="0.15"/>
+</radialGradient>
+</defs>
+
+<rect x="0" y="0" width="1000" height="600" fill="url(#water)"/>
+
+<g id="floor">
+<path d="M0 526 C 150 512 300 532 450 516 C 600 506 750 534 1000 518 L1000 600 L0 600 Z" fill="url(#sand)"/>
+<ellipse cx="120" cy="560" rx="38" ry="17" fill="#b18a5c" opacity="0.75"/>
+<ellipse cx="440" cy="572" rx="54" ry="18" fill="#8f6a41" opacity="0.75"/>
+<ellipse cx="830" cy="560" rx="42" ry="16" fill="#c1a06d" opacity="0.7"/>
+</g>
+
+<g id="weeds">
+<path d="M165 522 C 154 492 176 474 167 444 C 158 416 181 396 173 366" fill="none" stroke="url(#weed)" stroke-width="11" stroke-linecap="round"/>
+<path d="M190 524 C 182 496 202 482 194 456 C 186 432 207 414 199 390" fill="none" stroke="url(#weed)" stroke-width="8" stroke-linecap="round"/>
+<path d="M810 526 C 822 494 798 474 808 444 C 818 416 793 394 803 364" fill="none" stroke="url(#weed)" stroke-width="10" stroke-linecap="round"/>
+</g>
+
+<g id="bubbles">
+<circle cx="120" cy="250" r="5"/>
+<circle cx="230" cy="490" r="3"/>
+<circle cx="340" cy="90" r="7"/>
+<circle cx="450" cy="485" r="4"/>
+<circle cx="560" cy="310" r="6"/>
+<circle cx="670" cy="20" r="3"/>
+<circle cx="780" cy="488" r="7"/>
+<circle cx="880" cy="380" r="4"/>
+<circle cx="160" cy="140" r="2"/>
+<circle cx="610" cy="455" r="5"/>
+</g>
+
+<g id="fish1" transform="translate(700 205) scale(-1 1)">
+<polygon points="-58 0 -108 -46 -108 46" fill="url(#fish1Tail)"/>
+<ellipse cx="0" cy="0" rx="58" ry="42" fill="url(#fish1Body)"/>
+<polygon points="-15 -38 12 -72 40 -28" fill="#f37616"/>
+<polygon points="16 22 -10 50 28 18" fill="#ee7a19"/>
+<circle cx="34" cy="-11" r="8" fill="#ffffff"/>
+<circle cx="36" cy="-11" r="4" fill="#12110f"/>
+<path d="M56 -6 Q58 0 56 6" fill="none" stroke="#5a2a10" stroke-width="3" stroke-linecap="round"/>
+</g>
+
+<g id="fish2" transform="translate(160 365) scale(0.58 0.58)">
+<polygon points="-73 0 -118 -28 -118 28" fill="url(#fish2Tail)"/>
+<ellipse cx="0" cy="0" rx="74" ry="18" fill="url(#fish2Body)"/>
+<polygon points="-10 -16 15 -38 40 -12" fill="#2db8db"/>
+<polygon points="18 10 4 30 30 14" fill="#2db8db"/>
+<circle cx="48" cy="-5" r="6" fill="#ffffff"/>
+<circle cx="50" cy="-5" r="3" fill="#12110f"/>
+<path d="M72 -3 Q74 0 72 3" fill="none" stroke="#0a4664" stroke-width="3" stroke-linecap="round"/>
+</g>
+</svg>
+
+<script>
+(function(){
+var W=1000;
+var layer=document.getElementById("bubbles");
+var els=layer.getElementsByTagName("circle");
+var bubbles=[];
+var i;
+for(i=0;i<els.length;i++){
+var el=els[i];
+var r=parseFloat(el.getAttribute("r"));
+bubbles.push({
+el:el,
+x:parseFloat(el.getAttribute("cx")),
+y:parseFloat(el.getAttribute("cy")),
+r:r,
+speed:18+(7-r)*4.5,
+phase:Math.random()*6.28
+});
+}
+
+var fishes=[
+{el:document.getElementById("fish1"),x:700,baseY:205,dir:-1,speed:26,scale:1,margin:175,bobSpeed:0.65,bobAmp:9,phase:1.2},
+{el:document.getElementById("fish2"),x:160,baseY:365,dir:1,speed:72,scale:0.58,margin:115,bobSpeed:1.3,bobAmp:6,phase:0.5}
+];
+
+function respawn(b){
+b.x=40+Math.random()*920;
+b.y=495+Math.random()*10;
+b.r=2+Math.random()*5;
+b.speed=18+(7-b.r)*4.5;
+b.phase=Math.random()*6.28;
+b.el.setAttribute("r",b.r);
+}
+
+var nowTime=(typeof performance!=="undefined"&&performance.now)?function(){return performance.now();}:function(){return Date.now();};
+function raf(cb){
+if(window.requestAnimationFrame)return window.requestAnimationFrame(cb);
+if(window.webkitRequestAnimationFrame)return window.webkitRequestAnimationFrame(cb);
+return setTimeout(cb,16);
+}
+
+var last=nowTime();
+var clock=0;
+
+function tick(){
+var now=nowTime();
+var dt=(now-last)/1000;
+last=now;
+if(dt>0.05)dt=0.05;
+if(dt<0)dt=0;
+clock+=dt;
+var t=clock;
+
+for(i=0;i<fishes.length;i++){
+var f=fishes[i];
+f.x+=f.dir*f.speed*dt;
+if(f.dir>0&&f.x>W+f.margin)f.x=-f.margin;
+if(f.dir<0&&f.x<-f.margin)f.x=W+f.margin;
+var y=f.baseY+Math.sin(t*f.bobSpeed+f.phase)*f.bobAmp;
+f.el.setAttribute("transform","translate("+f.x+" "+y+") scale("+(f.dir*f.scale)+" "+f.scale+")");
+}
+
+for(i=0;i<bubbles.length;i++){
+var b=bubbles[i];
+b.y-=b.speed*dt;
+b.x+=Math.sin(t*1.25+b.phase)*35*dt;
+if(b.x<10)b.x=10;
+if(b.x>W-10)b.x=W-10;
+if(b.y<-15)respawn(b);
+b.el.setAttribute("cx",b.x);
+b.el.setAttribute("cy",b.y);
+}
+
+raf(tick);
+}
+
+raf(tick);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Abyssal Drift — Plate II</title>
+<style>
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#03101c;-webkit-font-smoothing:antialiased}
+#stage{display:block;width:100vw;height:100vh}
+.fish{cursor:pointer}
+.lift{transform-box:fill-box;transform-origin:50% 50%;transition:transform .6s cubic-bezier(.2,.8,.25,1)}
+.fish:hover .lift{transform:scale(1.09) translateY(-7px)}
+.fronds{transform-box:fill-box;transform-origin:50% 100%;animation:sway 8s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-3.2deg)}to{transform:rotate(3.6deg)}}
+.ray{transform-box:fill-box;transform-origin:50% 0;animation:shim 13s ease-in-out infinite alternate}
+@keyframes shim{from{opacity:.42;transform:skewX(-2deg) scaleX(.93)}to{opacity:.95;transform:skewX(3.5deg) scaleX(1.07)}}
+#surface{animation:glide 11s ease-in-out infinite alternate}
+@keyframes glide{from{transform:translateX(-30px)}to{transform:translateX(30px)}}
+.ano{transform-box:fill-box;transform-origin:50% 100%;animation:breathe 6.5s ease-in-out infinite alternate}
+@keyframes breathe{from{transform:scale(.93,.95)}to{transform:scale(1.07,1.05)}}
+.caust{animation:caust 9s ease-in-out infinite alternate}
+@keyframes caust{from{transform:translateX(-34px);opacity:.5}to{transform:translateX(34px);opacity:1}}
+.hud{position:fixed;z-index:5;pointer-events:none;color:#e9f9ff;text-shadow:0 3px 22px rgba(2,16,30,.9)}
+.tl{top:min(6vh,54px);left:min(5vw,58px);max-width:38ch;animation:rise 1.5s cubic-bezier(.2,.8,.25,1) both .25s}
+.br{right:min(5vw,58px);bottom:min(5vh,44px);text-align:right;animation:rise 1.5s cubic-bezier(.2,.8,.25,1) both .65s}
+@keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.kicker{font:600 10.5px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.34em;text-transform:uppercase;color:#7fd6ee}
+h1{margin:.14em 0 .1em;font:400 clamp(40px,6.6vw,88px)/.9 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;letter-spacing:-.02em;color:#f6feff}
+h1 em{display:block;font-style:italic;color:#ffc478}
+.rule{width:104px;height:2px;margin:.7em 0 .8em;background:linear-gradient(90deg,#ffc478,rgba(255,196,120,0))}
+.lede{max-width:33ch;font:400 13.5px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:#bfe4f3}
+.stat{margin-bottom:11px}
+.stat b{display:block;font:400 26px/1 Georgia,"Times New Roman",serif;color:#ffd79b}
+.stat span{font:600 9.5px/1.8 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.26em;text-transform:uppercase;color:#93d8ec}
+.tip{margin-top:14px;font:italic 400 12.5px/1.5 Georgia,serif;color:#8ec9de;opacity:.85}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Animated underwater scene: two fish swim past swaying seaweed while bubbles rise from the seafloor">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#86e2f2"/><stop offset=".16" stop-color="#41b2db"/><stop offset=".44" stop-color="#1777ad"/><stop offset=".72" stop-color="#0a4166"/><stop offset="1" stop-color="#041423"/>
+</linearGradient>
+<radialGradient id="sun" cx=".5" cy="-.06" r=".72">
+<stop offset="0" stop-color="#f4feff" stop-opacity=".85"/><stop offset=".5" stop-color="#bdf0ff" stop-opacity=".2"/><stop offset="1" stop-color="#bdf0ff" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="rayG" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#eefdff" stop-opacity=".5"/><stop offset=".42" stop-color="#b8ecff" stop-opacity=".14"/><stop offset="1" stop-color="#9fe4ff" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="sandG" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ecd6a4"/><stop offset=".3" stop-color="#c9a570"/><stop offset=".72" stop-color="#8f6c44"/><stop offset="1" stop-color="#57422a"/>
+</linearGradient>
+<linearGradient id="bodyA" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ffcb6d"/><stop offset=".42" stop-color="#f8842c"/><stop offset="1" stop-color="#c1372a"/>
+</linearGradient>
+<linearGradient id="tailA" x1="1" y1="0" x2="0" y2="0">
+<stop offset="0" stop-color="#ffb757"/><stop offset="1" stop-color="#dd5529"/>
+</linearGradient>
+<linearGradient id="bodyB" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#0c5f81"/><stop offset=".42" stop-color="#37c3c9"/><stop offset="1" stop-color="#e2f4e9"/>
+</linearGradient>
+<linearGradient id="tailB" x1="1" y1="0" x2="0" y2="0">
+<stop offset="0" stop-color="#84e7dc"/><stop offset="1" stop-color="#12739a"/>
+</linearGradient>
+<radialGradient id="bub" cx=".34" cy=".3" r=".78">
+<stop offset="0" stop-color="#ffffff" stop-opacity=".72"/><stop offset=".42" stop-color="#d6f2ff" stop-opacity=".12"/><stop offset=".86" stop-color="#eafaff" stop-opacity=".05"/><stop offset="1" stop-color="#ffffff" stop-opacity=".42"/>
+</radialGradient>
+<radialGradient id="vig" cx=".5" cy=".42" r=".78">
+<stop offset=".52" stop-color="#00101c" stop-opacity="0"/><stop offset="1" stop-color="#00101c" stop-opacity=".6"/>
+</radialGradient>
+<clipPath id="clipA"><ellipse cx="0" cy="0" rx="104" ry="76"/></clipPath>
+<clipPath id="clipB"><path d="M-68,0 C-44,-16 -6,-25 46,-16 C74,-10 78,10 46,16 C-6,25 -44,16 -68,0 Z"/></clipPath>
+<clipPath id="bedClip"><path id="bedClipPath" d="M0,780 L0,900 L1600,900 Z"/></clipPath>
+<path id="rock" d="M-46,16 C-42,-8 -24,-26 -2,-28 C20,-30 38,-14 46,16 Z"/>
+<path id="stone" d="M-34,14 C-30,-4 -12,-18 6,-18 C26,-18 36,-4 38,14 Z"/>
+<g id="weed" fill="none" stroke="currentColor" stroke-linecap="round">
+<path d="M0,0 C-16,-44 10,-82 -6,-128 C-18,-164 6,-196 -2,-232" stroke-width="12"/>
+<path d="M2,-2 C18,-40 38,-64 30,-110 C26,-140 44,-158 40,-190" stroke-width="8" opacity=".85"/>
+<path d="M-2,-2 C-22,-38 -44,-60 -38,-104 C-34,-134 -52,-150 -50,-176" stroke-width="7" opacity=".7"/>
+<path d="M0,-6 C6,-40 -6,-70 4,-104" stroke-width="5" opacity=".55"/>
+<g fill="currentColor" stroke="none" opacity=".9">
+<path d="M-6,-128 c-24,-12 -40,-4 -50,14 c22,8 40,2 50,-14 z"/>
+<path d="M30,-110 c22,-14 40,-8 48,10 c-22,10 -40,4 -48,-10 z"/>
+<path d="M-38,-104 c-20,-14 -36,-10 -44,6 c20,12 36,8 44,-6 z"/>
+</g>
+</g>
+<g id="anem" fill="none" stroke="currentColor" stroke-linecap="round">
+<path d="M0,0 C-2,-16 -8,-26 -14,-34" stroke-width="5"/><path d="M0,0 C0,-18 -2,-30 -3,-44" stroke-width="5"/>
+<path d="M0,0 C2,-16 8,-28 13,-38" stroke-width="5"/><path d="M0,0 C-6,-12 -16,-18 -24,-22" stroke-width="4.5"/>
+<path d="M0,0 C6,-12 16,-20 23,-26" stroke-width="4.5"/>
+<g fill="currentColor" stroke="none"><circle cx="-14" cy="-34" r="4"/><circle cx="-3" cy="-44" r="4"/><circle cx="13" cy="-38" r="4"/><circle cx="-24" cy="-22" r="3.4"/><circle cx="23" cy="-26" r="3.4"/></g>
+<path d="M-16,6 C-10,-8 10,-8 16,6 Z" fill="#7c3f63" stroke="none" opacity=".9"/>
+</g>
+<g id="fan" fill="none" stroke="currentColor" stroke-linecap="round">
+<path d="M0,0 C-4,-30 -18,-56 -38,-76" stroke-width="5"/><path d="M0,0 C-2,-36 -8,-66 -14,-96" stroke-width="5"/>
+<path d="M0,0 C4,-34 12,-62 26,-92" stroke-width="5"/><path d="M0,0 C8,-26 26,-46 46,-62" stroke-width="4.5"/>
+<path d="M-24,-52 C-8,-58 10,-58 26,-50" stroke-width="2.5" opacity=".65"/><path d="M-30,-68 C-8,-76 14,-74 34,-64" stroke-width="2.5" opacity=".65"/>
+</g>
+</defs>
+
+<rect width="100%" height="100%" fill="url(#water)"/>
+<rect width="100%" height="62%" fill="url(#sun)"/>
+
+<g id="rays">
+<polygon class="ray" points="150,-40 292,-40 470,700 268,700" fill="url(#rayG)" style="animation-duration:12s"/>
+<polygon class="ray" points="512,-40 592,-40 706,690 566,690" fill="url(#rayG)" style="animation-duration:16s;animation-delay:-4s"/>
+<polygon class="ray" points="852,-40 1006,-40 1148,672 932,672" fill="url(#rayG)" style="animation-duration:14s;animation-delay:-7s"/>
+<polygon class="ray" points="1238,-40 1318,-40 1436,650 1286,650" fill="url(#rayG)" style="animation-duration:18s;animation-delay:-2s"/>
+<polygon class="ray" points="1470,-40 1590,-40 1720,660 1560,660" fill="url(#rayG)" style="animation-duration:15s;animation-delay:-9s"/>
+</g>
+
+<g id="surface" fill="none" stroke="#eafeff" stroke-linecap="round">
+<path d="M-160,24 q60,-15 120,0 t120,0 t120,0 t120,0 t120,0 t120,0 t120,0 t120,0 t120,0 t120,0 t120,0 t120,0 t120,0 t120,0" stroke-width="5" opacity=".33"/>
+<path d="M-200,56 q70,-13 140,0 t140,0 t140,0 t140,0 t140,0 t140,0 t140,0 t140,0 t140,0 t140,0 t140,0 t140,0" stroke-width="3" opacity=".18"/>
+<path d="M-120,98 q80,-11 160,0 t160,0 t160,0 t160,0 t160,0 t160,0 t160,0 t160,0 t160,0" stroke-width="2" opacity=".1"/>
+</g>
+
+<g id="backdrop"></g>
+
+<g id="fishB" class="fish"><g class="lift">
+<g class="tail"><polygon points="-64,0 -150,-46 -150,46" fill="url(#tailB)"/>
+<path d="M-66,0 -142,-38 M-66,4 -142,38" stroke="#0c5a74" stroke-opacity=".3" stroke-width="2" fill="none"/></g>
+<path d="M-16,-20 C-2,-52 30,-52 44,-16 C22,-26 2,-27 -16,-20 Z" fill="#12718f"/>
+<path d="M-20,-16 C-46,-40 -78,-52 -108,-44" stroke="#88e6dc" stroke-opacity=".65" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M-6,18 C6,44 26,44 34,16 C20,26 6,26 -6,18 Z" fill="#0f6f8c" opacity=".9"/>
+<path d="M-68,0 C-44,-16 -6,-25 46,-16 C74,-10 78,10 46,16 C-6,25 -44,16 -68,0 Z" fill="url(#bodyB)"/>
+<g clip-path="url(#clipB)">
+<path d="M-70,-6 C-40,-22 0,-26 46,-18 L46,-8 C0,-16 -40,-12 -70,-2 Z" fill="#0a4b63" opacity=".45"/>
+<ellipse cx="-4" cy="12" rx="70" ry="11" fill="#f0fbf6" opacity=".4"/>
+<g stroke="#0d5f7c" stroke-opacity=".35" stroke-width="3" fill="none">
+<path d="M22,-24 C14,-8 14,8 22,24"/><path d="M-2,-24 C-10,-8 -10,8 -2,24"/><path d="M-26,-22 C-34,-8 -34,8 -26,22"/><path d="M-50,-18 C-56,-6 -56,6 -50,18"/></g>
+</g>
+<path d="M34,-14 C26,-2 26,6 34,15" fill="none" stroke="#0d5f7c" stroke-opacity=".45" stroke-width="2.5"/>
+<g class="side"><path d="M22,3 C6,26 -22,30 -34,10 C-14,18 6,14 22,3 Z" fill="#6fdcd2" opacity=".85" stroke="#0d6a86" stroke-opacity=".4" stroke-width="1.5"/></g>
+<circle cx="38" cy="-7" r="9.5" fill="#fbfffd"/><circle cx="40" cy="-6.5" r="4.6" fill="#0d1a22"/><circle cx="37.4" cy="-9" r="1.7" fill="#fff"/>
+<path d="M52,2 C56,9 62,10 66,3" fill="none" stroke="#0b4a60" stroke-width="2.6" stroke-linecap="round"/>
+</g></g>
+
+<g id="bed">
+<path id="bedPath" fill="url(#sandG)"/>
+<g clip-path="url(#bedClip)" fill="#5b4326" opacity=".26">
+<ellipse cx="180" cy="846" rx="190" ry="26"/><ellipse cx="620" cy="864" rx="230" ry="30"/><ellipse cx="1080" cy="842" rx="200" ry="24"/><ellipse cx="1520" cy="866" rx="240" ry="30"/><ellipse cx="1980" cy="848" rx="200" ry="26"/><ellipse cx="2300" cy="862" rx="200" ry="28"/>
+<g fill="none" stroke="#fdf1c9" stroke-opacity=".16" stroke-width="3">
+<path class="caust" d="M-40,812 q160,-14 320,0 t320,0 t320,0 t320,0 t320,0 t320,0 t320,0" style="animation-duration:10s"/>
+<path class="caust" d="M-80,838 q150,-12 300,0 t300,0 t300,0 t300,0 t300,0 t300,0 t300,0 t300,0" stroke-opacity=".1" style="animation-duration:13s;animation-delay:-4s"/>
+<path class="caust" d="M-20,866 q180,-12 360,0 t360,0 t360,0 t360,0 t360,0 t360,0" stroke-opacity=".07" style="animation-duration:16s;animation-delay:-8s"/>
+</g>
+</g>
+<path id="bedEdge" fill="none" stroke="#f8e7bb" stroke-opacity=".45" stroke-width="3"/>
+<g id="bedDecor"></g>
+</g>
+
+<g id="fishA" class="fish"><g class="lift">
+<g class="tail"><polygon points="-92,0 -196,-66 -196,66" fill="url(#tailA)"/>
+<path d="M-96,0 -186,-54 M-96,5 -186,54 M-98,-8 -176,-40" stroke="#b9482a" stroke-opacity=".26" stroke-width="2.5" fill="none"/></g>
+<path d="M-46,-58 C-14,-124 52,-116 74,-54 C34,-70 -8,-72 -46,-58 Z" fill="#e4622e"/>
+<path d="M-42,-58 C-12,-112 44,-106 66,-56" fill="none" stroke="#ffd08a" stroke-opacity=".4" stroke-width="2.5"/>
+<path d="M-30,56 C-6,102 34,98 48,54 C22,68 -6,68 -30,56 Z" fill="#d7552c" opacity=".9"/>
+<ellipse cx="0" cy="0" rx="104" ry="76" fill="url(#bodyA)"/>
+<g clip-path="url(#clipA)">
+<ellipse cx="-6" cy="54" rx="100" ry="46" fill="#ffd8a0" opacity=".3"/>
+<ellipse cx="8" cy="-64" rx="88" ry="26" fill="#8f2f1c" opacity=".16"/>
+<path d="M36,-84 C60,-30 60,30 36,84 L62,84 C86,30 86,-30 62,-84 Z" fill="#fff3dd" opacity=".92"/>
+<path d="M-34,-84 C-12,-30 -12,30 -34,84 L-12,84 C10,30 10,-30 -12,-84 Z" fill="#fff3dd" opacity=".84"/>
+<path d="M-96,-84 C-78,-30 -78,30 -96,84 L-76,84 C-58,30 -58,-30 -76,-84 Z" fill="#fff3dd" opacity=".6"/>
+</g>
+<path d="M50,-56 C30,-16 30,18 50,56" fill="none" stroke="#b2482a" stroke-opacity=".42" stroke-width="3.5"/>
+<g class="side"><path d="M34,4 C8,44 -36,54 -52,20 C-22,34 10,28 34,4 Z" fill="#ffb45f" stroke="#d05a2c" stroke-opacity=".45" stroke-width="2"/></g>
+<circle cx="64" cy="-26" r="18" fill="#fdfdf8"/><circle cx="68" cy="-25" r="9" fill="#101d29"/><circle cx="64" cy="-30" r="3.2" fill="#fff"/>
+<path d="M82,12 C88,24 98,25 103,14" fill="none" stroke="#8b3421" stroke-width="4.5" stroke-linecap="round"/>
+<path d="M86,-40 C96,-34 100,-24 100,-14" fill="none" stroke="#a83c24" stroke-opacity=".3" stroke-width="3"/>
+</g></g>
+
+<g id="motes"></g>
+<g id="bubbles"></g>
+<rect width="100%" height="100%" fill="url(#vig)" pointer-events="none"/>
+</svg>
+
+<div class="hud tl">
+<div class="kicker">Plate II &middot; pelagic survey</div>
+<h1>Abyssal<em>Drift</em></h1>
+<div class="rule"></div>
+<p class="lede">Two residents of the twelve&#8209;metre shelf, drawn from ellipses, triangles and a little patience. Hover one and it will notice you.</p>
+</div>
+
+<div class="hud br">
+<div class="stat"><b id="rb">18</b><span>bubbles aloft</span></div>
+<div class="stat"><b id="rc">1.08</b><span>m/s current</span></div>
+<div class="stat"><b id="rd">12.0</b><span>metres deep</span></div>
+<div class="tip">click the water to release air</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var svg=document.getElementById('stage'),NS='http://www.w3.org/2000/svg',XLINK='http://www.w3.org/1999/xlink';
+var H=900,W=1600,BED=778;
+var bubL=document.getElementById('bubbles'),moteL=document.getElementById('motes'),
+    decorL=document.getElementById('bedDecor'),backL=document.getElementById('backdrop'),
+    raysL=document.getElementById('rays'),bedP=document.getElementById('bedPath'),
+    bedE=document.getElementById('bedEdge'),bedC=document.getElementById('bedClipPath');
+
+function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e;}
+function rnd(a,b){return a+Math.random()*(b-a);}
+function use(id,color,cls){var u=el('use',{href:'#'+id});u.setAttributeNS(XLINK,'xlink:href','#'+id);
+ if(color)u.setAttribute('color',color); if(cls)u.setAttribute('class',cls); return u;}
+function ground(x){return BED+11*Math.sin(x*0.0042)+7*Math.sin(x*0.0113+1.7);}
+
+/* ---------- terrain + decoration ---------- */
+var items=[];
+function place(parent,node,fx,s,yoff){var w=el('g');w.appendChild(node);parent.appendChild(w);
+ items.push({w:w,fx:fx,s:s,yo:yoff||0});return w;}
+
+var greens=['#2f8f63','#1f6f57','#3fa770','#256b4c','#48b07a','#1c5a4a','#2c8a58','#3d9c66'];
+var i,w;
+for(i=0;i<8;i++){
+ var inner=el('g',{'class':'fronds'});
+ inner.setAttribute('style','animation-duration:'+rnd(6,11).toFixed(1)+'s;animation-delay:-'+rnd(0,7).toFixed(1)+'s');
+ inner.appendChild(use('weed',greens[i%greens.length]));
+ place(decorL,inner,rnd(.03,.97),rnd(.55,1.35),4);
+}
+for(i=0;i<7;i++){
+ var c=(i%2)?'#4a5866':'#6a7581';
+ var r=el('path',{d:(i%3===0)?'M-46,16 C-42,-8 -24,-26 -2,-28 C20,-30 38,-14 46,16 Z':'M-34,14 C-30,-4 -12,-18 6,-18 C26,-18 36,-4 38,14 Z',fill:c});
+ var rr=el('g');rr.appendChild(r);place(decorL,rr,rnd(.02,.98),rnd(.35,1.15),2);
+}
+for(i=0;i<11;i++){
+ var p=el('ellipse',{cx:0,cy:0,rx:rnd(6,17).toFixed(1),ry:rnd(3,7).toFixed(1),fill:(i%2)?'#8b6b45':'#a98a5e','fill-opacity':.75});
+ var pg=el('g');pg.appendChild(p);place(decorL,pg,rnd(.01,.99),1,10);
+}
+var anemCols=['#ef7f9d','#f2a35e','#c98ce0','#ff8f6b'];
+for(i=0;i<4;i++){
+ var ag=el('g',{'class':'ano'});ag.appendChild(use('anem',anemCols[i%4]));
+ place(decorL,ag,rnd(.06,.94),rnd(.7,1.25),2);
+}
+for(i=0;i<2;i++){
+ var fg=el('g');fg.appendChild(use('fan',['#e0677a','#f08a5f'][i]));fg.firstChild.setAttribute('opacity','.8');
+ place(decorL,fg,.3+i*.42,rnd(.9,1.3),2);
+}
+for(i=0;i<5;i++){
+ var mound=el('path',{d:'M-300,0 C-180,-130 -70,-186 10,-196 C90,-186 200,-120 320,0 Z',fill:'#0b3a5c',opacity:(.35+i*.05).toFixed(2)});
+ place(backL,mound,(i+.4)/5.4,rnd(.7,1.25),34);
+}
+for(i=0;i<6;i++){
+ var bk=el('g');bk.appendChild(use('weed','#0e4a52'));bk.firstChild.setAttribute('opacity','.5');
+ place(backL,bk,rnd(.02,.98),rnd(.5,1),30);
+}
+
+function layout(){
+ W=Math.max(880,Math.min(2400,Math.round(900*innerWidth/innerHeight)));
+ svg.setAttribute('viewBox','0 0 '+W+' '+H);
+ var pts=[],x;
+ for(x=-60;x<=W+60;x+=140)pts.push([x,ground(x)]);
+ var top='M'+pts[0][0]+','+pts[0][1].toFixed(1),j;
+ for(j=1;j<pts.length-1;j++)top+=' Q'+pts[j][0]+','+pts[j][1].toFixed(1)+' '+((pts[j][0]+pts[j+1][0])/2).toFixed(1)+','+((pts[j][1]+pts[j+1][1])/2).toFixed(1);
+ bedP.setAttribute('d',top+' L'+(W+60)+','+(H+60)+' L-60,'+(H+60)+' Z');
+ bedC.setAttribute('d',top+' L'+(W+60)+','+(H+60)+' L-60,'+(H+60)+' Z');
+ bedE.setAttribute('d',top);
+ for(j=0;j<items.length;j++){var it=items[j],gx=it.fx*W;
+  it.w.setAttribute('transform','translate('+gx.toFixed(1)+','+(ground(gx)+it.yo).toFixed(1)+') scale('+it.s.toFixed(2)+')');}
+ for(j=0;j<bubbles.length;j++)bubbles[j].baseX=bubbles[j].fx*W;
+ for(j=0;j<fish.length;j++){var f=fish[j];if(f.x>W+f.m)f.x=W+f.m;if(f.x<-f.m)f.x=-f.m;}
+}
+
+/* ---------- bubbles ---------- */
+var vents=[.12,.3,.47,.62,.79,.93],bubbles=[];
+function seed(b,x,y,r){
+ b.r=(r!==undefined)?r:2.2+Math.pow(Math.random(),1.7)*9.8;
+ b.fx=(x!==undefined)?x/W:vents[(Math.random()*vents.length)|0]+rnd(-.03,.03);
+ b.baseX=b.fx*W; b.y=(y!==undefined)?y:ground(b.baseX)+rnd(0,34);
+ b.vy=11+155/(b.r+7)+rnd(0,7); b.amp=rnd(5,26); b.freq=rnd(.4,1.3); b.ph=rnd(0,6.28);
+ b.c.setAttribute('r',b.r.toFixed(2));
+ b.c.setAttribute('stroke-width',Math.max(.6,b.r*.1).toFixed(2));
+ b.h.setAttribute('r',(b.r*.26).toFixed(2));
+ b.h.setAttribute('cx',(-b.r*.3).toFixed(2));
+ b.h.setAttribute('cy',(-b.r*.34).toFixed(2));
+ b.g.setAttribute('opacity',Math.min(.95,.4+b.r/14).toFixed(2));
+}
+function makeBubble(x,y,r,temp){
+ var g=el('g'),c=el('circle',{fill:'url(#bub)',stroke:'rgba(226,247,255,.55)'}),h=el('circle',{fill:'rgba(255,255,255,.9)'});
+ g.appendChild(c);g.appendChild(h);
+ var b={g:g,c:c,h:h,r:0,x:0,y:0,fx:0,baseX:0,vy:0,amp:0,freq:0,ph:0,temp:!!temp};
+ seed(b,x,y,r);bubL.appendChild(g);bubbles.push(b);return b;
+}
+for(i=0;i<18;i++){var nb=makeBubble();nb.y=rnd(-60,ground(W/2));}
+function tickBubbles(dt,t){
+ for(var k=bubbles.length-1;k>=0;k--){
+  var b=bubbles[k];b.y-=b.vy*dt;b.r+=dt*.28;
+  var prog=(1-(b.y/H))*.9+.5;
+  b.x=b.baseX+Math.sin(t*b.freq+b.ph)*b.amp*prog;
+  if(b.y<-b.r-8){
+   if(b.temp){bubL.removeChild(b.g);bubbles.splice(k,1);continue;}
+   seed(b);b.r=rnd(2.2,12);continue;
+  }
+  b.c.setAttribute('r',b.r.toFixed(2));
+  b.g.setAttribute('transform','translate('+b.x.toFixed(1)+','+b.y.toFixed(1)+')');
+ }
+}
+
+/* ---------- plankton motes ---------- */
+var motes=[];
+for(i=0;i<30;i++){
+ var c=el('circle',{r:rnd(.7,2.4).toFixed(2),fill:'#e2f7ff',opacity:rnd(.06,.3).toFixed(2)});
+ moteL.appendChild(c);motes.push({c:c,x:Math.random()*W,y:Math.random()*H,vy:rnd(2,9),vx:rnd(-6,2),ph:rnd(0,6.28)});
+}
+function tickMotes(dt,t){
+ for(var k=0;k<motes.length;k++){var m=motes[k];
+  m.y-=m.vy*dt;m.x+=(m.vx+Math.sin(t*.5+m.ph)*3)*dt;
+  if(m.y<-8){m.y=H+8;m.x=Math.random()*W;} if(m.x<-10)m.x=W+10; if(m.x>W+10)m.x=-10;
+  m.c.setAttribute('transform','translate('+m.x.toFixed(1)+','+m.y.toFixed(1)+')');
+ }
+}
+
+/* ---------- fish ---------- */
+function Fish(o){
+ o.g=document.getElementById(o.id);o.tail=o.g.querySelector('.tail');o.fin=o.g.querySelector('.side');
+ o.sp=o.base;o.spT=o.base;
+ o.g.addEventListener('mouseenter',function(){o.spT=o.base*2.6;});
+ o.g.addEventListener('mouseleave',function(){o.spT=o.base;});
+ return o;
+}
+var fish=[
+ Fish({id:'fishA',x:520,y0:288,dir:1,base:56,m:250,ba:20,bf:.15,ph:0,tf:.9,ta:11,px:-92,py:0,fpx:34,fpy:6}),
+ Fish({id:'fishB',x:1180,y0:560,dir:-1,base:134,m:200,ba:30,bf:.26,ph:2.1,tf:2,ta:14,px:-64,py:0,fpx:22,fpy:3})
+];
+
+var last=0,acc=0,rb=document.getElementById('rb'),rc=document.getElementById('rc'),rd=document.getElementById('rd'),amb=18;
+function frame(ts){
+ var t=ts/1000,dt=last?Math.min(.05,(ts-last)/1000):0;last=ts;
+ for(var k=0;k<fish.length;k++){
+  var f=fish[k];
+  f.sp+=(f.spT-f.sp)*Math.min(1,dt*2.6);
+  f.x+=f.dir*f.sp*dt;
+  if(f.dir>0&&f.x-f.m>W)f.x=-f.m; else if(f.dir<0&&f.x+f.m<0)f.x=W+f.m;
+  var y=f.y0+Math.sin(t*f.bf*6.283+f.ph)*f.ba;
+  var rot=Math.sin(t*f.bf*6.283+f.ph+1.2)*2.6;
+  f.g.setAttribute('transform','translate('+f.x.toFixed(1)+','+y.toFixed(1)+') rotate('+rot.toFixed(2)+') scale('+f.dir+',1)');
+  var wag=Math.sin(t*f.tf*6.283+f.ph)*f.ta*(f.sp/f.base);
+  f.tail.setAttribute('transform','rotate('+wag.toFixed(2)+','+f.px+','+f.py+')');
+  f.fin.setAttribute('transform','rotate('+(-wag*.55).toFixed(2)+','+f.fpx+','+f.fpy+')');
+ }
+ tickBubbles(dt,t);tickMotes(dt,t);
+ acc+=dt;
+ if(acc>.3){acc=0;rb.textContent=bubbles.length;rc.textContent=(fish[0].sp/52).toFixed(2);rd.textContent=(11.6+Math.sin(t*.25)*.7).toFixed(1);}
+ requestAnimationFrame(frame);
+}
+
+/* ---------- interaction ---------- */
+svg.addEventListener('pointerdown',function(e){
+ var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;
+ var m=svg.getScreenCTM();if(!m)return;var q=p.matrixTransform(m.inverse());
+ if(bubbles.length>110)return;
+ for(var k=0;k<7;k++)makeBubble(q.x+rnd(-24,24),q.y+rnd(-14,18),rnd(1.4,5.5),true);
+});
+var px=0,py=0;
+addEventListener('mousemove',function(e){
+ px=(e.clientX/innerWidth-.5);py=(e.clientY/innerHeight-.5);
+ raysL.setAttribute('transform','translate('+(px*38).toFixed(1)+','+(py*10).toFixed(1)+')');
+ backL.setAttribute('transform','translate('+(-px*20).toFixed(1)+','+(-py*8).toFixed(1)+')');
+});
+addEventListener('resize',layout);
+layout();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

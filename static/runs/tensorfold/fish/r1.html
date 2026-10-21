@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reef Drift — an underwater scene in SVG primitives</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#04202f}
+  #scene{display:block;position:fixed;inset:0;width:100%;height:100%;cursor:crosshair;touch-action:none}
+  .plate{position:fixed;left:clamp(14px,2.6vw,48px);bottom:clamp(14px,3.4vh,40px);
+    max-width:min(345px,42vw);padding:16px 22px 18px 20px;pointer-events:none;
+    background:rgba(4,23,33,.84);border-left:2px solid #eab96a;
+    box-shadow:0 20px 46px rgba(0,9,16,.52);
+    transform:translateX(calc(-1*clamp(0px,(1200px - 100vw)/2,320px)));
+    transition:transform .75s cubic-bezier(.19,1,.22,1),opacity .55s ease}
+  .plate:hover{transform:translate(0,0);opacity:1}
+  .plate>*{opacity:.92}
+  .kicker{font:700 9px/1.6 'Avenir Next','Segoe UI',system-ui,sans-serif;letter-spacing:.34em;
+    text-transform:uppercase;color:#f0c283}
+  h1{font-family:'Iowan Old Style','Hoefler Text','Iowan Old Style',Georgia,serif;
+    font-size:clamp(23px,2.55vw,35px);line-height:.94;font-weight:400;color:#f7fbf8;
+    margin:6px 0 0;letter-spacing:.004em}
+  h1 em{display:block;font-size:.44em;letter-spacing:.3em;text-transform:uppercase;
+    font-weight:700;color:#7fd8e7;margin:0 0 9px}
+  p{font:400 13px/1.5 'Iowan Old Style','Hoefler Text',Georgia,serif;color:#b6d8e5;margin:11px 0 0}
+  .legend{margin-top:11px;padding-top:11px;border-top:1px solid rgba(255,255,255,.14);
+    font:500 10.5px/1.7 'Avenir Next','Segoe UI',system-ui,sans-serif;letter-spacing:.055em;
+    text-transform:uppercase;color:#7fbccf}
+  .legend b{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:0}
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg"></svg>
+<div class="plate">
+  <p class="kicker">SVG primitives, hand-built</p>
+  <h1><em>Reef Drift</em>Sand, Sway &amp; Light</h1>
+  <p>Two resident fish pass over the sand; bubbles leave the seafloor and pop at the surface, one per frame, never the same two twice.</p>
+  <p class="legend"><span><b style="background:#ff9650"></b>Coral discus — slow, deep-bodied</span><br><span><b style="background:#2fd7eb"></b>Teal dart — lean and quick</span></p>
+</div>
+<script>
+(function(){
+"use strict";
+var NS='http://www.w3.org/2000/svg';
+var scene=document.getElementById('scene');
+var W=0,H=0,BUB=[],WEED=[],FISH=[],RAY=[],MOTE=[],ventG,vents=[],spawn;
+
+function rnd(a,b){return a+Math.random()*(b-a);}
+function el(tag,at,parent){var e=document.createElementNS(NS,tag),k;
+  for(k in at){e.setAttribute(k,at[k]);} if(parent){parent.appendChild(e);} return e;}
+function layer(id,parent,at){var g=el('g',at||{},parent); g.setAttribute('id',id); return g;}
+function path(d,at,parent){var a={d:d}; for(var k in at){a[k]=at[k];} return el('path',a,parent);}
+
+/* ---------- defs ---------- */
+function buildDefs(){
+  var defs=el('defs',{},scene);
+  function grad(id,stops,vert){
+    var g=el('linearGradient',{id:id,x1:vert?'0':'0',y1:'0',x2:vert?'0':'1',y2:'1'},defs);
+    for(var i=0;i<stops.length;i++){el('stop',{offset:stops[i][0],'stop-color':stops[i][1]},g);}
+  }
+  grad('water',[['0','#7adcea'],['0.34','#2c9dc4'],['0.68','#12557d'],['1','#04202f']],true);
+  grad('sand',[['0','#f6e5bd'],['0.44','#dcb77c'],['1','#7a5530']],true);
+  grad('aG',[['0','#ffe3a4'],['1','#ec6a34']],false);
+  grad('bG',[['0','#73f2f6'],['1','#14557e']],false);
+  el('radialGradient',{id:'glow',cx:'0.5',cy:'0.5',r:'0.5'},defs).appendChild(
+    el('stop',{offset:'0','stop-color':'#d9fbff','stop-opacity':'0.5'}));
+  scene.querySelector('radialGradient').appendChild(
+    el('stop',{offset:'1','stop-color':'#d9fbff','stop-opacity':'0'}));
+  el('filter',{id:'soft',x:'-25%',y:'-25%',width:'150%',height:'150%'},defs).appendChild(
+    el('feGaussianBlur',{stdDeviation:'11'}));
+}
+
+/* ---------- water, light, motes ---------- */
+function buildWater(){
+  layer('water',scene).appendChild(el('rect',{x:0,y:0,width:W,height:H,fill:'url(#water)'}));
+  var p=layer('pool',scene,{opacity:'.26'});
+  p.appendChild(el('ellipse',{cx:W*0.5,cy:-H*0.12,rx:W*0.62,ry:H*0.34,fill:'url(#glow)'}));
+}
+function buildRays(){
+  var g=layer('rays',scene,{filter:'url(#soft)',fill:'#c8f2ff',opacity:'.26'});
+  var n=Math.max(3,Math.round(W/360)),i,x,w,ln,lean;
+  for(i=0;i<n;i++){
+    x=rnd(-40,W); w=rnd(42,104); ln=H*rnd(.5,.82); lean=rnd(40,140);
+    RAY.push({el:path('M'+x+' -10h'+w.toFixed(1)+'L'+(x+w+lean).toFixed(1)+' '+ln.toFixed(1)+
+      'h'+(-w*1.7).toFixed(1)+'Z',{},g),ph:rnd(0,6.28),sp:rnd(.14,.34)});
+  }
+}
+function buildMotes(){ /* faint plankton snow */
+  var g=layer('snow',scene,{fill:'#ccf4ff',opacity:'.42'}),i;
+  for(i=0;i<Math.max(14,Math.round(W/52));i++){
+    MOTE.push({el:el('circle',{r:rnd(.7,2.1),cx:0,cy:0},g),x:rnd(0,W),y:rnd(0,H),
+      s:rnd(4,15),a:rnd(4,18),p:rnd(0,6.28),ph:rnd(0,6.28)});
+  }
+}
+
+/* ---------- seafloor ---------- */
+function floorH(){return H*0.14;}          /* ~14% of viewport height */
+function buildFloor(){
+  var top=H-floorH(),low=H-floorH()*0.45,bot=H-floorH()*0.04;
+  var g=layer('floor',scene),n=Math.max(6,Math.round(W/125)),d='M-8 '+low,i;
+  for(i=0;i<=n;i++){d+=' L'+(W*i/n).toFixed(1)+' '+(low-14+Math.sin(i*1.7)*9).toFixed(1);}
+  d+=' L'+(W+8)+' '+top.toFixed(1)+' L'+(W+8)+' '+bot.toFixed(1)+' L'+(W+8)+' '+(H+8)+' L-8 '+(H+8)+'Z';
+  path(d,{fill:'url(#sand)'},g);
+  var ridge='M-8 '+low.toFixed(1),steps=Math.max(8,Math.round(W/72)),i2;
+  for(i2=0;i2<=steps;i2++){ridge+=' L'+(W*i2/steps).toFixed(1)+' '+(low-14-Math.abs(Math.sin(i2*1.1))*10).toFixed(1);}
+  path(ridge,{fill:'#d47c57',opacity:'.42'},g);
+  var rocks=layer('rocks',g,{fill:'#6e5233',opacity:'.55'}),i3;
+  for(i3=0;i3<7;i3++){el('ellipse',{cx:rnd(0,W).toFixed(1),cy:(rnd(0,1)*floorH()+top-floorH()*0.18).toFixed(1),
+    rx:rnd(16,44).toFixed(1),ry:rnd(6,15).toFixed(1)},rocks);}
+  var peb=layer('pebbles',g,{fill:'#8a6741',opacity:'.7'}),i4;
+  for(i4=0;i4<9;i4++){el('circle',{cx:rnd(0,W).toFixed(1),cy:(rnd(0,1)*floorH()*0.7+top+6).toFixed(1),r:rnd(2,4.6).toFixed(1)},peb);}
+  ventG=layer('vents',scene); vents=[];
+}
+
+/* ---------- seaweed ---------- */
+function stalk(w){
+  var g=el('g',{},scene),N=7,col=240,i;
+  for(i=0;i<=N;i++){col+=22;
+    w.pts.push({ph:rnd(0,6.28),k:rnd(5,21)*Math.pow(1-i/N,0.85),r:(w.h*(1-i/N*0.74)).toFixed(1),c:'#'+col.toString(16)});}
+  WEED.push(w);
+}
+function strand(x,h,w,color,ph){
+  var g=el('g',{},scene);
+  var p1=path('',{fill:color},g);
+  var w2={x:x,h:h,el:p1,pts:[],sway:ph,k:0.1};
+  stalk(w2);
+  return w2;
+}
+function buildWeeds(){
+  var g=layer('weed',scene,{'stroke-linejoin':'round','stroke-linecap':'round'});
+  var f=H*0.14, base=H-f*0.34;
+  function ribbon(x,h,w,color,ph){
+    var pts=[],i;
+    for(i=0;i<=7;i++){pts.push({ph:rnd(0,6.28),k:rnd(5,21)*Math.pow(1-i/7,0.85),
+      r:((i===0?w*0.55:w*Math.pow(1-i/7,1.3))/2).toFixed(1),c:color});}
+    WEED.push({x:x,h:h,base:base,el:el('path',{fill:color},g),pts:pts,sway:ph,k:0.12});
+  }
+  function chain(x,h,r){
+    var pts=[],i,c;
+    for(i=0;i<5;i++){pts.push({ph:rnd(0,6.28),k:rnd(5,21)*Math.pow(1-i/5,0.85),r:rnd(7,11),c:c});}
+    WEED.push({x:x,h:h,base:base,el:g,pts:pts,sway:rnd(0,6.28),k:0.09,r:r});
+  }
+  ribbon(W*0.05,H*0.36,9,'#1b6d52',0);
+  ribbon(W*0.085,H*0.27,7,'#2f9a6e',1.7);
+  ribbon(W*0.13,H*0.42,10,'#14705a',3.1);
+  ribbon(W*0.78,H*0.4,10,'#177055',0.8);
+  ribbon(W*0.82,H*0.29,8,'#2f9a6e',2.4);
+  chain(W*0.24,H*0.3,6.5);
+  chain(W*0.62,H*0.24,6);
+  chain(W*0.92,H*0.34,7);
+}
+
+/* ---------- shell & anemone ---------- */
+function buildReefs(){
+  var f=H*0.14,base=H-f*0.3, i;
+  var s=layer('shell',scene,{opacity:'.95'});
+  var cx=W*0.44, cy=base-3;
+  for(i=6;i>=0;i--){
+    el('g',{transform:'rotate('+(i*8.571-25.7)+' '+cx+' '+cy+')'},s).appendChild(
+      el('circle',{cx:cx,cy:cy-6-i,r:20-i*2.3,fill:['#ffd9a6','#efc387','#e6a561','#c8804b'][i%4],opacity:'.92'}));
+  }
+  var a=layer('anem',scene,{});
+  for(i=0;i<11;i++){
+    el('g',{transform:'rotate('+(i*32.7)+' '+(W*0.68)+' '+(base-11)+')'},a).appendChild(
+      el('ellipse',{cx:W*0.68,cy:base-11,rx:3.6,ry:15,fill:i%2?'#ff7f96':'#ffa4b6',opacity:'.85'}));
+  }
+}
+
+/* ---------- fish ---------- */
+function makeFish(cfg){
+  var f={el:el('g',{},scene),b:null,dir:cfg.dir,v:cfg.v,y:cfg.y,s:cfg.s,
+         x:cfg.dir>0?W+130:-130,p:Math.random()*0.4,pd:3.1+cfg.pd,
+         ang:cfg.ang,sway:0,bob:0,bub:Math.random()*0.7};
+  f.b=el('g',{},f.el);
+  path(cfg.tail,{fill:cfg.fin},f.b);                       /* triangular tail */
+  path(cfg.body,{fill:'url(#'+cfg.id+'G)',stroke:cfg.line,'stroke-width':1.4,opacity:'.95'},f.b);
+  var cp=el('clipPath',{id:'c'+cfg.id},scene.querySelector('defs'));
+  cp.appendChild(path(cfg.body,{transform:'translate(15,2)'}));
+  var st=el('g',{'clip-path':'url(#c'+cfg.id+')',fill:cfg.stripe,opacity:'.75',
+                 transform:'translate(15,2)'},f.b);
+  for(var i=0;i<cfg.marks.length;i++){
+    el('ellipse',{cx:cfg.marks[i][0],cy:cfg.marks[i][1],rx:cfg.marks[i][2],ry:cfg.marks[i][3]},st);
+  }
+  path(cfg.dorsal,{fill:cfg.fin},f.b);                      /* dorsal fin */
+  path(cfg.fin,{fill:cfg.fin,opacity:'.82'},f.b);           /* side fin */
+  var eye=el('g',{},f.b);
+  el('circle',{cx:cfg.eye,cy:cfg.eyeY,r:cfg.er,fill:'#fdffff'},eye);
+  el('circle',{cx:cfg.eye+1.2,cy:cfg.eyeY,r:(cfg.er*0.45).toFixed(2),fill:'#132029'},eye);
+  path(cfg.mouth,{fill:'none',stroke:'#17323d','stroke-width':1.7,'stroke-linecap':'round'},f.b);
+  if(cfg.dir<0){f.el.setAttribute('transform','scale(-1,1)');}
+  FISH.push(f);
+}
+
+/* ---------- bubbles ---------- */
+function newBurst(x,y){
+  var b=bubbles.pop();
+  if(!b){return;}
+  var r=2+Math.random()*Math.random()*7.5;
+  b.x=x; b.y=y; b.r=r;
+  b.s=(8.5+r*3.4)*0.55*(1+(11-r)*0.02);
+  b.a=3+r*0.9;
+}
+function buildBubbles(){
+  var i,r;
+  for(i=0;i<26;i++){
+    r=2+Math.random()*Math.random()*7.5;
+    bubbles.push({x:rnd(0,W),y:rnd(H*0.8,H),r:r,s:(8.5+r*3.4)*0.55*(1+(11-r)*0.02),a:3+r*0.9,p:rnd(0,6.28)});
+  }
+}
+
+/* keep a reference for bubble layer */
+var bubbles=[], bubbleLayer=null;
+
+/* ---------- per-frame ---------- */
+function frame(t){
+  var dt=Math.min(0.05,(t-last)/1000)||0.016; last=t;
+
+  for(var i=0;i<bubbles.length;i++){                    /* rising bubbles */
+    var b=bubbles[i]; b.y-=b.s*dt; b.p+=dt*1.6; b.x+=Math.sin(b.p)*b.a*dt;
+    if(b.y+b.r<-8){newBurst(bubbles[i].x,b.y);}
+    b.el.setAttribute('cx',b.x.toFixed(1)); b.el.setAttribute('cy',b.y.toFixed(1));
+  }
+  for(var m=0;m<MOTE.length;m++){                        /* ambient snow */
+    var mo=MOTE[m]; mo.y-=mo.s*dt; mo.p+=dt; mo.x+=Math.sin(mo.p+mo.ph)*mo.a*dt;
+    if(mo.y<-6){mo.y=H+6; mo.x=Math.random()*W;}
+    if(mo.x<-6){mo.x=W+6;} else if(mo.x>W+6){mo.x=-6;}
+    mo.el.setAttribute('cx',mo.x.toFixed(1)); mo.el.setAttribute('cy',mo.y.toFixed(1));
+  }
+  for(var r=0;r<RAY.length;r++){                          /* swaying light */
+    var ra=RAY[r]; ra.ph+=dt*ra.sp;
+    ra.el.setAttribute('opacity',(0.1+0.11*(1+Math.sin(ra.ph))*0.5).toFixed(3));
+  }
+  for(var w=0;w<WEED.length;w++){                          /* swaying seaweed */
+    var wd=WEED[w],L=wd.h,N=wd.pts.length,j,pts=[],s=0;
+    for(j=0;j<=N;j++){
+      var frac=j/N;
+      var off=Math.cos(wd.sway+j*0.22)*wd.k*7*(1-frac*0.35)*L/100+Math.sin(wd.sway*0.6)*1.6;
+      pts.push([wd.x+off,L-frac*L+wd.base-L]);
+    }
+    /* build closed ribbon */
+    var down=[],up=[];
+    for(j=0;j<pts.length;j++){down.push([(pts[j][0]+ +wd.pts[j].r).toFixed(1),pts[j][1].toFixed(1)]);}
+    for(j=pts.length-1;j>=0;j--){up.push([(pts[j][0]- +wd.pts[j].r).toFixed(1),pts[j][1].toFixed(1)]);}
+    wd.el.setAttribute('d','M'+down.concat(up).map(function(p){return p[0]+' '+p[1];}).join('L')+'Z');
+    if(wd.ell){ for(j=0;j<wd.pts.length;j++){ wd.ell[j].setAttribute('cx',pts[j][0].toFixed(1));
+      wd.ell[j].setAttribute('cy',pts[j][1].toFixed(1)); } }
+    wd.sway+=dt*(0.6+w%3*0.11);
+  }
+  for(var f=0;f<FISH.length;f++){                          /* swimming fish */
+    var fi=FISH[f];
+    fi.x+=fi.v*fi.dir*dt; fi.p+=dt*(1.55+fi.pd);
+    if(fi.x>W+150){fi.x=-150;} else if(fi.x<-150){fi.x=W+150;}
+    fi.bub-=dt;
+    if(fi.bub<=0){
+      fi.bub=0.26+Math.random()*0.34;
+      var bx=fi.x+(fi.tailTipX||-15)*fi.s*fi.dir, by=fi.y+rnd(-6,6);
+      bubbles[f*11+2]&&bubbleAt(bx,by,f*11+2);
+    }
+    var angle=Math.sin(fi.p*Math.PI*2)*fi.ang;
+    fi.el.setAttribute('transform','translate('+fi.x.toFixed(1)+','+fi.y.toFixed(1)+') scale('+(fi.s*fi.dir)+','+fi.s+')');
+    fi.b.setAttribute('transform','rotate('+angle.toFixed(2)+')');
+  }
+  requestAnimationFrame(frame);
+}
+function bubbleAt(x,y,idx){
+  var b=bubbles[idx]; if(!b){return;}
+  b.x=x; b.y=y; b.r=1.8+Math.random()*2.4;
+  b.s=(8.5+b.r*3.4)*0.55*1.3;
+}
+
+/* ---------- assembly ---------- */
+function build(){
+  W=window.innerWidth; H=window.innerHeight;
+  scene.innerHTML=''; BUB=[];WEED=[];FISH=[];RAY=[];MOTE=[];bubbles=[];vents=[];
+  buildDefs(); buildWater(); buildRays(); buildMotes();
+  buildFloor(); buildWeeds(); buildReefs();
+  var fishG=layer('fish',scene);
+
+  var bodyA='M20 2 Q44 -29 70 -17 Q88 -9 95 -3 Q89 2 92 5 Q86 12 68 17 Q42 27 19 20 Q2 14 0 0 Q4 -12 20 2Z';
+  makeFish({id:'fA',dir:1,v:78,y:H-floorH()*1.25,s:1.18,ang:7,pd:1.7,
+    body:bodyA,
+    tail:'M21 -2 L-15 -31 L-4 -2 Z M21 2 L-15 31 L-4 2 Z',
+    fin:'M49 2 Q40 24 26 22 Q37 13 42 1 Z',
+    dorsal:'M44 -15 Q54 -47 76 -25 Q59 -21 44 -15 Z',
+    eye:75,eyeY:-6,er:6,mouth:'M92 5 Q86 11 80 10',
+    fin2:1,
+    stripe:'#8e2a1a',
+    marks:[[36,-14,7,24],[54,-6,6,22],[70,-2,5,16]]});
+  FISH[0].el.appendChild(el('path',{d:'M21 -2 L-15 -31 L-4 -2 Z M21 2 L-15 31 L-4 2 Z',fill:'#e0512c',opacity:'.9'}));
+
+  var bodyB='M16 -7 Q44 -15 68 -9 Q83 -5 89 -1 Q84 3 86 5 Q80 9 66 8 Q40 11 16 6 Q7 2 4 -1 Q7 -5 16 -7Z';
+  makeFish({id:'fB',dir:-1,v:134,y:H-floorH()*2.55,s:1.16,ang:11,pd:3.4,
+    body:bodyB,
+    tail:'M17 -5 L-7 -19 L-5 -1 Z M17 5 L-7 19 L-5 1 Z',
+    fin:'M42 3 Q34 18 24 16 Q34 10 39 2 Z',
+    dorsal:'M30 -9 L40 -27 L54 -10 Z',
+    eye:72,eyeY:-3,er:4.6,mouth:'M86 5 Q81 11 75 10',
+    stripe:'#0d3f57',
+    marks:[[30,-4,4,9],[44,-3,3.4,8],[58,-2,3,7]]});
+
+  /* place the two fish groups correctly (factory already appended bodies) */
+  var i;
+  for(i=0;i<FISH.length;i++){
+    var f=FISH[i];
+    f.el.setAttribute('transform','translate('+f.x.toFixed(1)+','+f.y.toFixed(1)+') scale('+(f.s*f.dir)+','+f.s+')');
+  }
+
+  /* vents on the sand + bubble layer */
+  var vg=layer('vents',scene);
+  for(i=0;i<6;i++){
+    var vx=rnd(20,W-20), vy=H-floorH()*rnd(.25,.75);
+    vents.push([vx,vy]);
+    el('ellipse',{cx:vx.toFixed(1),cy:vy.toFixed(1),rx:rnd(5,11).toFixed(1),
+      ry:rnd(2,4.4).toFixed(1),fill:'#0b3247',opacity:'.7'},vg);
+  }
+  var bl=layer('bubbles',scene,{fill:'#e8fbff','fill-opacity':'.3','stroke':'#f2feff','stroke-opacity':'.6'});
+  for(i=0;i<bubbles.length;i++){
+    bubbles[i].el=el('circle',{r:bubbles[i].r.toFixed(2)},bl);
+    bubbles[i].hi=el('circle',{r:(bubbles[i].r*0.3).toFixed(2),fill:'#f6ffff','fill-opacity':'.5',stroke:'none'},bl);
+  }
+}
+
+/* rebuild on resize so the seafloor / seaweed / bubble depths stay right */
+scene.addEventListener('pointerdown',function(e){
+  var i,j,n=Math.max(3,Math.round(6+Math.random()*5)),x=e.clientX,y=e.clientY;
+  var group=el('g',{},scene.querySelector('#bubbles'));
+  for(i=0;i<n;i++){
+    var r=2+Math.random()*3.4;
+    var c=el('circle',{r:r.toFixed(2),cx:(x+rnd(-9,9)).toFixed(1),cy:(y+rnd(-6,6)).toFixed(1)},group);
+    var ph=rnd(0,6.28);
+    bubbles.push({el:c,x:x,y:y,r:r,s:(8.5+r*3.4)*0.55*1.7,a:3+r*0.9,p:ph});
+  }
+  if(bubbles.length>90){bubbles.length=90;}
+});
+
+var rt=null, last=0;
+window.addEventListener('resize',function(){
+  clearTimeout(rt); rt=setTimeout(function(){build();},140);
+});
+
+build();
+requestAnimationFrame(function(t){last=t;frame(t);});
+})();
+</script>
+</body>
+</html>

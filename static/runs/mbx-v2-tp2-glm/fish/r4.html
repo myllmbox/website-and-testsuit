@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Beneath the Surface</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#0d3451}
+svg{display:block;width:100vw;height:100vh}
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#a9e2f0"/><stop offset=".45" stop-color="#4ba4c6"/><stop offset="1" stop-color="#0d3451"/>
+</linearGradient>
+<linearGradient id="sandG" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#e6c795"/><stop offset="1" stop-color="#b1855a"/>
+</linearGradient>
+<linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ffb75e"/><stop offset="1" stop-color="#ec7c1c"/>
+</linearGradient>
+<linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#63d6c4"/><stop offset="1" stop-color="#1d8d82"/>
+</linearGradient>
+<linearGradient id="kelpG" x1="0" y1="1" x2="0" y2="0">
+<stop offset="0" stop-color="#1e6f38"/><stop offset="1" stop-color="#4cb96a"/>
+</linearGradient>
+<linearGradient id="ray" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#eaf9ff" stop-opacity=".18"/><stop offset=".8" stop-color="#eaf9ff" stop-opacity="0"/>
+</linearGradient>
+<clipPath id="c1"><ellipse rx="70" ry="45"/></clipPath>
+<clipPath id="c2"><ellipse rx="48" ry="17"/></clipPath>
+</defs>
+
+<rect width="100%" height="100%" fill="url(#water)"/>
+
+<g opacity=".5">
+<polygon points="170,-80 320,-80 780,2300 540,2300" fill="url(#ray)"/>
+<polygon points="640,-80 720,-80 1220,2300 1070,2300" fill="url(#ray)"/>
+<polygon points="1080,-80 1180,-80 1740,2300 1560,2300" fill="url(#ray)"/>
+<animate attributeName="opacity" values=".35;.7;.35" dur="9s" repeatCount="indefinite"/>
+</g>
+
+<path id="sand" fill="url(#sandG)"/>
+
+<g id="r1">
+<ellipse cy="18" rx="54" ry="10" fill="rgba(40,25,10,.18)"/>
+<ellipse rx="44" ry="24" fill="#6f6053"/>
+<ellipse cx="-10" cy="-8" rx="26" ry="11" fill="#8a7a69" opacity=".85"/>
+<ellipse cx="58" cy="10" rx="12" ry="8" fill="#7d6c58"/>
+</g>
+<g id="r2">
+<ellipse cy="12" rx="34" ry="7" fill="rgba(40,25,10,.18)"/>
+<ellipse rx="28" ry="17" fill="#7a6a58"/>
+<ellipse cx="-6" cy="-6" rx="16" ry="7" fill="#94836f" opacity=".85"/>
+</g>
+<g id="r3">
+<ellipse rx="14" ry="9" fill="#867561"/>
+<ellipse cx="-3" cy="-3" rx="8" ry="4" fill="#9d8b74" opacity=".85"/>
+</g>
+<path id="star" d="M0 -14 L4 -4 L14 -3 L6 4 L8 14 L0 8 L-8 14 L-6 4 L-14 -3 L-4 -4 Z" fill="#d9825f" stroke="#a85a38" stroke-width="1"/>
+<g id="vent">
+<ellipse rx="20" ry="6" fill="#5c4a38"/>
+<ellipse cx="-15" cy="2" rx="5" ry="3" fill="#6b5844"/>
+<ellipse cx="13" cy="3" rx="4" ry="3" fill="#6b5844"/>
+</g>
+
+<g id="k1"><g>
+<path d="M0 0 C-14 -42 14 -78 -8 -122 C-22 -156 12 -186 -4 -226 Q-6 -236 6 -234 C18 -196 -10 -162 6 -124 C26 -80 -6 -44 12 -2 Z" fill="url(#kelpG)"/>
+<animateTransform attributeName="transform" type="rotate" values="-2.6 0 0;2.6 0 0;-2.6 0 0" dur="5.4s" begin="-0.8s" repeatCount="indefinite"/>
+</g></g>
+<g id="k2"><g>
+<path d="M0 0 C12 -34 -12 -66 6 -104 C16 -130 -6 -150 2 -172 Q4 -182 12 -178 C22 -152 4 -130 18 -102 C4 -66 26 -36 14 -2 Z" fill="url(#kelpG)"/>
+<animateTransform attributeName="transform" type="rotate" values="-2.2 0 0;2.2 0 0;-2.2 0 0" dur="4.6s" begin="-2.6s" repeatCount="indefinite"/>
+</g></g>
+<g id="kb"><g fill="#2f9d54">
+<ellipse cy="-10" rx="14" ry="18"/>
+<ellipse cx="-12" cy="-30" rx="13" ry="16" fill="#278a48"/>
+<ellipse cx="10" cy="-46" rx="13" ry="17"/>
+<ellipse cx="-4" cy="-64" rx="12" ry="15" fill="#278a48"/>
+<ellipse cx="6" cy="-80" rx="10" ry="13"/>
+<animateTransform attributeName="transform" type="rotate" values="-1.6 0 0;1.6 0 0;-1.6 0 0" dur="6.5s" begin="-2s" repeatCount="indefinite"/>
+</g></g>
+
+<g id="bubbles"></g>
+
+<g id="f1">
+<g>
+<path d="M-56 0 L-104 -36 Q-95 0 -104 36 Z" fill="#e97e22"/>
+<animateTransform attributeName="transform" type="rotate" values="9 -56 0;-9 -56 0;9 -56 0" dur=".75s" repeatCount="indefinite"/>
+</g>
+<path d="M-38 -34 C-22 -62 12 -60 34 -32 C10 -44 -12 -44 -38 -34 Z" fill="#ef8c2c"/>
+<ellipse rx="70" ry="45" fill="url(#g1)" stroke="#b45711" stroke-opacity=".4" stroke-width="2"/>
+<g clip-path="url(#c1)">
+<path d="M-42 -50 Q-32 0 -42 50 L-26 50 Q-17 0 -26 -50 Z" fill="#f9edd8" opacity=".95"/>
+<path d="M-8 -50 Q2 0 -8 50 L8 50 Q17 0 8 -50 Z" fill="#f9edd8" opacity=".95"/>
+</g>
+<path d="M2 10 Q-26 16 -20 40 Q0 34 4 12 Z" fill="#d96f1a" opacity=".88">
+<animateTransform attributeName="transform" type="rotate" values="6 2 10;-8 2 10;6 2 10" dur="1.2s" repeatCount="indefinite"/>
+</path>
+<circle cx="36" cy="-14" r="9" fill="#fff"/>
+<circle cx="38" cy="-14" r="4.5" fill="#26160a"/>
+<circle cx="36.4" cy="-16.6" r="1.6" fill="#fff"/>
+<path d="M64 6 Q56 13 45 11" stroke="#8a4212" stroke-width="3" fill="none" stroke-linecap="round"/>
+</g>
+
+<g id="f2">
+<g>
+<path d="M-42 0 L-72 -19 Q-66 0 -72 19 Z" fill="#1a857b"/>
+<animateTransform attributeName="transform" type="rotate" values="11 -42 0;-11 -42 0;11 -42 0" dur=".5s" repeatCount="indefinite"/>
+</g>
+<path d="M-30 -13 C-16 -26 6 -26 20 -12 C4 -17 -12 -17 -30 -13 Z" fill="#1a857b"/>
+<ellipse rx="48" ry="17" fill="url(#g2)" stroke="#0f5f57" stroke-opacity=".35" stroke-width="1.5"/>
+<g clip-path="url(#c2)"><rect x="-50" y="-18" width="100" height="8" fill="#0f5f57" opacity=".5"/></g>
+<path d="M-40 -1 Q0 -7 44 -2" stroke="#a9ede4" stroke-width="2" opacity=".5" fill="none"/>
+<path d="M4 4 Q-10 10 -7 20 Q3 15 6 6 Z" fill="#17918a" opacity=".9"/>
+<circle cx="28" cy="-5" r="5.5" fill="#fff"/>
+<circle cx="29.6" cy="-5" r="2.8" fill="#0d2b28"/>
+<circle cx="28.6" cy="-6.8" r="1" fill="#fff"/>
+<path d="M44 3 Q38 8 32 7" stroke="#0e4b46" stroke-width="2" fill="none" stroke-linecap="round"/>
+</g>
+</svg>
+
+<script>
+(function(){
+var NS='http://www.w3.org/2000/svg';
+function $(id){return document.getElementById(id)}
+var sand=$('sand'),star=$('star'),vent=$('vent'),layer=$('bubbles');
+var rocks=[['r1',.16],['r2',.86],['r3',.42]];
+var plants=[['k1',.24],['k2',.78],['kb',.5]];
+var W=0,H=0;
+function sy(){return H*0.87}
+function ventX(){return W*0.68}
+function layout(){
+  W=window.innerWidth;H=window.innerHeight;
+  var y=sy(),w=W;
+  sand.setAttribute('d','M0 '+(y+6)+' Q'+(w*.1)+' '+(y-10)+' '+(w*.2)+' '+(y-2)+
+    ' T'+(w*.4)+' '+(y-5)+' T'+(w*.6)+' '+(y-1)+' T'+(w*.8)+' '+(y-7)+' T'+w+' '+(y-3)+
+    ' L'+w+' '+H+' L0 '+H+' Z');
+  var i,p;
+  for(i=0;i<rocks.length;i++){p=rocks[i];$(p[0]).setAttribute('transform','translate('+(w*p[1])+' '+(y+8)+')');}
+  for(i=0;i<plants.length;i++){p=plants[i];$(p[0]).setAttribute('transform','translate('+(w*p[1])+' '+(y+6)+')');}
+  star.setAttribute('transform','translate('+(w*.57)+' '+(y+14)+') rotate(-16)');
+  vent.setAttribute('transform','translate('+ventX()+' '+(y+2)+')');
+}
+
+/* bubbles */
+var bubbles=[];
+function resetB(b,spread){
+  b.r=3+Math.random()*7;
+  b.x0=ventX()+(Math.random()-.5)*84;
+  b.y=spread?H*.2+Math.random()*H*.6:sy()-6-Math.random()*8;
+  b.sp=34+Math.random()*30;
+  b.amp=6+Math.random()*10;
+  b.wf=.5+Math.random()*.9;
+  b.ph=Math.random()*6.283;
+  b.c.setAttribute('r',b.r);
+  b.h.setAttribute('r',Math.max(1,b.r*.32));
+  b.h.setAttribute('cx',-b.r*.35);
+  b.h.setAttribute('cy',-b.r*.42);
+}
+for(var i=0;i<7;i++){
+  var g=document.createElementNS(NS,'g');
+  var c=document.createElementNS(NS,'circle');
+  var h=document.createElementNS(NS,'circle');
+  c.setAttribute('fill','rgba(213,238,255,.28)');
+  c.setAttribute('stroke','rgba(255,255,255,.7)');
+  c.setAttribute('stroke-width','1.4');
+  h.setAttribute('fill','rgba(255,255,255,.85)');
+  g.appendChild(c);g.appendChild(h);layer.appendChild(g);
+  var b={el:g,c:c,h:h};
+  resetB(b,true);
+  bubbles.push(b);
+}
+
+/* fish state */
+var F1={el:$('f1'),x:0,sp:95,fr:1.1,amp:14,m:140};
+var F2={el:$('f2'),x:0,sp:175,fr:1.9,amp:10,m:140};
+
+layout();
+F1.x=W*0.2;F2.x=W*0.65;
+window.addEventListener('resize',layout);
+
+var last=performance.now();
+function tick(now){
+  var dt=Math.min((now-last)/1000,.05);last=now;
+  var t=now/1000;
+  /* big orange fish: left to right, slower */
+  F1.x+=F1.sp*dt;
+  if(F1.x>W+F1.m)F1.x=-F1.m;
+  var y1=H*.34+Math.sin(t*F1.fr)*F1.amp;
+  F1.el.setAttribute('transform','translate('+F1.x.toFixed(1)+' '+y1.toFixed(1)+') rotate('+(Math.cos(t*F1.fr)*3).toFixed(2)+')');
+  /* small teal fish: right to left, quicker */
+  F2.x-=F2.sp*dt;
+  if(F2.x<-F2.m)F2.x=W+F2.m;
+  var y2=H*.55+Math.sin(t*F2.fr)*F2.amp;
+  F2.el.setAttribute('transform','translate('+F2.x.toFixed(1)+' '+y2.toFixed(1)+') rotate('+(-Math.cos(t*F2.fr)*4).toFixed(2)+') scale(-1 1)');
+  /* bubbles: smaller ones rise faster, respawn at the seafloor vent */
+  for(var j=0;j<bubbles.length;j++){
+    var b=bubbles[j];
+    b.y-=b.sp*(1.9-b.r/9)*dt;
+    if(b.y<-b.r*2-6)resetB(b,false);
+    var x=b.x0+Math.sin(t*b.wf+b.ph)*b.amp;
+    b.el.setAttribute('transform','translate('+x.toFixed(1)+' '+b.y.toFixed(1)+')');
+  }
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

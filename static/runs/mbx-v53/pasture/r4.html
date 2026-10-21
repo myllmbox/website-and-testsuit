@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pasture — Field Notes 04</title>
+<style>
+:root{--ink:#16351f;--ink2:#4b6b56;--paper:#fffdf4;--line:rgba(22,53,31,.14);--hop:.8s;--wind:1}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#123020}
+body{font-family:ui-sans-serif,system-ui,"Segoe UI",Helvetica,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.dsp{font-family:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,"Times New Roman",serif}
+#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+
+/* ---------- HUD ---------- */
+.hud{position:fixed;inset:0;padding:clamp(14px,2.3vw,34px);display:flex;flex-direction:column;justify-content:space-between;gap:14px;pointer-events:none}
+.card{background:linear-gradient(160deg,#fffdf5,#f6efdd);border:1px solid var(--line);border-radius:3px 14px 3px 14px;
+  box-shadow:0 14px 34px rgba(9,32,18,.22),inset 0 1px 0 #fff;opacity:0;animation:rise .8s cubic-bezier(.2,.85,.3,1) forwards}
+.intro{max-width:min(430px,74vw);padding:16px 20px 14px;position:relative;overflow:hidden}
+.intro:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(#e8b93f,#57a05c 60%,#2f7a4f)}
+.intro:after{content:"";position:absolute;inset:-40% -20% auto auto;width:180px;height:180px;background:radial-gradient(circle,rgba(255,214,92,.55),transparent 65%);animation:ping 6s ease-in-out infinite}
+@keyframes ping{0%,100%{transform:translate(0,0) scale(1);opacity:.7}50%{transform:translate(-14px,10px) scale(1.15);opacity:1}}
+.eyebrow{margin:0;font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:#8a6a24;font-weight:700}
+h1{margin:2px 0 4px;font-size:clamp(38px,6.4vw,68px);line-height:.9;font-weight:400;letter-spacing:-.025em}
+h1 em{font-style:italic;color:#2f7a4f}
+.lede{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink2);max-width:34ch}
+.lede b{color:var(--ink);font-weight:600}
+.meta{display:flex;gap:12px;margin-top:11px;padding-top:9px;border-top:1px dashed var(--line);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:#6d8b77;font-variant-numeric:tabular-nums}
+.meta span{white-space:nowrap}
+#hops{color:#a3711b;font-weight:700}
+.bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.legend{list-style:none;margin:0;padding:0;display:flex;gap:9px;flex-wrap:wrap;pointer-events:auto}
+.legend li{display:flex;align-items:center;gap:10px;padding:9px 13px 9px 11px;border:1px solid var(--line);border-radius:12px;
+  background:linear-gradient(160deg,#fffdf5,#f4edda);box-shadow:0 8px 20px rgba(9,32,18,.16);cursor:pointer;opacity:0;
+  animation:rise .7s cubic-bezier(.2,.85,.3,1) forwards;transition:transform .2s ease,box-shadow .2s ease,background .2s}
+.legend li:hover,.legend li:focus-visible{transform:translateY(-4px);background:linear-gradient(160deg,#fff,#fdf3d6);outline:none;
+  box-shadow:0 14px 26px rgba(9,32,18,.24)}
+.legend li.on{background:linear-gradient(160deg,#20452c,#356b45);border-color:#20452c;color:#fdf6e3}
+.legend li.on .cnt{color:#e8c76a}
+.dot{width:15px;height:15px;border-radius:50%;border:1.5px solid rgba(22,53,31,.35);box-shadow:inset 0 -3px 6px rgba(0,0,0,.14);flex:none}
+.nm{font-size:13px;letter-spacing:.02em}
+.cnt{font-size:11px;font-weight:700;color:#8a6a24;font-variant-numeric:tabular-nums;min-width:56px;text-align:right}
+.controls{display:flex;gap:8px;pointer-events:auto;opacity:0;animation:rise .8s .35s cubic-bezier(.2,.85,.3,1) forwards}
+.btn{font:inherit;font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--ink);cursor:pointer;
+  padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:linear-gradient(160deg,#fffdf5,#f3ecd8);
+  box-shadow:0 8px 18px rgba(9,32,18,.16);transition:transform .18s ease,background .18s,box-shadow .18s}
+.btn b{color:#2f7a4f}
+.btn:hover{transform:translateY(-3px) rotate(-.6deg);background:linear-gradient(160deg,#fff,#fdeec2);box-shadow:0 13px 24px rgba(9,32,18,.22)}
+.btn:active{transform:translateY(0) scale(.97)}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* ---------- scene motion ---------- */
+@keyframes drift{from{transform:translateX(-380px)}to{transform:translateX(2000px)}}
+.cloud{animation-name:drift;animation-timing-function:linear;animation-iteration-count:infinite;will-change:transform}
+.cloudBob{animation:bob 9s ease-in-out infinite alternate}
+@keyframes bob{from{transform:translateY(-6px)}to{transform:translateY(6px)}}
+@keyframes fly{from{transform:translateX(-160px)}to{transform:translateX(1780px)}}
+.flock{animation:fly 52s linear infinite}
+@keyframes hop{
+ 0%{transform:translateY(0);animation-timing-function:cubic-bezier(.15,.7,.35,1)}
+ 42%{transform:translateY(-17px);animation-timing-function:cubic-bezier(.55,0,.85,.4)}
+ 72%{transform:translateY(0)}
+ 84%{transform:translateY(-5px);animation-timing-function:ease-out}
+ 100%{transform:translateY(0)}}
+.bounce{animation:hop var(--d) linear infinite;will-change:transform}
+@keyframes shd{0%,100%{transform:scale(1,1);opacity:.3}42%{transform:scale(.8,.72);opacity:.17}72%{transform:scale(1.05,1);opacity:.33}}
+.shd{fill:#123a20;transform-box:fill-box;transform-origin:50% 50%;animation:shd var(--d) linear infinite}
+.animal{cursor:pointer;opacity:0;animation:fadeIn .9s var(--in) ease-out forwards}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.body{transform-box:fill-box;transform-origin:50% 100%;transition:transform .3s cubic-bezier(.2,1.4,.4,1),filter .3s}
+.animal.spot .body{transform:scale(1.045);filter:drop-shadow(0 8px 10px rgba(12,40,22,.28)) saturate(1.08)}
+@keyframes poke{0%{transform:rotate(0) scale(1)}22%{transform:rotate(-3.5deg) scale(1.05,.94)}55%{transform:rotate(2.6deg) scale(.98,1.06)}100%{transform:rotate(0) scale(1)}}
+.animal.poke .body{animation:poke .6s ease-out}
+@keyframes puff{from{transform:translate(0,0) scale(1);opacity:.8}to{transform:translate(var(--dx),-30px) scale(.25);opacity:0}}
+.dust circle{transform-box:fill-box;transform-origin:50% 50%;animation:puff .85s ease-out forwards}
+@keyframes ex{0%{opacity:0;transform:translateY(6px) scale(.7)}30%{opacity:1;transform:translateY(-4px) scale(1.1)}75%{opacity:1}100%{opacity:0;transform:translateY(-22px) scale(1)}}
+.ex{transform-box:fill-box;transform-origin:50% 100%;animation:ex .95s ease-out forwards;font-size:30px;font-weight:700;fill:#e08b1f;paint-order:stroke;stroke:#fffdf4;stroke-width:5px;stroke-linejoin:round}
+.tag{font-size:14px;letter-spacing:.16em;text-transform:uppercase;fill:#12351f;text-anchor:middle;opacity:0;transition:opacity .28s ease,transform .28s ease;
+  paint-order:stroke;stroke:rgba(255,253,244,.9);stroke-width:5px;stroke-linejoin:round;font-family:ui-sans-serif,system-ui,sans-serif;font-weight:700}
+.animal.spot .tag{opacity:1}
+@keyframes sway{from{transform:skewX(-.7deg)}to{transform:skewX(1deg)}}
+.tufts{transform-box:fill-box;transform-origin:50% 100%;animation:sway calc(3.6s / var(--wind)) ease-in-out infinite alternate;animation-play-state:paused}
+.tufts.b{animation-duration:calc(4.7s / var(--wind));animation-delay:-1.3s}
+.tufts.c{animation-duration:calc(5.9s / var(--wind));animation-delay:-2.6s}
+#field.windy .tufts{animation-play-state:running}
+@keyframes flap{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.28)}}
+.wl{transform-box:fill-box;transform-origin:100% 50%;animation:flap .17s ease-in-out infinite alternate}
+.wr{transform-box:fill-box;transform-origin:0% 50%;animation:flap .17s ease-in-out infinite alternate;animation-delay:.02s}
+.fl{transform-box:fill-box;transform-origin:50% 100%;animation:sway 4.2s ease-in-out infinite alternate}
+@media (prefers-reduced-motion:reduce){.bounce,.shd,.cloud,.flock,.tufts,.wl,.wr,.cloudBob,.fl{animation:none}.animal{opacity:1}}
+</style>
+</head>
+<body>
+
+<svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Animated pasture with a cow, sheep, pig and horse bouncing on grass under a sunlit sky">
+<defs>
+ <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#5cb3e8"/><stop offset=".36" stop-color="#a2dbf3"/><stop offset=".72" stop-color="#d4effa"/><stop offset="1" stop-color="#f2fbed"/>
+ </linearGradient>
+ <linearGradient id="gGrass" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#95d078"/><stop offset=".16" stop-color="#79bf63"/><stop offset=".58" stop-color="#55984a"/><stop offset="1" stop-color="#39722f"/>
+ </linearGradient>
+ <radialGradient id="gHalo"><stop offset="0" stop-color="#fff5bd" stop-opacity=".95"/><stop offset=".45" stop-color="#ffe58a" stop-opacity=".45"/><stop offset="1" stop-color="#ffe58a" stop-opacity="0"/></radialGradient>
+ <radialGradient id="gSun" cx=".4" cy=".35"><stop offset="0" stop-color="#fff8cd"/><stop offset=".55" stop-color="#ffdf6b"/><stop offset="1" stop-color="#ffc635"/></radialGradient>
+ <radialGradient id="gVig" cx=".5" cy=".45" r=".78"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#0d3320" stop-opacity=".22"/></radialGradient>
+ <linearGradient id="gPond" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfeefb"/><stop offset="1" stop-color="#7cc3e0"/></linearGradient>
+ <linearGradient id="gCow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffaf1"/><stop offset="1" stop-color="#e9dcc6"/></linearGradient>
+ <linearGradient id="gCowH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdf6ea"/><stop offset="1" stop-color="#ecdfc9"/></linearGradient>
+ <linearGradient id="gPig" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7b4be"/><stop offset="1" stop-color="#e2889a"/></linearGradient>
+ <linearGradient id="gPigH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fac0c9"/><stop offset="1" stop-color="#ee9fac"/></linearGradient>
+ <linearGradient id="gHorse" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9714a"/><stop offset="1" stop-color="#7b4a2b"/></linearGradient>
+ <linearGradient id="gTrunk" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5c3720"/><stop offset=".45" stop-color="#8a5630"/><stop offset="1" stop-color="#48290f"/></linearGradient>
+ <pattern id="pTex" width="52" height="52" patternUnits="userSpaceOnUse" patternTransform="rotate(-6)">
+  <path d="M10,52 c-4,-12 -6,-18 -9,-24" stroke="#ffffff" stroke-opacity=".06" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M32,52 c1,-13 2,-20 3,-27" stroke="#0f3f1c" stroke-opacity=".06" stroke-width="3" fill="none" stroke-linecap="round"/>
+ </pattern>
+ <clipPath id="cowClip"><ellipse cx="118" cy="-100" rx="82" ry="48"/></clipPath>
+ <g id="cloud">
+  <ellipse cx="-42" cy="10" rx="36" ry="21" fill="#e7f3fa"/><ellipse cx="42" cy="12" rx="33" ry="19" fill="#e7f3fa"/>
+  <ellipse cx="0" cy="7" rx="57" ry="25" fill="#eff7fc"/>
+  <ellipse cx="-30" cy="-4" rx="34" ry="24" fill="#fff"/><ellipse cx="10" cy="-13" rx="41" ry="28" fill="#fff"/>
+  <ellipse cx="45" cy="0" rx="27" ry="19" fill="#fdfefe"/><ellipse cx="-4" cy="11" rx="50" ry="17" fill="#fdfefe"/>
+ </g>
+ <g id="bird"><path d="M-9,0 q9,-9 9,0 q0,-9 9,0" fill="none" stroke="#54748a" stroke-width="2.4" stroke-linecap="round"/></g>
+ <g id="bush"><circle cx="-18" cy="-8" r="16" fill="#4a8b48"/><circle cx="4" cy="-16" r="20" fill="#57a055"/><circle cx="24" cy="-6" r="15" fill="#417f41"/><ellipse cx="2" cy="-2" rx="30" ry="12" fill="#4a8b48"/></g>
+ <g id="leaf"><circle r="30"/></g>
+</defs>
+
+<!-- sky -->
+<rect x="0" y="0" width="1600" height="620" fill="url(#gSky)"/>
+
+<!-- sun -->
+<g id="sun">
+ <circle cx="1330" cy="152" r="172" fill="url(#gHalo)"/>
+ <circle cx="1330" cy="152" r="106" fill="#fff3ae" opacity=".38"/>
+ <g transform="translate(1330,152)"><g id="rays"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="120s" repeatCount="indefinite"/></g></g>
+ <circle cx="1330" cy="152" r="54" fill="url(#gSun)"/>
+ <circle cx="1314" cy="136" r="17" fill="#fffbe0" opacity=".55"/>
+</g>
+
+<!-- clouds -->
+<g id="clouds">
+ <g transform="translate(0,116) scale(1.18)"><g class="cloud" style="animation-duration:96s;animation-delay:-24s"><g class="cloudBob"><use href="#cloud"/></g></g></g>
+ <g transform="translate(0,214) scale(.82)"><g class="cloud" style="animation-duration:64s;animation-delay:-41s"><g class="cloudBob" style="animation-duration:11s"><use href="#cloud"/></g></g></g>
+ <g transform="translate(0,74) scale(.62)"><g class="cloud" style="animation-duration:132s;animation-delay:-88s"><g class="cloudBob" style="animation-duration:13s"><use href="#cloud"/></g></g></g>
+ <g transform="translate(0,282) scale(1)"><g class="cloud" style="animation-duration:78s;animation-delay:-9s"><g class="cloudBob" style="animation-duration:8s"><use href="#cloud"/></g></g></g>
+ <g transform="translate(0,178) scale(.72)"><g class="cloud" style="animation-duration:112s;animation-delay:-70s"><g class="cloudBob" style="animation-duration:10s"><use href="#cloud"/></g></g></g>
+</g>
+
+<!-- birds -->
+<g class="flock" style="animation-delay:-14s">
+ <g transform="translate(180,196)"><g><animateTransform attributeName="transform" type="scale" values="1 1;1 .5;1 1" dur=".55s" repeatCount="indefinite"/><use href="#bird"/></g></g>
+ <g transform="translate(228,224) scale(.8)"><g><animateTransform attributeName="transform" type="scale" values="1 1;1 .55;1 1" dur=".48s" repeatCount="indefinite"/><use href="#bird"/></g></g>
+ <g transform="translate(268,182) scale(.65)"><g><animateTransform attributeName="transform" type="scale" values="1 1;1 .45;1 1" dur=".6s" repeatCount="indefinite"/><use href="#bird"/></g></g>
+</g>
+
+<!-- distant hills -->
+<path d="M0,558 L0,524 C150,480 290,504 420,494 C540,486 640,442 760,456 C880,470 980,514 1100,498 C1230,480 1330,440 1450,464 C1520,478 1566,508 1600,518 L1600,558 Z" fill="#a9d5a4" opacity=".9"/>
+<path d="M0,558 L0,540 C130,516 250,532 380,524 C520,516 610,492 740,504 C860,516 940,540 1080,532 C1210,524 1330,498 1460,514 C1530,522 1572,540 1600,548 L1600,558 Z" fill="#7db877" opacity=".95"/>
+<g id="hedge" opacity=".85"></g>
+
+<!-- grass -->
+<path id="field" d="M0,900 L1600,900 L1600,558 C1380,552 1180,564 940,558 C700,552 470,566 230,558 L0,562 Z" fill="url(#gGrass)"/>
+<path d="M0,900 L1600,900 L1600,558 C1380,552 1180,564 940,558 C700,552 470,566 230,558 L0,562 Z" fill="url(#pTex)"/>
+<g id="terrain"></g>
+
+<!-- far trees on the horizon band -->
+<g id="farTrees"></g>
+
+<!-- left tree -->
+<g class="tree">
+ <ellipse cx="152" cy="690" rx="76" ry="13" fill="#123a20" opacity=".22"/>
+ <g><animateTransform attributeName="transform" type="rotate" values="-1.2 152 690;1.2 152 690;-1.2 152 690" dur="8.4s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1"/>
+  <path d="M140,690 C142,640 138,600 143,576 L163,576 C167,606 164,648 168,690 Z" fill="url(#gTrunk)"/>
+  <path d="M146,640 q-16,-8 -26,-24" stroke="url(#gTrunk)" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <g class="canopy"><animateTransform attributeName="transform" type="scale" values="1 1;1.02 .985;1 1" dur="6.2s" repeatCount="indefinite" additive="sum"/>
+   <circle cx="104" cy="566" r="34" fill="#3f7f42"/><circle cx="196" cy="558" r="36" fill="#3f7f42"/>
+   <circle cx="150" cy="588" r="46" fill="#4a8b48"/><circle cx="112" cy="524" r="40" fill="#57a055"/>
+   <circle cx="188" cy="522" r="38" fill="#57a055"/><circle cx="150" cy="486" r="44" fill="#63ab5c"/>
+   <circle cx="128" cy="548" r="38" fill="#6bb465"/><circle cx="176" cy="556" r="32" fill="#63ab5c"/>
+   <circle cx="140" cy="456" r="26" fill="#84c575"/><circle cx="118" cy="498" r="22" fill="#84c575" opacity=".85"/>
+  </g>
+ </g>
+</g>
+
+<!-- right tree -->
+<g class="tree">
+ <ellipse cx="1502" cy="782" rx="104" ry="16" fill="#123a20" opacity=".24"/>
+ <g><animateTransform attributeName="transform" type="rotate" values="1 1502 782;-1 1502 782;1 1502 782" dur="9.6s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.5;1" keySplines=".4 0 .6 1;.4 0 .6 1"/>
+  <path d="M1484,782 C1488,700 1482,644 1489,606 L1517,606 C1523,652 1518,712 1524,782 Z" fill="url(#gTrunk)"/>
+  <path d="M1512,690 q22,-10 34,-30" stroke="url(#gTrunk)" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <path d="M1490,664 q-24,-10 -36,-30" stroke="url(#gTrunk)" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <g class="canopy"><animateTransform attributeName="transform" type="scale" values="1 1;1.025 .98;1 1" dur="7.1s" repeatCount="indefinite" additive="sum"/>
+   <circle cx="1424" cy="596" r="44" fill="#3b7a3f"/><circle cx="1578" cy="588" r="46" fill="#3b7a3f"/>
+   <circle cx="1462" cy="548" r="52" fill="#478745"/><circle cx="1548" cy="540" r="50" fill="#478745"/>
+   <circle cx="1502" cy="588" r="58" fill="#52964f"/><circle cx="1502" cy="500" r="54" fill="#5ca657"/>
+   <circle cx="1456" cy="484" r="40" fill="#6ab363"/><circle cx="1548" cy="480" r="42" fill="#6ab363"/>
+   <circle cx="1502" cy="444" r="38" fill="#7cc073"/><circle cx="1470" cy="524" r="34" fill="#7cc073" opacity=".8"/>
+  </g>
+ </g>
+</g>
+
+<!-- bushes, pond, fence, haystack -->
+<g id="props"></g>
+
+<!-- grass texture layers -->
+<g id="grassBits"></g>
+
+<!-- ANIMALS -->
+<g id="animals">
+
+ <!-- PIG -->
+ <g class="animal" data-species="pig" style="--d:calc(var(--hop)*.7);animation-delay:-.34s;--in:.5s" transform="translate(300,742) scale(.78)">
+  <ellipse class="shd" cx="100" cy="-3" rx="66" ry="10"/>
+  <rect class="hit" x="18" y="-112" width="182" height="118" fill="transparent"/>
+  <g class="bounce"><g class="body">
+   <g fill="#cf8092"><rect x="60" y="-34" width="13" height="36" rx="6"/><rect x="122" y="-34" width="13" height="36" rx="6"/></g>
+   <g fill="#8f4f5e"><rect x="59" y="-7" width="15" height="8" rx="3"/><rect x="121" y="-7" width="15" height="8" rx="3"/></g>
+   <path d="M40,-70 c-15,-3 -16,-20 -2,-21 c10,-1 11,9 3,11" fill="none" stroke="#eb95a4" stroke-width="6" stroke-linecap="round"/>
+   <ellipse cx="100" cy="-56" rx="63" ry="40" fill="url(#gPig)"/>
+   <ellipse cx="100" cy="-38" rx="52" ry="17" fill="#dd8496" opacity=".32"/>
+   <g fill="#ef9fae"><rect x="74" y="-36" width="14" height="38" rx="6"/><rect x="136" y="-36" width="14" height="38" rx="6"/></g>
+   <g fill="#9c5766"><rect x="73" y="-8" width="16" height="9" rx="3"/><rect x="135" y="-8" width="16" height="9" rx="3"/></g>
+   <path d="M142,-84 l 6,-24 l 20,14 z" fill="#d97d91"/>
+   <circle cx="152" cy="-62" r="30" fill="url(#gPigH)"/>
+   <path d="M160,-84 l 14,-20 l 10,22 z" fill="#e88fa0"/>
+   <path d="M163,-82 l 10,-13 l 5,14 z" fill="#c96d81"/>
+   <ellipse cx="178" cy="-56" rx="15" ry="12" fill="#e37d92" stroke="#c56a7e" stroke-width="2"/>
+   <ellipse cx="174" cy="-57" rx="3" ry="4" fill="#95505f"/><ellipse cx="184" cy="-56" rx="3" ry="4" fill="#95505f"/>
+   <circle cx="152" cy="-72" r="4.2" fill="#33222a"/><circle cx="153.4" cy="-73.4" r="1.5" fill="#fff"/>
+   <circle cx="166" cy="-70" r="3.8" fill="#33222a"/><circle cx="167.2" cy="-71.2" r="1.3" fill="#fff"/>
+   <circle cx="146" cy="-52" r="7" fill="#e3788d" opacity=".45"/>
+  </g></g>
+  <text class="tag" x="110" y="-128">Pig</text>
+ </g>
+
+ <!-- COW -->
+ <g class="animal" data-species="cow" style="--d:calc(var(--hop)*1.05);animation-delay:-.62s;--in:.3s" transform="translate(600,808) scale(.95)">
+  <ellipse class="shd" cx="118" cy="-4" rx="95" ry="14"/>
+  <rect class="hit" x="22" y="-186" width="256" height="192" fill="transparent"/>
+  <g class="bounce"><g class="body">
+   <g fill="#e4d6bf"><rect x="56" y="-62" width="15" height="60" rx="7"/><rect x="150" y="-62" width="15" height="60" rx="7"/></g>
+   <g fill="#5b5148"><rect x="54" y="-10" width="19" height="10" rx="3"/><rect x="148" y="-10" width="19" height="10" rx="3"/></g>
+   <path d="M44,-136 C26,-120 20,-92 28,-66" stroke="#efe3cd" stroke-width="8" fill="none" stroke-linecap="round"/>
+   <ellipse cx="29" cy="-58" rx="9" ry="13" fill="#5b5148"/>
+   <ellipse cx="118" cy="-100" rx="82" ry="48" fill="url(#gCow)"/>
+   <g clip-path="url(#cowClip)" fill="#2c2b33">
+    <ellipse cx="70" cy="-134" rx="30" ry="22"/><ellipse cx="146" cy="-70" rx="34" ry="21"/>
+    <ellipse cx="176" cy="-124" rx="21" ry="16"/><ellipse cx="46" cy="-92" rx="17" ry="26"/>
+   </g>
+   <ellipse cx="108" cy="-56" rx="20" ry="13" fill="#f0a4b4"/>
+   <rect x="100" y="-48" width="6" height="11" rx="3" fill="#e78fa2"/><rect x="112" y="-48" width="6" height="11" rx="3" fill="#e78fa2"/>
+   <g fill="#fdf7ea"><rect x="72" y="-62" width="16" height="62" rx="8"/><rect x="166" y="-62" width="16" height="62" rx="8"/></g>
+   <g fill="#4a4239"><rect x="70" y="-11" width="20" height="11" rx="3"/><rect x="164" y="-11" width="20" height="11" rx="3"/></g>
+   <ellipse cx="182" cy="-120" rx="30" ry="34" fill="#fbf3e4"/>
+   <g transform="translate(206,-138) rotate(6)">
+    <ellipse rx="33" ry="28" fill="url(#gCowH)"/>
+    <ellipse cx="-26" cy="-13" rx="14" ry="7.5" transform="rotate(-28 -26 -13)" fill="#f0e2ca"/>
+    <ellipse cx="20" cy="-17" rx="13" ry="7" transform="rotate(24 20 -17)" fill="#f0e2ca"/>
+    <path d="M-14,-24 C-19,-37 -10,-43 -4,-38" stroke="#ecdcb8" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M9,-26 C13,-39 23,-41 25,-34" stroke="#ecdcb8" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <ellipse cx="-9" cy="-8" rx="14" ry="12" fill="#2c2b33" opacity=".92"/>
+    <circle cx="-8" cy="-8" r="5.2" fill="#1f1e24"/><circle cx="-6.4" cy="-9.6" r="1.8" fill="#fff"/>
+    <circle cx="14" cy="-10" r="4.6" fill="#1f1e24"/><circle cx="15.4" cy="-11.4" r="1.6" fill="#fff"/>
+    <ellipse cx="18" cy="10" rx="21" ry="15" fill="#f2a3b4"/>
+    <ellipse cx="12" cy="9" rx="3.4" ry="4.4" fill="#cf7a8e"/><ellipse cx="25" cy="10" rx="3.4" ry="4.4" fill="#cf7a8e"/>
+    <path d="M6,19 q8,5 16,1" stroke="#cf7a8e" stroke-width="2" fill="none" stroke-linecap="round"/>
+   </g>
+  </g></g>
+  <text class="tag" x="118" y="-196">Cow</text>
+ </g>
+
+ <!-- SHEEP (flipped: faces left) -->
+ <g class="animal" data-species="sheep" style="--d:calc(var(--hop)*.82);animation-delay:-.15s;--in:.65s" transform="translate(1010,752) scale(.74)">
+  <ellipse class="shd" cx="-100" cy="-3" rx="78" ry="12"/>
+  <rect class="hit" x="-212" y="-160" width="218" height="166" fill="transparent"/>
+  <g class="bounce"><g class="flip" transform="scale(-1,1)"><g class="body">
+   <g fill="#2f2b34"><rect x="66" y="-56" width="12" height="52" rx="6"/><rect x="128" y="-56" width="12" height="52" rx="6"/></g>
+   <g fill="#191720"><rect x="64" y="-8" width="16" height="8" rx="3"/><rect x="126" y="-8" width="16" height="8" rx="3"/></g>
+   <ellipse cx="104" cy="-90" rx="70" ry="47" fill="#f4f1e8"/>
+   <circle cx="42" cy="-108" r="13" fill="#fffefb"/><circle cx="33" cy="-100" r="9" fill="#fffefb"/>
+   <g fill="#fffefb" stroke="#e5e0d3" stroke-width="1.5">
+    <circle cx="54" cy="-96" r="22"/><circle cx="62" cy="-122" r="21"/><circle cx="90" cy="-134" r="24"/>
+    <circle cx="120" cy="-132" r="23"/><circle cx="148" cy="-118" r="22"/><circle cx="160" cy="-92" r="21"/>
+    <circle cx="150" cy="-64" r="21"/><circle cx="120" cy="-56" r="22"/><circle cx="88" cy="-56" r="21"/>
+    <circle cx="60" cy="-68" r="19"/><circle cx="96" cy="-100" r="20"/><circle cx="126" cy="-98" r="21"/>
+   </g>
+   <g fill="#3b3640"><rect x="80" y="-58" width="13" height="56" rx="6"/><rect x="142" y="-58" width="13" height="56" rx="6"/></g>
+   <g fill="#191720"><rect x="78" y="-9" width="17" height="9" rx="3"/><rect x="140" y="-9" width="17" height="9" rx="3"/></g>
+   <g transform="translate(180,-104)">
+    <ellipse cx="-18" cy="-8" rx="14" ry="8" transform="rotate(22 -18 -8)" fill="#3a3640"/>
+    <ellipse rx="27" ry="24" fill="#4b4650"/>
+    <ellipse cx="16" cy="10" rx="12" ry="9" fill="#39353f"/>
+    <circle cx="20" cy="8" r="2" fill="#15131a"/><circle cx="10" cy="11" r="1.8" fill="#15131a"/>
+    <circle cx="-4" cy="-2" r="5.4" fill="#15131a"/><circle cx="-2.4" cy="-3.6" r="1.9" fill="#fff"/>
+    <circle cx="14" cy="-4" r="5" fill="#15131a"/><circle cx="15.5" cy="-5.5" r="1.7" fill="#fff"/>
+    <ellipse cx="16" cy="-16" rx="13" ry="7.5" transform="rotate(-24 16 -16)" fill="#3a3640"/>
+    <g fill="#fffefb"><circle cx="-10" cy="-20" r="10"/><circle cx="6" cy="-24" r="11"/><circle cx="18" cy="-18" r="8"/></g>
+   </g>
+  </g></g></g>
+  <text class="tag" x="-100" y="-164">Sheep</text>
+ </g>
+
+ <!-- HORSE (flipped: faces left) -->
+ <g class="animal" data-species="horse" style="--d:calc(var(--hop)*1.2);animation-delay:-.48s;--in:.15s" transform="translate(1305,846) scale(.98)">
+  <ellipse class="shd" cx="-115" cy="-5" rx="116" ry="15"/>
+  <rect class="hit" x="-242" y="-268" width="258" height="274" fill="transparent"/>
+  <g class="bounce"><g class="flip" transform="scale(-1,1)"><g class="body">
+   <g fill="#70452a"><rect x="52" y="-86" width="14" height="80" rx="7"/><rect x="150" y="-86" width="14" height="80" rx="7"/></g>
+   <g fill="#33241b"><rect x="50" y="-11" width="18" height="11" rx="3"/><rect x="148" y="-11" width="18" height="11" rx="3"/></g>
+   <path d="M28,-140 C6,-138 -8,-112 -2,-80 C4,-108 16,-124 34,-128 Z" fill="#4a2e1c"/>
+   <path d="M22,-134 C4,-124 -4,-104 -2,-86" stroke="#5c3a24" stroke-width="3" fill="none" stroke-linecap="round"/>
+   <circle cx="40" cy="-116" r="34" fill="url(#gHorse)"/>
+   <circle cx="158" cy="-114" r="31" fill="url(#gHorse)"/>
+   <ellipse cx="100" cy="-112" rx="80" ry="40" fill="url(#gHorse)"/>
+   <ellipse cx="100" cy="-84" rx="64" ry="17" fill="#6b4026" opacity=".3"/>
+   <rect x="-19" y="-52" width="38" height="104" rx="18" fill="url(#gHorse)" transform="translate(150,-150) rotate(22)"/>
+   <path d="M154,-206 C138,-188 128,-160 126,-126 C140,-156 152,-182 168,-198 Z" fill="#4a2e1c"/>
+   <path d="M150,-196 C136,-178 128,-156 127,-132" stroke="#3a2314" stroke-width="3" fill="none" stroke-linecap="round"/>
+   <g fill="#9a633d"><rect x="66" y="-88" width="15" height="82" rx="7"/><rect x="164" y="-88" width="15" height="82" rx="7"/></g>
+   <g fill="#2b1e17"><rect x="64" y="-12" width="19" height="12" rx="3"/><rect x="162" y="-12" width="19" height="12" rx="3"/></g>
+   <circle cx="73" cy="-50" r="5" fill="#b98356" opacity=".45"/><circle cx="171" cy="-50" r="5" fill="#b98356" opacity=".45"/>
+   <g transform="translate(176,-206) rotate(-12)">
+    <path d="M2,-14 L-2,-34 L14,-20 Z" fill="#6f4527"/>
+    <path d="M16,-16 L22,-36 L30,-16 Z" fill="#7d5230"/>
+    <ellipse cx="14" cy="0" rx="36" ry="19" fill="url(#gHorse)"/>
+    <path d="M-4,-14 C-16,-20 -20,-6 -8,-2 Z" fill="#4a2e1c"/>
+    <ellipse cx="42" cy="4" rx="14" ry="12" fill="#6f4527"/>
+    <ellipse cx="46" cy="5" rx="3.4" ry="4.4" fill="#241812"/>
+    <path d="M36,12 q8,3 13,-2" stroke="#241812" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="4" cy="-6" r="5" fill="#241812"/><circle cx="5.6" cy="-7.6" r="1.8" fill="#fff"/>
+    <path d="M20,-10 q10,-4 16,-2" stroke="#e6d3ba" stroke-width="4" opacity=".45" fill="none" stroke-linecap="round"/>
+   </g>
+  </g></g></g>
+  <text class="tag" x="-115" y="-266">Horse</text>
+ </g>
+</g>
+
+<g id="butterflies"></g>
+<rect x="0" y="0" width="1600" height="900" fill="url(#gVig)" pointer-events="none"/>
+</svg>
+
+<div class="hud">
+ <div><div class="card intro">
+   <p class="eyebrow dsp">Field notes · plot 04 · morning</p>
+   <h1 class="dsp">The <em>Living</em> Pasture</h1>
+   <p class="lede">Four animals, one horizon, <b>no stillness</b>. Hover a name to find them in the field — click one and it will notice you.</p>
+   <div class="meta"><span id="watch">--:--</span><span id="hops">0 hops</span><span>est. 4 heads</span></div>
+ </div></div>
+ <div class="bottom">
+   <ul class="legend" id="legend"></ul>
+   <div class="controls" id="controls">
+     <button class="btn" data-act="tempo">hop <b>brisk</b></button>
+     <button class="btn" data-act="wind">breeze <b>soft</b></button>
+   </div>
+ </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg", svg=document.getElementById("scene");
+function el(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e}
+function rnd(a,b){return a+Math.random()*(b-a)}
+function pick(a){return a[Math.random()*a.length|0]}
+function put(id,html){document.getElementById(id).innerHTML+=html}
+
+/* sun rays */
+var rays=document.getElementById("rays");
+for(var i=0;i<12;i++){
+ rays.appendChild(el("path",{d:"M-5,-84 L5,-84 L0,-118 Z",fill:"#ffe27a",opacity:(i%2?.4:.75),transform:"rotate("+i*30+")"}));
+}
+
+/* hedge silhouette on the horizon */
+var h="";
+for(var x=0;x<1620;x+=rnd(26,54)){
+ var y=rnd(548,562),r=rnd(9,20);
+ h+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="#3f7d43" opacity=".55"/>';
+}
+put("hedge",'<g>'+h+'</g>');
+
+/* far trees + props */
+var ft="";
+[[858,620,.95],[936,616,.72],[1188,608,.6],[320,604,.55],[1418,598,.5]].forEach(function(t){
+ var X=t[0],Y=t[1],s=t[2];
+ ft+='<g transform="translate('+X+','+Y+') scale('+s+')">'+
+  '<rect x="-6" y="-46" width="12" height="46" fill="#5f3a22"/>'+
+  '<circle cx="-20" cy="-62" r="22" fill="#3a7a41"/><circle cx="20" cy="-64" r="21" fill="#3a7a41"/>'+
+  '<circle cx="0" cy="-72" r="27" fill="#468a48"/><circle cx="-9" cy="-92" r="19" fill="#52994f"/>'+
+  '<circle cx="14" cy="-88" r="17" fill="#52994f"/></g>';
+});
+put("farTrees",ft);
+
+var p="";
+/* pond */
+p+='<ellipse cx="706" cy="610" rx="92" ry="20" fill="url(#gPond)"/>'+
+   '<ellipse cx="706" cy="610" rx="92" ry="20" fill="none" stroke="#8dc98a" stroke-width="4" opacity=".7"/>'+
+   '<path d="M660,608 q22,-5 44,0 M690,616 q26,-4 50,1" stroke="#ffffff" stroke-opacity=".55" stroke-width="2.5" fill="none"/>';
+/* fence */
+for(var fx=1024;fx<1300;fx+=54){
+ p+='<rect x="'+fx+'" y="630" width="9" height="44" rx="2" fill="#9c7248"/>'+
+    '<rect x="'+(fx-3)+'" y="626" width="15" height="6" rx="3" fill="#b58a5c"/>';
+}
+p+='<path d="M1020,644 h276 M1020,660 h276" stroke="#a87f52" stroke-width="7" stroke-linecap="round"/>';
+/* bushes */
+[[486,678,.9],[1188,700,1.05],[64,646,.7],[1044,622,.5],[540,640,.6]].forEach(function(b){
+ p+='<g transform="translate('+b[0]+','+b[1]+') scale('+b[2]+')"><use href="#bush"/></g>';
+});
+/* haystack */
+p+='<g transform="translate(540,706)"><path d="M-52,0 C-42,-52 -18,-66 0,-66 C18,-66 42,-52 52,0 Z" fill="#dcb75f"/>'+
+   '<path d="M-40,-6 C-30,-40 -14,-54 0,-56" stroke="#c19a45" stroke-width="3" fill="none"/>'+
+   '<path d="M-16,-4 C-10,-34 -4,-48 4,-56 M18,-4 C16,-30 22,-44 30,-52" stroke="#c19a45" stroke-width="3" fill="none"/>'+
+   '<ellipse cx="0" cy="0" rx="52" ry="8" fill="#3f7d43" opacity=".4"/></g>';
+put("props",p);
+
+/* grass tufts, flowers, pebbles */
+var GC=[["#7fbb6d","#6cab5c"],["#69ab5d","#568f4b"],["#528d47","#426f3a"],["#40702f","#32601f"]];
+var FL=["#ffe3ea","#fff6cf","#ffdfb4","#f1e6ff","#ffffff"];
+function tuft(x,y,s,c){
+ return '<path transform="translate('+x.toFixed(1)+' '+y.toFixed(1)+') scale('+s.toFixed(2)+')" fill="none" stroke="'+c+
+  '" stroke-width="3.4" stroke-linecap="round" d="M0,0 c-4,-9 -7,-14 -11,-19 M0,0 c0,-11 1,-17 2,-25 M0,0 c5,-9 9,-13 14,-17"/>';
+}
+function flower(x,y,s,c){
+ var g='<g class="fl" transform="translate('+x.toFixed(1)+' '+y.toFixed(1)+') scale('+s.toFixed(2)+')">'+
+  '<path d="M0,0 C-1,-8 1,-13 0,-19" stroke="#3f7a3a" stroke-width="2.2" fill="none"/>';
+ for(var i=0;i<5;i++){var a=i/5*Math.PI*2;
+  g+='<circle cx="'+(Math.cos(a)*5.2).toFixed(1)+'" cy="'+(-19+Math.sin(a)*5.2).toFixed(1)+'" r="3.7" fill="'+c+'"/>';}
+ return g+'<circle cx="0" cy="-19" r="2.5" fill="#f2bf45"/></g>';
+}
+var L=[[],[],[],[]], bands=[[586,640],[640,706],[706,790],[790,892]];
+bands.forEach(function(b,lv){
+ var n=[26,22,20,16][lv],s=[.4,.62,.9,1.35][lv];
+ for(var i=0;i<n;i++){
+  var X=rnd(-10,1610),Y=rnd(b[0],b[1]),sc=s*rnd(.75,1.3);
+  L[lv].push(tuft(X,Y,sc,pick(GC[lv])));
+ }
+ if(lv>0){
+  var fn=[0,4,6,5][lv];
+  for(var j=0;j<fn;j++) L[lv].push(flower(rnd(0,1600),rnd(b[0],b[1]),s*rnd(.8,1.4),pick(FL)));
+ }
+ for(var k=0;k<3;k++){
+  L[lv].push('<ellipse cx="'+rnd(0,1600).toFixed(1)+'" cy="'+rnd(b[0],b[1]).toFixed(1)+'" rx="'+rnd(3,7).toFixed(1)+
+   '" ry="'+rnd(2,4).toFixed(1)+'" fill="#8b8f86" opacity=".5"/>');
+ }
+});
+put("grassBits",'<g class="tufts">'+L[0].join("")+'</g><g class="tufts b">'+L[1].join("")+'</g>'+
+   '<g class="tufts c">'+L[2].join("")+'</g><g class="tufts b" style="animation-duration:calc(6.6s / var(--wind))">'+L[3].join("")+'</g>');
+
+/* butterflies */
+var flies=[{x:260,y:712,p:0,c:"#f4bf4c"},{x:1120,y:664,p:2.3,c:"#ef8fa8"}].map(function(o,i){
+ var g=el("g",{class:"fly"}),
+  wl=el("path",{d:"M0,0 C-15,-17 -24,-4 -6,4 Z",fill:o.c,class:"wl",opacity:".92"}),
+  wr=el("path",{d:"M0,0 C15,-17 24,-4 6,4 Z",fill:o.c,class:"wr",opacity:".92"}),
+  bd=el("path",{d:"M0,-4 q2.5,7 0,12",stroke:"#5a4632","stroke-width":"2.6",fill:"none","stroke-linecap":"round"});
+ g.appendChild(wl);g.appendChild(wr);g.appendChild(bd);
+ document.getElementById("butterflies").appendChild(g);
+ return {g:g,o:o,s:.6+i*.22};
+});
+var t0=performance.now();
+(function loop(t){
+ var s=(t-t0)/1000;
+ flies.forEach(function(f,i){
+  var x=f.o.x+Math.sin(s*.17+i*1.7)*230,
+      y=f.o.y+Math.sin(s*.61+i)*40-Math.cos(s*.33)*18,
+      tilt=Math.cos(s*.17+i*1.7)*14;
+  f.g.setAttribute("transform","translate("+x.toFixed(1)+","+y.toFixed(1)+") scale("+f.s+") rotate("+tilt.toFixed(1)+")");
+ });
+ requestAnimationFrame(loop);
+})(t0);
+
+/* legend + counters */
+var SPEC=[["horse","Horse","#a9714a"],["cow","Cow","#fbf3e4"],["sheep","Sheep","#fffefb"],["pig","Pig","#f7b4be"]];
+var leg=document.getElementById("legend"),animals={},count={},total=0,hopsEl=document.getElementById("hops");
+SPEC.forEach(function(s,i){
+ var li=document.createElement("li");
+ li.dataset.s=s[0]; li.tabIndex=0; li.style.animationDelay=(.45+i*.11)+"s";
+ li.innerHTML='<span class="dot" style="background:'+s[2]+'"></span><span class="nm dsp">'+s[1]+'</span><span class="cnt">0 hops</span>';
+ leg.appendChild(li); count[s[0]]={li:li,cnt:li.querySelector(".cnt"),n:0};
+ li.addEventListener("pointerenter",function(){focus(s[0])});
+ li.addEventListener("pointerleave",function(){focus(null)});
+ li.addEventListener("focus",function(){focus(s[0])});
+ li.addEventListener("blur",function(){focus(null)});
+});
+function focus(sp){
+ document.querySelectorAll(".animal").forEach(function(a){a.classList.toggle("spot",a.dataset.species===sp)});
+ document.querySelectorAll(".legend li").forEach(function(l){l.classList.toggle("on",l.dataset.s===sp)});
+}
+document.querySelectorAll(".animal").forEach(function(a){
+ animals[a.dataset.species]=a;
+ var b=a.querySelector(".bounce");
+ b.addEventListener("animationiteration",function(){
+  total++; count[a.dataset.species].n++;
+  count[a.dataset.species].cnt.textContent=count[a.dataset.species].n+" hops";
+  hopsEl.textContent=total+" hops";
+ });
+ a.addEventListener("pointerenter",function(){a.classList.add("spot")});
+ a.addEventListener("pointerleave",function(){a.classList.remove("spot")});
+ a.addEventListener("click",function(){poke(a)});
+});
+var MARK={cow:"Moo!",pig:"Oink!",sheep:"Baa!",horse:"Neigh!"};
+function poke(a){
+ var sp=a.dataset.species;
+ a.classList.remove("poke"); a.getBoundingClientRect(); a.classList.add("poke");
+ setTimeout(function(){a.classList.remove("poke")},700);
+ var g=el("g",{class:"dust"});
+ for(var i=0;i<9;i++){
+  var d=el("circle",{cx:rnd(-70,70).toFixed(1),cy:-rnd(2,12).toFixed(1),r:rnd(3,7.5).toFixed(1),fill:"#efe3c4"});
+  d.style.setProperty("--dx",rnd(-26,26).toFixed(1)+"px");
+  d.style.animationDuration=rnd(.55,1).toFixed(2)+"s";
+  d.style.animationDelay=rnd(0,.14).toFixed(2)+"s";
+  g.appendChild(d);
+ }
+ a.appendChild(g); setTimeout(function(){g.remove()},1600);
+ var t=el("text",{class:"ex",x:a.querySelector(".tag").getAttribute("x"),y:-14,fill:"#e08b1f"});
+ t.textContent=MARK[sp]; a.appendChild(t); setTimeout(function(){t.remove()},1000);
+}
+/* buttons */
+var TEMPO=[["brisk",".8s"],["easy","1s"],["slow","1.25s"]], tp=0;
+var WIND=[["still","0"],["soft","1"],["gusty","2.2"]], wd=1;
+document.getElementById("controls").addEventListener("click",function(e){
+ var b=e.target.closest(".btn"); if(!b)return;
+ if(b.dataset.act==="tempo"){
+  tp=(tp+1)%TEMPO.length;
+  document.documentElement.style.setProperty("--hop",TEMPO[tp][1]);
+  b.innerHTML='hop <b>'+TEMPO[tp][0]+'</b>';
+ }else{
+  wd=(wd+1)%WIND.length;
+  document.documentElement.style.setProperty("--wind",WIND[wd][1]);
+  document.getElementById("field").classList.toggle("windy",wd>0);
+  document.querySelectorAll(".cloud").forEach(function(c){
+   var base=+c.style.animationDuration.replace("s","");
+   c.style.animationDuration=(base/(wd===0?2.4:wd===1?1:2))+"s";
+  });
+  b.innerHTML='breeze <b>'+WIND[wd][0]+'</b>';
+ }
+});
+/* watch */
+function watch(){
+ var d=new Date(), t=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+ document.getElementById("watch").textContent=t+" · "+WIND[wd][0]+" breeze";
+}
+setInterval(watch,20000); watch();
+})();
+</script>
+</body>
+</html>

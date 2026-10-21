@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Underwater Scene</title>
+<style>
+html,body{height:100%;margin:0;overflow:hidden;background:#021a34}
+#scene{position:fixed;left:0;top:0;width:100vw;height:100vh;display:block}
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#7dd6ff"/>
+<stop offset="0.45" stop-color="#1a74c8"/>
+<stop offset="1" stop-color="#011023"/>
+</linearGradient>
+<linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#e8d4a0"/>
+<stop offset="0.45" stop-color="#c0a06a"/>
+<stop offset="1" stop-color="#5c3f22"/>
+</linearGradient>
+<radialGradient id="bubble" cx="35%" cy="30%" r="70%">
+<stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+<stop offset="0.55" stop-color="#d6f6ff" stop-opacity="0.35"/>
+<stop offset="1" stop-color="#ffffff" stop-opacity="0.08"/>
+</radialGradient>
+</defs>
+<rect id="bg" x="0" y="0" fill="url(#water)"></rect>
+<path id="floor" fill="url(#sand)" stroke="none"></path>
+<g id="plants"></g>
+<g id="bubbles"></g>
+<g id="fishes"></g>
+</svg>
+<script>
+(function(){
+var NS='http://www.w3.org/2000/svg';
+var svg=document.getElementById('scene');
+var bg=document.getElementById('bg');
+var floor=document.getElementById('floor');
+var plantsG=document.getElementById('plants');
+var bubblesG=document.getElementById('bubbles');
+var fishesG=document.getElementById('fishes');
+var W=window.innerWidth||800,H=window.innerHeight||600;
+
+function el(t,a,p){var n=document.createElementNS(NS,t);for(var k in a){if(a.hasOwnProperty(k))n.setAttribute(k,a[k]);}if(p)p.appendChild(n);return n;}
+function floorY(){return H*0.88;}
+function buildFloor(){var y=floorY();var step=Math.max(40,W/18);var d='M 0 '+H+' L 0 '+y;var x=0;while(x<W){var nx=Math.min(W,x+step);var yy=y-11*Math.sin(nx*0.013+0.7)-6*Math.sin(nx*0.05+2.1);d+=' L '+nx+' '+yy;x=nx;}d+=' L '+W+' '+H+' Z';floor.setAttribute('d',d);}
+function sizeScene(){W=window.innerWidth||800;H=window.innerHeight||600;svg.setAttribute('viewBox','0 0 '+W+' '+H);bg.setAttribute('width',W);bg.setAttribute('height',H);buildFloor();}
+
+var plants=[];
+function createPlants(){plants=[];plantsG.textContent='';var count=Math.max(3,Math.round(W/210));for(var i=0;i<count;i++){var x=(i+0.5)*W/count+(Math.random()*24-12);if(W>20)x=Math.max(10,Math.min(W-10,x));var g=el('g',{},plantsG);var baseH=H*(0.10+Math.random()*0.12);var fronds=4+(Math.random()*3|0);for(var j=0;j<fronds;j++){var dir=(j%2?1:-1)*(1+j*0.15);var h=baseH*(0.75+Math.random()*0.45);var bend=14+Math.random()*18;var d='M 0 0 C '+(dir*bend*0.4)+' '+(-h*0.15)+' '+(dir*bend)+' '+(-h*0.35)+' '+(dir*bend*0.35)+' '+(-h*0.55)+' S '+(dir*bend*1.1)+' '+(-h*0.8)+' '+(dir*bend*1.3)+' '+(-h);el('path',{d:d,fill:'none',stroke:(j%3===0)?'#176e2a':'#26a040','stroke-width':(4.5-j*0.5)+'','stroke-linecap':'round',opacity:(0.86-j*0.03)+''},g);}plants.push({g:g,x:x,yOff:2+Math.random()*6,phase:Math.random()*6.283});}}
+
+var bubbles=[];
+function createBubbles(){bubblesG.textContent='';bubbles=[];for(var i=0;i<14;i++){var r=3+Math.random()*11;var c=el('circle',{r:r,fill:'url(#bubble)',stroke:'rgba(255,255,255,0.42)','stroke-width':1},bubblesG);bubbles.push({x:Math.random()*W,y:Math.min(H-r,Math.random()*(floorY()+40)),r:r,speed:20+85/r,wob:Math.random()*6.283,drift:4+Math.random()*9,g:c});}}
+function resetBubble(b){b.x=Math.random()*W;b.y=Math.min(H-1,floorY()+6+Math.random()*26);if(b.y<-b.r)b.y=-b.r;b.speed=20+85/b.r;b.wob=Math.random()*6.283;}
+
+function createFish1(){var g=el('g',{},fishesG);el('polygon',{points:'-58 -38 -118 0 -58 38',fill:'#d96100'},g);el('ellipse',{cx:0,cy:0,rx:66,ry:43,fill:'#ff8c1d'},g);el('ellipse',{cx:6,cy:11,rx:48,ry:20,fill:'#ffb15c',opacity:'0.55'},g);el('path',{fill:'#d96100',d:'M 6 -36 C 26 -72 52 -66 56 -33 C 37 -40 20 -38 6 -34 Z'},g);el('path',{fill:'#e87212',d:'M 6 8 C 30 30 20 44 2 47 C -14 36 -7 16 6 8 Z'},g);el('circle',{cx:43,cy:-10,r:12,fill:'#f7fbff'},g);el('circle',{cx:49,cy:-10,r:5,fill:'#102035'},g);el('path',{fill:'none',stroke:'#a83f00','stroke-width':2.5,'stroke-linecap':'round',d:'M 57 8 C 65 13 67 6 64 1'},g);return g;}
+function createFish2(){var g=el('g',{},fishesG);el('polygon',{points:'-60 -14 -108 0 -60 14',fill:'#0d7fa8'},g);el('ellipse',{cx:13,cy:0,rx:79,ry:16,fill:'#4fd7ff'},g);el('path',{fill:'#0d7fa8',d:'M -10 -14 C 18 -44 50 -39 59 -12 C 36 -20 11 -17 -10 -13 Z'},g);el('path',{fill:'#2fc9f4',d:'M 16 9 C 35 30 27 39 10 41 C -5 32 2 15 16 9 Z'},g);el('circle',{cx:67,cy:-4,r:9,fill:'#f7fbff'},g);el('circle',{cx:71,cy:-4,r:3.8,fill:'#0d263d'},g);el('path',{fill:'none',stroke:'#08607c','stroke-width':2,'stroke-linecap':'round',d:'M 81 4 C 88 7 88 0 84 1'},g);return g;}
+
+var fish=[];
+function createFish(){fishesG.textContent='';fish=[];fish.push({g:createFish1(),x:W*0.28,dir:1,speed:38,scale:1.15,yFrac:0.42,bob:9,bobSpeed:0.7});fish.push({g:createFish2(),x:W*0.73,dir:-1,speed:102,scale:0.58,yFrac:0.26,bob:13,bobSpeed:1.1});}
+
+sizeScene();createPlants();createBubbles();createFish();
+window.addEventListener('resize',function(){sizeScene();createPlants();});
+
+var last=Date.now();
+function loop(){
+var now=Date.now();
+var dt=Math.min(0.05,(now-last)/1000);if(dt<0)dt=0;last=now;
+var fy=floorY();
+var viewScale=Math.max(0.55,Math.min(1.15,Math.min(W,H)/850));
+var i,b,f,p,s,y,margin,dx;
+for(i=0;i<bubbles.length;i++){b=bubbles[i];b.y-=b.speed*dt;if(b.x<-b.r)b.x=W+b.r;if(b.x>W+b.r)b.x=-b.r;dx=Math.sin(now/900+b.wob)*b.drift*dt*12;if(b.y<-b.r){resetBubble(b);dx=0;}b.g.setAttribute('cx',b.x+dx);b.g.setAttribute('cy',b.y);}
+for(i=0;i<fish.length;i++){f=fish[i];s=f.scale*viewScale;margin=170*s;f.x+=f.speed*f.dir*dt;if(f.x>W+margin)f.x=-margin;if(f.x<-margin)f.x=W+margin;y=f.yFrac*H+Math.sin(now/1000*f.bobSpeed)*f.bob;f.g.setAttribute('transform','translate('+f.x+','+y+') scale('+(f.dir*s)+','+s+')');}
+for(i=0;i<plants.length;i++){p=plants[i];p.g.setAttribute('transform','translate('+p.x+','+(fy+p.yOff)+') rotate('+(1.6*Math.sin(now/1500+p.phase))+')');}
+var request=window.requestAnimationFrame||function(cb){return setTimeout(cb,16);};request(loop);
+}
+loop();
+})();
+</script>
+</body>
+</html>

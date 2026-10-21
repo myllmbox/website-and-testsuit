@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pasture</title>
+<style>
+html,body{height:100%;margin:0;overflow:hidden;background:#cfefff}
+#scene{position:fixed;left:0;top:0;width:100vw;height:100vh;display:block}
+.hop{animation:hop .8s ease-in-out infinite}
+#cowHop{animation-duration:.78s;animation-delay:-.17s}
+#sheepHop{animation-duration:.72s;animation-delay:-.43s}
+#pigHop{animation-duration:.92s;animation-delay:-.66s}
+#horseHop{animation-duration:.68s;animation-delay:-.08s}
+@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+</style>
+</head>
+<body>
+<svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#55b3ef"/>
+<stop offset="0.62" stop-color="#9eddf7"/>
+<stop offset="1" stop-color="#dff6ff"/>
+</linearGradient>
+<linearGradient id="grassGrad" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#72bd3f"/>
+<stop offset="1" stop-color="#3f7f19"/>
+</linearGradient>
+</defs>
+
+<rect x="0" y="0" width="100%" height="65%" fill="url(#skyGrad)"/>
+
+<g id="sunG">
+<circle r="82" fill="#fff7a3" opacity="0.45"/>
+<g fill="#ffe86b" opacity="0.85">
+<polygon points="56,-11 56,11 112,0"/>
+<polygon transform="rotate(45)" points="56,-11 56,11 112,0"/>
+<polygon transform="rotate(90)" points="56,-11 56,11 112,0"/>
+<polygon transform="rotate(135)" points="56,-11 56,11 112,0"/>
+<polygon transform="rotate(180)" points="56,-11 56,11 112,0"/>
+<polygon transform="rotate(225)" points="56,-11 56,11 112,0"/>
+<polygon transform="rotate(270)" points="56,-11 56,11 112,0"/>
+<polygon transform="rotate(315)" points="56,-11 56,11 112,0"/>
+</g>
+<circle r="45" fill="#ffdc2e"/>
+</g>
+
+<g id="clouds">
+<g id="cloud1" fill="#ffffff">
+<ellipse cx="-47" cy="7" rx="31" ry="19"/>
+<ellipse cx="-12" cy="-9" rx="36" ry="24"/>
+<ellipse cx="24" cy="-2" rx="31" ry="20"/>
+<ellipse cx="52" cy="10" rx="21" ry="14"/>
+<ellipse cx="4" cy="14" rx="37" ry="15" fill="#f6f8ff"/>
+</g>
+<g id="cloud2" fill="#fbfdff">
+<ellipse cx="-39" cy="5" rx="26" ry="16"/>
+<ellipse cx="-8" cy="-8" rx="30" ry="20"/>
+<ellipse cx="22" cy="-3" rx="25" ry="16"/>
+<ellipse cx="43" cy="7" rx="18" ry="11"/>
+<ellipse cx="2" cy="11" rx="30" ry="12" fill="#ffffff"/>
+</g>
+<g id="cloud3" fill="#ffffff">
+<ellipse cx="-56" cy="9" rx="36" ry="22"/>
+<ellipse cx="-15" cy="-10" rx="42" ry="27"/>
+<ellipse cx="29" cy="-3" rx="35" ry="22"/>
+<ellipse cx="62" cy="12" rx="24" ry="15"/>
+<ellipse cx="4" cy="17" rx="43" ry="17" fill="#f6f8ff"/>
+</g>
+</g>
+
+<rect x="0" y="65%" width="100%" height="35%" fill="url(#grassGrad)"/>
+<rect x="0" y="65%" width="100%" height="2" fill="#39701a" opacity="0.65"/>
+
+<g id="trees">
+<g id="tree1">
+<path d="M-6,0 C-5,-35 -5,-55 -4,-75 L4,-75 C5,-55 5,-35 6,0 Z" fill="#7a4b28"/>
+<path d="M-4,-50 L-22,-63" stroke="#7a4b28" stroke-width="5" stroke-linecap="round"/>
+<circle cx="-21" cy="-76" r="19" fill="#4e9f2e"/>
+<circle cx="20" cy="-75" r="20" fill="#59b23a"/>
+<circle cx="0" cy="-98" r="24" fill="#49a12b"/>
+<circle cx="-1" cy="-72" r="18" fill="#5cb841"/>
+<circle cx="16" cy="-93" r="14" fill="#419226"/>
+<circle cx="-17" cy="-91" r="14" fill="#52ae35"/>
+</g>
+<g id="tree2">
+<path d="M-6,0 C-5,-35 -5,-55 -4,-75 L4,-75 C5,-55 5,-35 6,0 Z" fill="#744826"/>
+<path d="M4,-49 L21,-61" stroke="#744826" stroke-width="5" stroke-linecap="round"/>
+<circle cx="22" cy="-75" r="19" fill="#51a831"/>
+<circle cx="-20" cy="-76" r="19" fill="#469c2a"/>
+<circle cx="0" cy="-99" r="25" fill="#4ca42d"/>
+<circle cx="-1" cy="-73" r="18" fill="#62b946"/>
+<circle cx="-16" cy="-92" r="14" fill="#449629"/>
+<circle cx="18" cy="-91" r="14" fill="#55ae36"/>
+</g>
+</g>
+
+<g id="animals">
+
+<g id="cowPos"><g id="cowHop" class="hop"><g id="cowScale"><g id="cow">
+<rect x="-63" y="-44" width="12" height="46" rx="5" fill="#e8e1d0"/>
+<rect x="-49" y="-41" width="12" height="43" rx="5" fill="#faf6ee"/>
+<rect x="35" y="-44" width="12" height="46" rx="5" fill="#e8e1d0"/>
+<rect x="49" y="-41" width="12" height="43" rx="5" fill="#faf6ee"/>
+<ellipse cx="0" cy="-65" rx="74" ry="36" fill="#fdfbf6" stroke="#9c8970" stroke-width="2"/>
+<ellipse cx="-31" cy="-72" rx="21" ry="13" fill="#25221f"/>
+<ellipse cx="5" cy="-53" rx="17" ry="11" fill="#1f1f1f"/>
+<ellipse cx="33" cy="-83" rx="12" ry="8" fill="#23211e"/>
+<polygon points="55,-96 61,-113 69,-95" fill="#f2e7cf" stroke="#9c8970" stroke-width="1"/>
+<polygon points="72,-97 81,-112 88,-95" fill="#f2e7cf" stroke="#9c8970" stroke-width="1"/>
+<ellipse cx="77" cy="-78" rx="26" ry="22" fill="#fdfbf6" stroke="#9c8970" stroke-width="2"/>
+<ellipse cx="101" cy="-71" rx="16" ry="12" fill="#f0a6bd" stroke="#b6657f" stroke-width="1.5"/>
+<ellipse cx="98" cy="-71" rx="2" ry="3" fill="#8c4e63"/>
+<ellipse cx="106" cy="-71" rx="2" ry="3" fill="#8c4e63"/>
+<circle cx="71" cy="-82" r="3.2" fill="#16130f"/>
+<circle cx="84" cy="-82" r="3.2" fill="#16130f"/>
+</g></g></g></g>
+
+<g id="sheepPos"><g id="sheepHop" class="hop"><g id="sheepScale"><g id="sheep">
+<rect x="-47" y="-36" width="9" height="38" rx="4" fill="#373231"/>
+<rect x="-33" y="-33" width="9" height="35" rx="4" fill="#272221"/>
+<rect x="31" y="-36" width="9" height="38" rx="4" fill="#373231"/>
+<rect x="45" y="-33" width="9" height="35" rx="4" fill="#272221"/>
+<ellipse cx="-3" cy="-50" rx="54" ry="30" fill="#fdfdfa"/>
+<circle cx="-40" cy="-49" r="22" fill="#ffffff"/>
+<circle cx="-15" cy="-63" r="24" fill="#ffffff"/>
+<circle cx="9" cy="-64" r="23" fill="#ffffff"/>
+<circle cx="31" cy="-55" r="21" fill="#ffffff"/>
+<circle cx="41" cy="-38" r="16" fill="#ffffff"/>
+<circle cx="-25" cy="-30" r="17" fill="#ffffff"/>
+<circle cx="7" cy="-32" r="16" fill="#ffffff"/>
+<ellipse cx="56" cy="-52" rx="17" ry="18" fill="#4d474a"/>
+<ellipse cx="41" cy="-63" rx="10" ry="5" fill="#3f3a3d" transform="rotate(-24 41 -63)"/>
+<ellipse cx="71" cy="-61" rx="10" ry="5" fill="#3f3a3d" transform="rotate(19 71 -61)"/>
+<circle cx="56" cy="-69" r="9" fill="#ffffff"/>
+<ellipse cx="50" cy="-55" rx="4" ry="5" fill="#fff"/>
+<circle cx="50" cy="-55" r="1.8" fill="#131111"/>
+<ellipse cx="62" cy="-55" rx="4" ry="5" fill="#fff"/>
+<circle cx="62" cy="-55" r="1.8" fill="#131111"/>
+</g></g></g></g>
+
+<g id="pigPos"><g id="pigHop" class="hop"><g id="pigScale"><g id="pig">
+<path d="M-46,-52 C-59,-59 -62,-40 -46,-39 C-39,-38 -37,-48 -45,-50" fill="none" stroke="#d37b95" stroke-width="5" stroke-linecap="round"/>
+<rect x="-32" y="-28" width="10" height="30" rx="5" fill="#cf7890"/>
+<rect x="-18" y="-26" width="10" height="28" rx="5" fill="#f2a9bb"/>
+<rect x="16" y="-28" width="10" height="30" rx="5" fill="#cf7890"/>
+<rect x="30" y="-26" width="10" height="28" rx="5" fill="#f2a9bb"/>
+<ellipse cx="-1" cy="-43" rx="46" ry="28" fill="#f5b2bf" stroke="#c87892" stroke-width="2"/>
+<ellipse cx="50" cy="-47" rx="19" ry="18" fill="#f5b2bf" stroke="#c87892" stroke-width="2"/>
+<ellipse cx="65" cy="-44" rx="10" ry="8" fill="#e589a1" stroke="#b96580" stroke-width="1.5"/>
+<ellipse cx="63" cy="-44" rx="1.8" ry="2.5" fill="#7c3e52"/>
+<ellipse cx="68" cy="-44" rx="1.8" ry="2.5" fill="#7c3e52"/>
+<polygon points="37,-63 43,-51 31,-52" fill="#efa0b3"/>
+<polygon points="53,-64 61,-53 50,-51" fill="#efa0b3"/>
+<circle cx="43" cy="-52" r="2.7" fill="#26171a"/>
+<circle cx="57" cy="-51" r="2.7" fill="#26171a"/>
+</g></g></g></g>
+
+<g id="horsePos"><g id="horseHop" class="hop"><g id="horseScale"><g id="horse">
+<path d="M-79,-90 C-104,-70 -102,-32 -84,-13" fill="none" stroke="#3a200f" stroke-width="10" stroke-linecap="round"/>
+<rect x="-72" y="-72" width="13" height="74" rx="5" fill="#55351b"/>
+<rect x="-57" y="-70" width="14" height="72" rx="5" fill="#794922"/>
+<rect x="53" y="-72" width="13" height="74" rx="5" fill="#55351b"/>
+<rect x="68" y="-70" width="14" height="72" rx="5" fill="#794922"/>
+<ellipse cx="0" cy="-100" rx="85" ry="30" fill="#8a5228" stroke="#4d2c15" stroke-width="2"/>
+<polygon points="70,-115 100,-178 120,-171 94,-110" fill="#8a5228" stroke="#4d2c15" stroke-width="1.5"/>
+<path d="M75,-112 C87,-148 105,-172 123,-183" fill="none" stroke="#3d2210" stroke-width="12" stroke-linecap="round"/>
+<polygon points="115,-191 109,-207 124,-194" fill="#794922"/>
+<polygon points="130,-193 131,-209 142,-194" fill="#794922"/>
+<ellipse cx="128" cy="-180" rx="20" ry="16" fill="#8a5228" stroke="#4d2c15" stroke-width="2"/>
+<ellipse cx="143" cy="-175" rx="12" ry="8" fill="#8a5228" stroke="#4d2c15" stroke-width="1.5"/>
+<circle cx="121" cy="-181" r="3" fill="#12100e"/>
+<circle cx="134" cy="-181" r="3" fill="#12100e"/>
+</g></g></g></g>
+
+</g>
+</svg>
+<script>
+(function(){
+var svg=document.getElementById("scene");
+var sun=document.getElementById("sunG");
+var tree1=document.getElementById("tree1");
+var tree2=document.getElementById("tree2");
+var animals=[
+{pos:"cowPos",sc:"cowScale",fx:.15,sf:.85},
+{pos:"sheepPos",sc:"sheepScale",fx:.35,sf:1.07},
+{pos:"pigPos",sc:"pigScale",fx:.55,sf:1.16},
+{pos:"horsePos",sc:"horseScale",fx:.78,sf:1}
+];
+var clouds=[
+{id:"cloud1",fx:.15,fy:.19,cs:.95,sp:16},
+{id:"cloud2",fx:.55,fy:.28,cs:.75,sp:22},
+{id:"cloud3",fx:.84,fy:.13,cs:1.1,sp:11}
+];
+var i,c;
+for(i=0;i<clouds.length;i++){c=clouds[i];c.el=document.getElementById(c.id);c.x=0;c.scale=1;}
+var init=false,last=0,W=1000,H=600;
+function resize(){
+W=Math.max(1,window.innerWidth);
+H=Math.max(1,window.innerHeight);
+svg.setAttribute("viewBox","0 0 "+W+" "+H);
+var base=Math.max(.25,Math.min(H/900,W/1400,1.05));
+sun.setAttribute("transform","translate("+(W*.78)+","+(H*.21)+") scale("+base+")");
+var treeScale=Math.max(.35,Math.min(base*1.35,1.1));
+tree1.setAttribute("transform","translate("+(W*.09)+","+(H*.72)+") scale("+treeScale+")");
+tree2.setAttribute("transform","translate("+(W*.9)+","+(H*.715)+") scale("+(treeScale*.95)+")");
+for(i=0;i<animals.length;i++){
+var p=animals[i],pg=document.getElementById(p.pos),sg=document.getElementById(p.sc);
+pg.setAttribute("transform","translate("+(W*p.fx)+","+(H*.865)+")");
+sg.setAttribute("transform","scale("+(base*p.sf)+")");
+}
+var cs=Math.max(.5,Math.min(base*1.3,1.2));
+if(!init){
+for(i=0;i<clouds.length;i++){c=clouds[i];c.scale=cs*c.cs;c.x=W*c.fx;}
+init=true;
+}else{
+for(i=0;i<clouds.length;i++){
+c=clouds[i];c.scale=cs*c.cs;
+var span=W+380*c.scale;
+c.x=((c.x+190*c.scale)%span+span)%span-190*c.scale;
+}
+}
+}
+function frame(t){
+if(typeof t!=="number")t=new Date().getTime();
+if(!last||typeof last!=="number")last=t;
+var dt=(t-last)/1000;
+last=t;
+if(dt<0)dt=0;
+if(dt>.1)dt=.1;
+for(var i=0;i<clouds.length;i++){
+var c=clouds[i];
+c.x+=c.sp*c.scale*dt;
+var m=200*c.scale;
+if(c.x>W+m)c.x=-m; else if(c.x<-m)c.x=W+m;
+c.el.setAttribute("transform","translate("+(c.x)+","+(c.fy*H)+") scale("+c.scale+")");
+}
+if(window.requestAnimationFrame)window.requestAnimationFrame(frame);
+else window.setTimeout(function(){frame(new Date().getTime());},16);
+}
+window.addEventListener("resize",resize);
+window.addEventListener("orientationchange",resize);
+resize();
+if(window.requestAnimationFrame)window.requestAnimationFrame(frame);
+else window.setTimeout(function(){frame(new Date().getTime());},16);
+})();
+</script>
+</body>
+</html>

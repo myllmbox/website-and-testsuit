@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Animated Pasture</title>
+<style>
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#cdeeff}
+  svg{display:block;position:fixed;left:0;top:0;width:100vw;height:100vh}
+  @keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+  @keyframes drift{from{transform:translateX(-360px)}to{transform:translateX(2200px)}}
+  .bounce{animation-name:hop;animation-iteration-count:infinite;animation-timing-function:ease-in-out;animation-duration:.70s}
+  .b1{animation-duration:.62s;animation-delay:.12s}
+  .b2{animation-duration:.76s;animation-delay:.36s}
+  .b3{animation-duration:.56s;animation-delay:.03s}
+  .b4{animation-duration:.70s;animation-delay:.49s}
+  .cloud{animation-name:drift;animation-iteration-count:infinite;animation-timing-function:linear;animation-duration:70s}
+  .cloud1{animation-duration:68s;animation-delay:-10s}
+  .cloud2{animation-duration:54s;animation-delay:-37s}
+  .cloud3{animation-duration:88s;animation-delay:-63s}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-label="animated pasture">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5fc6ff"/>
+      <stop offset=".62" stop-color="#b9e9ff"/>
+      <stop offset="1" stop-color="#eaffff"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6dbd43"/>
+      <stop offset="1" stop-color="#2d7b21"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#fff7a3" stop-opacity=".85"/>
+      <stop offset="1" stop-color="#fff7a3" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1600" height="586" fill="url(#sky)"/>
+
+  <circle cx="1270" cy="218" r="126" fill="url(#glow)"/>
+  <g transform="translate(1270,218)" stroke="#ffe15c" stroke-width="9" stroke-linecap="round">
+    <line x1="76" y1="0" x2="148" y2="0"/>
+    <line x1="76" y1="0" x2="148" y2="0" transform="rotate(36)"/>
+    <line x1="76" y1="0" x2="148" y2="0" transform="rotate(72)"/>
+    <line x1="76" y1="0" x2="148" y2="0" transform="rotate(108)"/>
+    <line x1="76" y1="0" x2="148" y2="0" transform="rotate(144)"/>
+    <line x1="76" y1="0" x2="148" y2="0" transform="rotate(180)"/>
+    <line x1="76" y1="0" x2="148" y2="0" transform="rotate(216)"/>
+    <line x1="76" y1="0" x2="148" y2="0" transform="rotate(252)"/>
+    <line x1="76" y1="0" x2="148" y2="0" transform="rotate(288)"/>
+    <line x1="76" y1="0" x2="148" y2="0" transform="rotate(324)"/>
+  </g>
+  <circle cx="1270" cy="218" r="58" fill="#ffe85e" stroke="#ffd638" stroke-width="3"/>
+
+  <g transform="translate(0,114) scale(1)">
+    <g class="cloud cloud1" fill="#ffffff" fill-opacity=".92">
+      <ellipse cx="0" cy="0" rx="58" ry="33"/>
+      <ellipse cx="46" cy="10" rx="44" ry="26"/>
+      <ellipse cx="-46" cy="8" rx="41" ry="25"/>
+      <ellipse cx="-8" cy="-20" rx="36" ry="24"/>
+    </g>
+  </g>
+
+  <g transform="translate(0,198) scale(.85)">
+    <g class="cloud cloud2" fill="#f8ffff" fill-opacity=".93">
+      <ellipse cx="0" cy="0" rx="66" ry="36"/>
+      <ellipse cx="52" cy="8" rx="48" ry="28"/>
+      <ellipse cx="-52" cy="6" rx="46" ry="26"/>
+      <ellipse cx="-6" cy="-24" rx="40" ry="26"/>
+    </g>
+  </g>
+
+  <g transform="translate(0,92) scale(1.18)">
+    <g class="cloud cloud3" fill="#ffffff" fill-opacity=".90">
+      <ellipse cx="0" cy="0" rx="50" ry="30"/>
+      <ellipse cx="38" cy="12" rx="38" ry="23"/>
+      <ellipse cx="-40" cy="12" rx="36" ry="22"/>
+      <ellipse cx="-10" cy="-20" rx="30" ry="21"/>
+    </g>
+  </g>
+
+  <rect x="0" y="585" width="1600" height="315" fill="url(#grass)"/>
+  <rect x="0" y="582" width="1600" height="5" fill="#3b8d26" opacity=".58"/>
+  <g fill="#1d5c15" opacity=".12">
+    <ellipse cx="150" cy="650" rx="100" ry="8"/>
+    <ellipse cx="505" cy="700" rx="145" ry="10"/>
+    <ellipse cx="860" cy="670" rx="130" ry="8"/>
+    <ellipse cx="1320" cy="730" rx="150" ry="10"/>
+    <ellipse cx="760" cy="860" rx="230" ry="11"/>
+  </g>
+
+  <!-- Tree 1 -->
+  <g>
+    <ellipse cx="155" cy="739" rx="82" ry="11" fill="#12330f" opacity=".16"/>
+    <rect x="147" y="615" width="17" height="122" rx="6" fill="#78491f"/>
+    <rect x="153" y="615" width="5" height="122" fill="#97632f" opacity=".6"/>
+    <circle cx="155" cy="585" r="44" fill="#2c8e3b"/>
+    <circle cx="117" cy="606" r="32" fill="#2c8e3b"/>
+    <circle cx="193" cy="606" r="32" fill="#2c8e3b"/>
+    <circle cx="136" cy="552" r="28" fill="#2c8e3b"/>
+    <circle cx="174" cy="548" r="28" fill="#2c8e3b"/>
+    <circle cx="146" cy="571" r="19" fill="#49ba58"/>
+    <circle cx="175" cy="563" r="15" fill="#5cd070" opacity=".7"/>
+  </g>
+
+  <!-- Tree 2 -->
+  <g transform="translate(1315,0)">
+    <ellipse cx="155" cy="739" rx="82" ry="11" fill="#12330f" opacity=".16"/>
+    <rect x="147" y="615" width="17" height="122" rx="6" fill="#78491f"/>
+    <rect x="153" y="615" width="5" height="122" fill="#97632f" opacity=".6"/>
+    <circle cx="155" cy="585" r="44" fill="#2c8e3b"/>
+    <circle cx="117" cy="606" r="32" fill="#2c8e3b"/>
+    <circle cx="193" cy="606" r="32" fill="#2c8e3b"/>
+    <circle cx="136" cy="552" r="28" fill="#2c8e3b"/>
+    <circle cx="174" cy="548" r="28" fill="#2c8e3b"/>
+    <circle cx="146" cy="571" r="19" fill="#49ba58"/>
+    <circle cx="175" cy="563" r="15" fill="#5cd070" opacity=".7"/>
+  </g>
+
+  <!-- Cow -->
+  <g transform="translate(370,815)">
+    <ellipse cx="16" cy="2" rx="102" ry="12" fill="#0a290a" opacity=".16"/>
+    <g class="bounce b1">
+      <g fill="#e9e3d7">
+        <rect x="-60" y="-60" width="14" height="60" rx="5"/>
+        <rect x="-34" y="-60" width="14" height="60" rx="5" fill="#f7f2e8"/>
+        <rect x="30" y="-60" width="14" height="60" rx="5"/>
+        <rect x="56" y="-60" width="14" height="60" rx="5" fill="#f7f2e8"/>
+      </g>
+      <g fill="#8d7f6b">
+        <rect x="-60" y="-13" width="14" height="13"/>
+        <rect x="-34" y="-13" width="14" height="13"/>
+        <rect x="30" y="-13" width="14" height="13"/>
+        <rect x="56" y="-13" width="14" height="13"/>
+      </g>
+      <ellipse cx="0" cy="-68" rx="112" ry="54" fill="#fffdf5"/>
+      <ellipse cx="-60" cy="-70" rx="30" ry="18" fill="#26241f" transform="rotate(-8 -60 -70)"/>
+      <ellipse cx="15" cy="-85" rx="23" ry="13" fill="#26241f"/>
+      <ellipse cx="72" cy="-64" rx="18" ry="12" fill="#26241f" transform="rotate(14 72 -64)"/>
+      <path d="M-112 -50 C -142 -44 -150 -10 -138 0" stroke="#26241f" stroke-width="7" fill="none"/>
+      <circle cx="-138" cy="-3" r="4" fill="#26241f"/>
+      <ellipse cx="140" cy="-92" rx="44" ry="40" fill="#fffdf5"/>
+      <ellipse cx="110" cy="-126" rx="16" ry="9" fill="#f2e6cf" transform="rotate(-28 110 -126)"/>
+      <ellipse cx="172" cy="-126" rx="16" ry="9" fill="#f2e6cf" transform="rotate(28 172 -126)"/>
+      <circle cx="124" cy="-100" r="6.5" fill="#161616"/>
+      <circle cx="161" cy="-100" r="6.5" fill="#161616"/>
+      <circle cx="122" cy="-102" r="2" fill="#fff"/>
+      <circle cx="159" cy="-102" r="2" fill="#fff"/>
+      <ellipse cx="142" cy="-62" rx="29" ry="19" fill="#f7aecb"/>
+      <ellipse cx="134" cy="-65" rx="4.5" ry="6" fill="#c65982"/>
+      <ellipse cx="150" cy="-65" rx="4.5" ry="6" fill="#c65982"/>
+    </g>
+  </g>
+
+  <!-- Sheep -->
+  <g transform="translate(650,815)">
+    <ellipse cx="14" cy="2" rx="78" ry="10" fill="#0a290a" opacity=".15"/>
+    <g class="bounce b2">
+      <g fill="#3a404a">
+        <rect x="-46" y="-44" width="10" height="44" rx="4"/>
+        <rect x="-20" y="-44" width="10" height="44" rx="4"/>
+        <rect x="14" y="-44" width="10" height="44" rx="4"/>
+        <rect x="36" y="-44" width="10" height="44" rx="4"/>
+      </g>
+      <g fill="#fbfcff">
+        <ellipse cx="0" cy="-56" rx="70" ry="45"/>
+        <circle cx="-54" cy="-72" r="24"/>
+        <circle cx="-36" cy="-94" r="23"/>
+        <circle cx="-12" cy="-108" r="25"/>
+        <circle cx="16" cy="-108" r="24"/>
+        <circle cx="40" cy="-92" r="22"/>
+        <circle cx="56" cy="-68" r="23"/>
+        <circle cx="-58" cy="-38" r="18"/>
+        <circle cx="-35" cy="-26" r="15"/>
+        <circle cx="0" cy="-22" r="17"/>
+        <circle cx="35" cy="-26" r="15"/>
+        <circle cx="58" cy="-38" r="18"/>
+      </g>
+      <ellipse cx="55" cy="-93" rx="16" ry="8" fill="#465161" transform="rotate(-28 55 -93)"/>
+      <ellipse cx="101" cy="-88" rx="16" ry="8" fill="#465161" transform="rotate(22 101 -88)"/>
+      <ellipse cx="76" cy="-66" rx="29" ry="34" fill="#566172"/>
+      <ellipse cx="67" cy="-71" rx="7" ry="8" fill="#ffffff"/>
+      <circle cx="67" cy="-71" r="3.5" fill="#111111"/>
+      <ellipse cx="89" cy="-71" rx="7" ry="8" fill="#ffffff"/>
+      <circle cx="89" cy="-71" r="3.5" fill="#111111"/>
+      <path d="M72 -48 C 78 -43 86 -43 92 -48" stroke="#2b313a" stroke-width="3" fill="none"/>
+    </g>
+  </g>
+
+  <!-- Pig -->
+  <g transform="translate(915,815)">
+    <ellipse cx="10" cy="2" rx="70" ry="9" fill="#0a290a" opacity=".14"/>
+    <g class="bounce b3">
+      <g fill="#f08fb0">
+        <rect x="-60" y="-50" width="12" height="50" rx="4"/>
+        <rect x="-33" y="-50" width="12" height="50" rx="4"/>
+        <rect x="12" y="-50" width="12" height="50" rx="4"/>
+        <rect x="36" y="-50" width="12" height="50" rx="4"/>
+      </g>
+      <g fill="#bd6986">
+        <rect x="-60" y="-14" width="12" height="14"/>
+        <rect x="-33" y="-14" width="12" height="14"/>
+        <rect x="12" y="-14" width="12" height="14"/>
+        <rect x="36" y="-14" width="12" height="14"/>
+      </g>
+      <ellipse cx="0" cy="-60" rx="80" ry="42" fill="#f8abc7"/>
+      <path d="M-78 -66 C -98 -62 -100 -45 -89 -42 C -83 -41 -84 -36 -90 -33" stroke="#f08fb0" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <circle cx="66" cy="-62" r="35" fill="#f8abc7"/>
+      <ellipse cx="95" cy="-56" rx="18" ry="14" fill="#e881a2"/>
+      <ellipse cx="90" cy="-58" rx="3.5" ry="5" fill="#7c3a51"/>
+      <ellipse cx="101" cy="-58" rx="3.5" ry="5" fill="#7c3a51"/>
+      <circle cx="54" cy="-70" r="5.5" fill="#111111"/>
+      <circle cx="78" cy="-70" r="5.5" fill="#111111"/>
+      <circle cx="52" cy="-72" r="1.8" fill="#ffffff"/>
+      <circle cx="76" cy="-72" r="1.8" fill="#ffffff"/>
+      <path d="M48 -96 L62 -84 L46 -80 Z" fill="#e780a1"/>
+      <path d="M84 -96 L97 -83 L79 -81 Z" fill="#e780a1"/>
+    </g>
+  </g>
+
+  <!-- Horse -->
+  <g transform="translate(1210,815)">
+    <ellipse cx="25" cy="2" rx="118" ry="12" fill="#0a290a" opacity=".16"/>
+    <g class="bounce b4">
+      <g fill="#7a4a21">
+        <rect x="-100" y="-95" width="14" height="95" rx="6"/>
+        <rect x="-70" y="-95" width="14" height="95" rx="6" fill="#8b5a2b"/>
+        <rect x="50" y="-95" width="14" height="95" rx="6"/>
+        <rect x="78" y="-95" width="14" height="95" rx="6" fill="#8b5a2b"/>
+      </g>
+      <g fill="#4a2e17">
+        <rect x="-100" y="-16" width="14" height="16"/>
+        <rect x="-70" y="-16" width="14" height="16"/>
+        <rect x="50" y="-16" width="14" height="16"/>
+        <rect x="78" y="-16" width="14" height="16"/>
+      </g>
+      <path d="M-124 -118 C -165 -105 -182 -55 -158 -10 C -155 -42 -148 -74 -125 -92 C -115 -98 -117 -110 -127 -118 Z" fill="#4a2e17"/>
+      <ellipse cx="0" cy="-115" rx="130" ry="52" fill="#9a6533"/>
+      <path d="M88 -132 C 126 -142 157 -170 185 -188 L208 -160 C 181 -148 156 -113 134 -91 Z" fill="#8c5c2d"/>
+      <path d="M96 -128 C 130 -135 160 -160 184 -178" stroke="#42260f" stroke-width="13" fill="none" stroke-linecap="round"/>
+      <ellipse cx="206" cy="-174" rx="42" ry="29" fill="#a16a35" transform="rotate(12 206 -174)"/>
+      <path d="M188 -204 L198 -190 L179 -192 Z" fill="#8c5c2d"/>
+      <path d="M226 -201 L236 -187 L217 -189 Z" fill="#8c5c2d"/>
+      <circle cx="191" cy="-176" r="5.5" fill="#111111"/>
+      <circle cx="216" cy="-176" r="5.5" fill="#111111"/>
+      <circle cx="189" cy="-178" r="1.8" fill="#ffffff"/>
+      <circle cx="214" cy="-178" r="1.8" fill="#ffffff"/>
+      <path d="M181 -158 C 186 -151 193 -151 197 -158" stroke="#6d4020" stroke-width="2.5" fill="none"/>
+    </g>
+  </g>
+</svg>
+</body>
+</html>

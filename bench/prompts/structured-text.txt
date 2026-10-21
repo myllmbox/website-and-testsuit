@@ -1,0 +1,22 @@
+You are generating seed data for the staging database of a fictional hardware and home-improvement store chain called "Northfield Supply". All names, companies and numbers are invented.
+
+Produce the complete product catalog as ONE JSON object that follows the provided schema exactly:
+
+- "store": the chain name, the catalog version "2026.10" and the currency "EUR".
+- "categories": exactly 12 categories (for example power tools, hand tools, fasteners, plumbing, electrical, paint, garden, lighting, storage, safety gear, adhesives, flooring), each with a short id, a name and a one-sentence description.
+- "products": exactly 120 products, 10 per category. Each product has:
+  - "sku": the category id + a 4-digit number, e.g. "PWT-0001"
+  - "name": a realistic product name
+  - "category": the category id
+  - "description": two full sentences about what it is and who it is for
+  - "price": the price in EUR with two decimals
+  - "stock": units in stock across all stores (integer)
+  - "weight_kg": shipping weight
+  - "dimensions": width, height and depth in centimetres
+  - "tags": 3 to 5 lowercase search tags
+  - "supplier": an invented supplier name and its country
+  - "warranty_months": 0, 12, 24 or 36
+  - "variants": 1 to 3 variants, each with its own sku suffix, a label (size, colour or pack size) and a price
+- "summary": the total product count, the number of products per category, and the average price per category.
+
+Write every product in full — no placeholders, no "...", no "and so on". Keep descriptions specific to each product.

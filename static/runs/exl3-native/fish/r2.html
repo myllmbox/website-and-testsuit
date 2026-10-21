@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Underwater Scene</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #06304a;
+  }
+  svg {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7ec8e3"/>
+      <stop offset="45%" stop-color="#2e7fb0"/>
+      <stop offset="100%" stop-color="#06304a"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d9c38a"/>
+      <stop offset="100%" stop-color="#8a6b3f"/>
+    </linearGradient>
+    <radialGradient id="bubbleGrad" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="70%" stop-color="#bfe6f5" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#e8f7ff" stop-opacity="0.55"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Water -->
+  <rect x="0" y="0" width="1000" height="600" fill="url(#water)"/>
+
+  <!-- Light rays -->
+  <g opacity="0.10" fill="#ffffff">
+    <polygon points="120,0 200,0 90,600 20,600"/>
+    <polygon points="420,0 470,0 380,600 330,600"/>
+    <polygon points="700,0 780,0 660,600 590,600"/>
+  </g>
+
+  <!-- Seafloor: ~13% of viewport height (520..600) -->
+  <g id="floor">
+    <path d="M0,540 Q150,515 300,535 T600,530 T1000,540 L1000,600 L0,600 Z" fill="url(#sand)"/>
+    <ellipse cx="180" cy="560" rx="60" ry="18" fill="#6e5433" opacity="0.6"/>
+    <ellipse cx="640" cy="565" rx="80" ry="20" fill="#6e5433" opacity="0.5"/>
+    <circle cx="820" cy="555" r="16" fill="#7a5f3a"/>
+    <circle cx="850" cy="562" r="11" fill="#6e5433"/>
+    <circle cx="90" cy="558" r="13" fill="#7a5f3a"/>
+    <circle cx="118" cy="565" r="9" fill="#6e5433"/>
+  </g>
+
+  <!-- Seaweed (anchored at y=560 so bases stay under sand top edge) -->
+  <g id="seaweed" fill="none" stroke-linecap="round">
+    <g>
+      <path d="M120,560 C105,510 135,470 118,420 C104,378 130,340 120,300"
+            stroke="#2e8b57" stroke-width="10" opacity="0.9"/>
+      <ellipse cx="118" cy="300" rx="9" ry="16" fill="#37a065" stroke="none"/>
+    </g>
+    <g>
+      <path d="M300,565 C318,520 288,480 305,435 C318,398 295,360 305,325"
+            stroke="#228b45" stroke-width="9" opacity="0.85"/>
+      <ellipse cx="305" cy="325" rx="8" ry="14" fill="#2fa85a" stroke="none"/>
+    </g>
+    <g>
+      <path d="M760,562 C745,515 775,475 758,428 C744,388 770,350 760,315"
+            stroke="#2e8b57" stroke-width="10" opacity="0.9"/>
+      <ellipse cx="760" cy="315" rx="9" ry="15" fill="#37a065" stroke="none"/>
+    </g>
+    <g>
+      <path d="M900,565 C915,525 888,490 902,450 C913,418 895,385 903,355"
+            stroke="#1f7a3d" stroke-width="8" opacity="0.8"/>
+      <ellipse cx="903" cy="355" rx="7" ry="13" fill="#2fa85a" stroke="none"/>
+    </g>
+  </g>
+
+  <!-- Fish A: round, short, orange (faces right at native coords) -->
+  <g id="fishA">
+    <g id="fishAbody">
+      <!-- tail -->
+      <polygon points="-38,0 -66,-20 -66,20" fill="#d95f1e"/>
+      <!-- body -->
+      <ellipse cx="0" cy="0" rx="44" ry="30" fill="#ff8c3b"/>
+      <ellipse cx="-6" cy="4" rx="30" ry="18" fill="#ffa75e" opacity="0.7"/>
+      <!-- dorsal fin -->
+      <path d="M-4,-28 Q6,-52 26,-30 Q12,-26 -4,-28 Z" fill="#e56d24"/>
+      <!-- side fin -->
+      <path d="M6,6 Q-8,26 14,20 Q18,12 6,6 Z" fill="#e56d24"/>
+      <!-- gill -->
+      <path d="M18,-12 Q12,0 18,12" stroke="#d95f1e" stroke-width="3" fill="none" opacity="0.7"/>
+      <!-- eye -->
+      <circle cx="26" cy="-6" r="7" fill="#ffffff"/>
+      <circle cx="28" cy="-6" r="3.5" fill="#1a1a1a"/>
+      <!-- mouth -->
+      <path d="M42,4 Q46,8 42,11" stroke="#a33d0f" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- Fish B: long, slender, blue/teal (faces right at native coords) -->
+  <g id="fishB">
+    <g id="fishBbody">
+      <!-- tail -->
+      <polygon points="-52,0 -84,-16 -84,16" fill="#12688f"/>
+      <!-- body -->
+      <ellipse cx="0" cy="0" rx="58" ry="15" fill="#22a3c9"/>
+      <ellipse cx="-4" cy="3" rx="42" ry="8" fill="#54c6e6" opacity="0.7"/>
+      <!-- dorsal fin -->
+      <path d="M-6,-14 Q4,-34 22,-16 Q8,-13 -6,-14 Z" fill="#1890b5"/>
+      <!-- side fin -->
+      <path d="M8,4 Q-4,20 16,15 Q20,9 8,4 Z" fill="#1890b5"/>
+      <!-- stripes -->
+      <path d="M-14,-12 Q-16,0 -14,12" stroke="#0f5f80" stroke-width="3" fill="none" opacity="0.6"/>
+      <path d="M2,-13 Q0,0 2,13" stroke="#0f5f80" stroke-width="3" fill="none" opacity="0.6"/>
+      <!-- eye -->
+      <circle cx="40" cy="-3" r="5.5" fill="#ffffff"/>
+      <circle cx="42" cy="-3" r="2.8" fill="#1a1a1a"/>
+      <!-- mouth -->
+      <path d="M56,2 Q59,5 56,8" stroke="#0b4d68" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- Bubbles -->
+  <g id="bubbles"></g>
+</svg>
+
+<script>
+(function () {
+  "use strict";
+
+  var VB_W = 1000, VB_H = 600;
+  var svg = document.getElementById("scene");
+  var bubbleLayer = document.getElementById("bubbles");
+  var fishA = document.getElementById("fishA");
+  var fishB = document.getElementById("fishB");
+  var seaweed = document.getElementById("seaweed");
+  var seed = 179107267;
+
+  function rand() {
+    // deterministic-ish pseudo-random (LCG)
+    seed = (seed * 1103515245 + 12345) % 2147483648;
+    return seed / 2147483648;
+  }
+
+  // ---------- Fish ----------
+  // Fish A: large, round. Fish B: smaller, slender.
+  var fishAState = { x: 200, y: 240, scale: 1.5, speed: 55, dir: 1, bob: 0 };
+  var fishBState = { x: 700, y: 380, scale: 0.9, speed: 130, dir: 1, bob: 0 };
+
+  // ---------- Bubbles ----------
+  var BUBBLE_COUNT = 8;
+  var bubbles = [];
+
+  function spawnBubble(b) {
+    b.r = 3 + rand() * 9;                       // varied sizes
+    b.x = 40 + rand() * (VB_W - 80);            // respawn near seafloor
+    b.y = 545 + rand() * 20;
+    b.speed = 26 + (12 - b.r) * 4.5;            // smaller bubbles rise faster
+    b.phase = rand() * Math.PI * 2;
+    b.sway = 6 + rand() * 10;
+    b.el.setAttribute("r", b.r.toFixed(1));
+    b.el.setAttribute("fill", "url(#bubbleGrad)");
+    b.el.setAttribute("stroke", "#ffffff");
+    b.el.setAttribute("stroke-width", (b.r * 0.12).toFixed(2));
+    b.el.setAttribute("opacity", (0.45 + rand() * 0.4).toFixed(2));
+  }
+
+  for (var i = 0; i < BUBBLE_COUNT; i++) {
+    var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    bubbleLayer.appendChild(c);
+    var b = { el: c };
+    spawnBubble(b);
+    b.y = rand() * VB_H; // stagger initial positions
+    bubbles.push(b);
+  }
+
+  // ---------- Seaweed sway (gentle, static-safe) ----------
+  var seaweedT = 0;
+
+  // ---------- Animation loop ----------
+  var last = null;
+
+  function frame(now) {
+    if (last === null) last = now;
+    var dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    seaweedT += dt;
+
+    // Fish movement + wrap-around
+    fishAState.x += fishAState.speed * fishAState.dir * dt;
+    fishBState.x += fishBState.speed * fishBState.dir * dt;
+
+    var marginA = 110 * fishAState.scale, marginB = 130 * fishBState.scale;
+    if (fishAState.x > VB_W + marginA) fishAState.x = -marginA;
+    if (fishAState.x < -marginA) fishAState.x = VB_W + marginA;
+    if (fishBState.x > VB_W + marginB) fishBState.x = -marginB;
+    if (fishBState.x < -marginB) fishBState.x = VB_W + marginB;
+
+    fishAState.bob += dt;
+    fishBState.bob += dt;
+    var bobA = Math.sin(fishAState.bob * 1.3) * 10;
+    var bobB = Math.sin(fishBState.bob * 2.1 + 1.7) * 14;
+
+    fishA.setAttribute("transform",
+      "translate(" + fishAState.x.toFixed(1) + "," + (fishAState.y + bobA).toFixed(1) + ") scale(" + fishAState.scale + ")");
+    fishB.setAttribute("transform",
+      "translate(" + fishBState.x.toFixed(1) + "," + (fishBState.y + bobB).toFixed(1) + ") scale(" + fishBState.scale + ")");
+
+    // Seaweed sway
+    var swayA = Math.sin(seaweedT * 1.1) * 3;
+    var swayB = Math.sin(seaweedT * 0.9 + 2) * 3;
+    var kids = seaweed.children;
+    for (var s = 0; s < kids.length; s++) {
+      var anchorY = 560;
+      var dir = (s % 2 === 0) ? swayA : swayB;
+      kids[s].setAttribute("transform",
+        "rotate(" + dir.toFixed(2) + ",0," + anchorY + ")");
+    }
+
+    // Bubbles rise; respawn at seafloor when they reach the top
+    for (var j = 0; j < bubbles.length; j++) {
+      var bu = bubbles[j];
+      bu.y -= bu.speed * dt;
+      var x = bu.x + Math.sin(seaweedT * 1.5 + bu.phase) * bu.sway;
+      if (bu.y < -bu.r * 2) {
+        spawnBubble(bu);
+        x = bu.x;
+      }
+      bu.el.setAttribute("cx", x.toFixed(1));
+      bu.el.setAttribute("cy", bu.y.toFixed(1));
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

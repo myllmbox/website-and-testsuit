@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Underwater Scene</title>
+<style>
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#051d38;}
+  svg{display:block;width:100vw;height:100vh;}
+  .beam{animation:beam 8s ease-in-out infinite;}
+  @keyframes beam{0%,100%{opacity:.05}50%{opacity:.16}}
+</style>
+</head>
+<body>
+<svg id="stage" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7ed1ff"/>
+      <stop offset=".45" stop-color="#2f88c9"/>
+      <stop offset=".78" stop-color="#0d3f6e"/>
+      <stop offset="1" stop-color="#051d38"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0dcae"/>
+      <stop offset=".55" stop-color="#c9a86f"/>
+      <stop offset="1" stop-color="#8a6a3f"/>
+    </linearGradient>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffb04d"/>
+      <stop offset="1" stop-color="#f26a10"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fe6ff"/>
+      <stop offset="1" stop-color="#1fa1cf"/>
+    </linearGradient>
+    <radialGradient id="bub" cx="35%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>
+      <stop offset=".6" stop-color="#bfe9ff" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#8fd4f5" stop-opacity=".55"/>
+    </radialGradient>
+  </defs>
+
+  <rect id="bg" x="0" y="0" fill="url(#water)"/>
+  <g id="beams" fill="#eaf9ff"></g>
+  <g id="kelp"></g>
+  <path id="floor" fill="url(#sand)"/>
+  <g id="rocks"></g>
+
+  <g id="fishLayer">
+    <!-- Fish 1: large, round-bodied orange fish, faces right -->
+    <g id="fish1"><g id="fish1in">
+      <g id="tail1"><polygon points="-36,0 -80,-27 -80,27" fill="#e0691c"/></g>
+      <path d="M-12,-30 Q8,-58 30,-28 Z" fill="#e0691c"/>
+      <ellipse rx="42" ry="32" fill="url(#g1)"/>
+      <path d="M18,-20 Q9,0 18,20" fill="none" stroke="#d15a12" stroke-width="3" stroke-linecap="round"/>
+      <path d="M2,6 Q-8,26 16,20 Q12,10 2,6 Z" fill="#e0691c"/>
+      <circle cx="26" cy="-10" r="9" fill="#ffffff"/>
+      <circle cx="29" cy="-10" r="4" fill="#14232e"/>
+      <path d="M36,10 Q41,16 46,11" fill="none" stroke="#b34e0e" stroke-width="3" stroke-linecap="round"/>
+    </g></g>
+    <!-- Fish 2: small, slender blue fish, faces left -->
+    <g id="fish2"><g id="fish2in">
+      <g id="tail2"><polygon points="-24,0 -54,-18 -54,18" fill="#187fa4"/></g>
+      <path d="M-6,-10 Q4,-27 15,-9 Z" fill="#187fa4"/>
+      <ellipse rx="30" ry="11" fill="url(#g2)"/>
+      <path d="M0,4 Q-6,16 10,12 Q8,6 0,4 Z" fill="#187fa4"/>
+      <circle cx="18" cy="-3" r="5" fill="#ffffff"/>
+      <circle cx="20" cy="-3" r="2.2" fill="#14232e"/>
+      <path d="M26,3 Q29,7 33,4" fill="none" stroke="#116a86" stroke-width="2" stroke-linecap="round"/>
+    </g></g>
+  </g>
+
+  <g id="bubbles"></g>
+</svg>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var svg=$('stage'),bg=$('bg'),floor=$('floor'),kelpLayer=$('kelp'),
+    rockLayer=$('rocks'),bubbleLayer=$('bubbles'),beamLayer=$('beams');
+var NS='http://www.w3.org/2000/svg';
+var W=0,H=0,floorY=0;
+
+/* light beams */
+var beams=[];
+for(var i=0;i<3;i++){
+  var p=document.createElementNS(NS,'polygon');
+  p.setAttribute('class','beam');
+  p.style.animationDelay=(i*2.3)+'s';
+  beamLayer.appendChild(p);
+  beams.push(p);
+}
+
+/* seaweed blades (wavy filled paths rooted on the seafloor) */
+var P1="M0,0 C8,-26 -6,-48 6,-72 C16,-92 2,-112 6,-132 L17,-132 C21,-112 7,-92 17,-72 C29,-48 15,-26 12,0 Z";
+var P2="M0,0 C-8,-20 6,-40 -4,-60 C-12,-76 0,-88 -2,-100 L9,-100 C11,-88 -1,-76 7,-60 C17,-40 5,-20 10,0 Z";
+var blades=[
+  {fx:0.14,d:0, path:P1,c:"#2e8b57",s:1,ph:0},
+  {fx:0.14,d:16,path:P2,c:"#3fa66b",s:0.8,ph:2.1},
+  {fx:0.5, d:0, path:P2,c:"#1f7a4c",s:1.15,ph:1.2},
+  {fx:0.5, d:18,path:P1,c:"#57b06f",s:0.7,ph:3.4},
+  {fx:0.82,d:0, path:P1,c:"#339966",s:1.1,ph:4.2},
+  {fx:0.82,d:15,path:P2,c:"#2e8b57",s:0.9,ph:0.7}
+];
+blades.forEach(function(b){
+  b.g=document.createElementNS(NS,'g');
+  b.p=document.createElementNS(NS,'path');
+  b.p.setAttribute('d',b.path);
+  b.p.setAttribute('fill',b.c);
+  b.p.setAttribute('opacity','0.92');
+  b.g.appendChild(b.p);
+  kelpLayer.appendChild(b.g);
+});
+
+/* rocks */
+var rocks=[
+  {fx:0.3, rx:62,ry:24,c:"#8a7150"},
+  {fx:0.66,rx:46,ry:18,c:"#75603f"},
+  {fx:0.93,rx:38,ry:15,c:"#93795a"}
+];
+rocks.forEach(function(r){
+  r.e=document.createElementNS(NS,'ellipse');
+  r.e.setAttribute('rx',r.rx);
+  r.e.setAttribute('ry',r.ry);
+  r.e.setAttribute('fill',r.c);
+  rockLayer.appendChild(r.e);
+});
+
+/* bubbles */
+var vents=[0.22,0.5,0.86];
+var bubbles=[];
+for(i=0;i<10;i++){
+  var g=document.createElementNS(NS,'g');
+  var c=document.createElementNS(NS,'circle');
+  c.setAttribute('fill','url(#bub)');
+  c.setAttribute('stroke','#dff4ff');
+  c.setAttribute('stroke-opacity','0.45');
+  var h=document.createElementNS(NS,'circle');
+  h.setAttribute('fill','#ffffff');
+  h.setAttribute('opacity','0.85');
+  g.appendChild(c);g.appendChild(h);
+  bubbleLayer.appendChild(g);
+  bubbles.push({g:g,c:c,h:h,r:0,x:0,y:0,sp:0,ph:0,amp:0});
+}
+function reset(b){
+  b.r=3+Math.random()*7;                       /* varied sizes */
+  b.x=vents[Math.floor(Math.random()*vents.length)]*W+(Math.random()*44-22);
+  b.y=floorY+14+Math.random()*22;              /* respawn near seafloor */
+  b.sp=14+(10-b.r)*3.6;                        /* smaller = faster */
+  b.ph=Math.random()*6.283;
+  b.amp=3+Math.random()*7;
+  b.c.setAttribute('r',b.r);
+  b.c.setAttribute('cx',0);b.c.setAttribute('cy',0);
+  b.h.setAttribute('r',Math.max(1,b.r*0.28));
+  b.h.setAttribute('cx',-b.r*0.3);b.h.setAttribute('cy',-b.r*0.35);
+}
+
+/* fish state */
+var fish=[
+  {g:$('fish1'),t:$('tail1'),dir:1, sp:26,fy:0.34,amp:12,ph:0,  s:1.15,wag:0.008,base:-36},
+  {g:$('fish2'),t:$('tail2'),dir:-1,sp:88,fy:0.6, amp:9, ph:2.6,s:0.75,wag:0.013,base:-24}
+];
+fish[0].x=0;fish[1].x=W;
+
+/* seafloor + layout */
+function buildFloor(){
+  var d='M0 '+H+' L0 '+(floorY+10).toFixed(1);
+  for(var x=0;x<=W;x+=36){
+    var y=floorY+Math.sin(x*0.012)*9+Math.sin(x*0.031+1.7)*6;
+    d+=' L'+x+' '+y.toFixed(1);
+  }
+  d+=' L'+W+' '+H+' Z';
+  floor.setAttribute('d',d);
+}
+function resize(){
+  W=window.innerWidth;H=window.innerHeight;
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  bg.setAttribute('width',W);bg.setAttribute('height',H);
+  floorY=H*0.86;
+  buildFloor();
+  blades.forEach(function(b){
+    b.g.setAttribute('transform','translate('+(b.fx*W+b.d).toFixed(1)+','+(floorY+18)+') scale('+b.s+')');
+  });
+  rocks.forEach(function(r){
+    r.e.setAttribute('cx',(r.fx*W).toFixed(1));
+    r.e.setAttribute('cy',(floorY+r.ry*0.55).toFixed(1));
+  });
+  beams.forEach(function(b,i){
+    var x=W*(0.15+i*0.3);
+    b.setAttribute('points',x.toFixed(1)+',0 '+(x+60).toFixed(1)+',0 '+(x+170).toFixed(1)+','+H+' '+(x+70).toFixed(1)+','+H);
+  });
+  bubbles.forEach(function(b){ if(b.y<0||b.y>floorY+60)reset(b); });
+}
+bubbles.forEach(reset);
+window.addEventListener('resize',resize);
+resize();
+
+/* animation loop */
+var last=performance.now();
+function tick(now){
+  var dt=Math.min(0.05,(now-last)/1000);last=now;
+
+  fish.forEach(function(f){
+    f.x+=f.dir*f.sp*dt;
+    var m=110;
+    if(f.dir>0&&f.x>W+m)f.x=-m;
+    if(f.dir<0&&f.x<-m)f.x=W+m;
+    var y=f.fy*H+Math.sin(now*0.001+f.ph)*f.amp;
+    var rot=Math.cos(now*0.001+f.ph)*3;
+    f.g.setAttribute('transform','translate('+f.x.toFixed(1)+','+y.toFixed(1)+') rotate('+rot.toFixed(2)+') scale('+(f.dir*f.s)+','+f.s+')');
+    f.t.setAttribute('transform','rotate('+(Math.sin(now*f.wag+f.ph)*7).toFixed(2)+' '+f.base+' 0)');
+  });
+
+  bubbles.forEach(function(b){
+    b.y-=b.sp*dt;
+    var x=b.x+Math.sin(now*0.0016+b.ph)*b.amp;
+    if(b.y<-b.r*2){reset(b);x=b.x;}          /* reached top -> respawn */
+    b.g.setAttribute('transform','translate('+x.toFixed(1)+','+b.y.toFixed(1)+')');
+  });
+
+  blades.forEach(function(bl){
+    bl.p.setAttribute('transform','rotate('+(Math.sin(now*0.0011+bl.ph)*4).toFixed(2)+' 5 0)');
+  });
+
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

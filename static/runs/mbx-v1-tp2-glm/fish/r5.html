@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Below the Surface</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#0b3050}
+#s{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+.tailA{transform-box:fill-box;transform-origin:100% 50%;animation:wag .8s ease-in-out infinite alternate}
+.tailB{transform-box:fill-box;transform-origin:0% 50%;animation:wag 1.15s ease-in-out infinite alternate}
+.finA{transform-box:fill-box;transform-origin:15% 12%;animation:flap 1.4s ease-in-out infinite alternate}
+.finB{transform-box:fill-box;transform-origin:10% 20%;animation:flap 1.9s ease-in-out infinite alternate}
+@keyframes wag{from{transform:rotate(9deg)}to{transform:rotate(-9deg)}}
+@keyframes flap{from{transform:rotate(9deg)}to{transform:rotate(-13deg)}}
+.weed{transform-box:fill-box;transform-origin:50% 100%}
+.sw1{animation:sway 5s ease-in-out infinite alternate}
+.sw2{animation:sway 6.8s ease-in-out -2.4s infinite alternate}
+.sw3{animation:sway 4.2s ease-in-out -1.1s infinite alternate}
+@keyframes sway{from{transform:rotate(-3.5deg)}to{transform:rotate(3.5deg)}}
+.rays polygon{animation:shimmer 8s ease-in-out infinite alternate}
+.rays polygon:nth-child(2){animation-duration:11s;animation-delay:-4s}
+.rays polygon:nth-child(3){animation-duration:13s;animation-delay:-8s}
+@keyframes shimmer{from{opacity:.35}to{opacity:1}}
+</style>
+</head>
+<body>
+<svg id="s" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#a5e3ec"/><stop offset=".35" stop-color="#4fa9c6"/>
+<stop offset=".7" stop-color="#1f6b95"/><stop offset="1" stop-color="#0b3050"/>
+</linearGradient>
+<linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#dcc094"/><stop offset="1" stop-color="#a07a4e"/>
+</linearGradient>
+<linearGradient id="ray" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#fff" stop-opacity=".15"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+</linearGradient>
+<radialGradient id="bA" cx=".38" cy=".3" r=".95">
+<stop offset="0" stop-color="#ffc978"/><stop offset=".55" stop-color="#f79a25"/><stop offset="1" stop-color="#e0760f"/>
+</radialGradient>
+<linearGradient id="fA" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#f5941f"/><stop offset="1" stop-color="#cf6207"/>
+</linearGradient>
+<linearGradient id="bB" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#dd4f5f"/><stop offset="1" stop-color="#ff9e8b"/>
+</linearGradient>
+<linearGradient id="fB" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#e8636f"/><stop offset="1" stop-color="#b83a4c"/>
+</linearGradient>
+<clipPath id="bodyClip"><ellipse rx="62" ry="40"/></clipPath>
+</defs>
+<g id="bg"></g>
+<g id="weeds"></g>
+<g id="fishLayer"></g>
+<g id="fx"></g>
+</svg>
+<script>
+'use strict';
+const NS='http://www.w3.org/2000/svg',$=i=>document.getElementById(i);
+const bg=$('bg'),weeds=$('weeds'),fl=$('fishLayer'),fx=$('fx');
+let W=0,H=0,S=1,sandTop=0;
+
+/* ---- fish templates (local coords, origin = body centre, primitives only) ---- */
+const fishA=`<g id="fishA">
+<path class="tailA" d="M-44 0L-98 -34L-86 0L-98 34Z" fill="url(#fA)"/>
+<path d="M-40 -26Q-6 -76 28 -28Z" fill="url(#fA)"/>
+<path d="M-36 28Q-6 74 26 28Z" fill="url(#fA)"/>
+<ellipse rx="62" ry="40" fill="url(#bA)" stroke="#c96a10" stroke-opacity=".35" stroke-width="2"/>
+<g clip-path="url(#bodyClip)" fill="#fdf6ea">
+<rect x="7.5" y="-44" width="13" height="88" rx="6" transform="rotate(3 14 0)"/>
+<rect x="-25.5" y="-44" width="15" height="88" rx="7" transform="rotate(-3 -18 0)"/>
+<rect x="-56" y="-44" width="12" height="88" rx="6" transform="rotate(4 -50 0)"/>
+</g>
+<circle cx="34" cy="-11" r="8" fill="#fff"/>
+<circle cx="36" cy="-11" r="4.2" fill="#243240"/>
+<circle cx="32.6" cy="-13.6" r="1.6" fill="#fff"/>
+<path d="M52 12Q60 17 51 22" fill="none" stroke="#8a4a08" stroke-width="2.6" stroke-linecap="round"/>
+<path class="finA" d="M2 8Q20 12 14 32Q2 22 2 8Z" fill="url(#fA)"/>
+</g>`;
+const fishB=`<g id="fishB">
+<path class="tailB" d="M38 0L76 -26L68 0L76 26Z" fill="url(#fB)"/>
+<path d="M-20 -12Q6 -44 30 -11Z" fill="url(#fB)"/>
+<path d="M2 12Q14 40 28 11Z" fill="url(#fB)"/>
+<ellipse rx="46" ry="15" fill="url(#bB)" stroke="#b23548" stroke-opacity=".4" stroke-width="1.5"/>
+<circle cx="-30" cy="-4" r="5" fill="#fff"/>
+<circle cx="-31.5" cy="-4" r="2.6" fill="#20303c"/>
+<circle cx="-32.5" cy="-5.9" r="1" fill="#fff"/>
+<path d="M-45 4Q-40.5 7 -45.5 9.5" fill="none" stroke="#8e2f3d" stroke-width="2" stroke-linecap="round"/>
+<path class="finB" d="M-22 3Q-14 22 2 7Q-12 12 -22 3Z" fill="url(#fB)"/>
+</g>`;
+
+/* ---- procedural wavy seaweed blade (green path, rooted at sand) ---- */
+function weedPath(h,w,ph){
+  const N=12;let d='';
+  const px=(i,s)=>{const t=i/N,cx=Math.sin(t*6.9+ph)*w*(.25+.75*t),
+    hf=Math.max(w*.85*(1-t*t),.5);
+    return (cx+s*hf).toFixed(1)+' '+(-h*t).toFixed(1);};
+  for(let i=0;i<=N;i++)d+=(i?'L':'M')+px(i,-1);
+  for(let i=N;i>=0;i--)d+='L'+px(i,1);
+  return d+'Z';
+}
+const weed=(x,hf,w,ph,col,cls)=>
+  `<g transform="translate(${x} ${sandTop+6})"><path class="weed ${cls}" d="${weedPath(H*hf,w,ph)}" fill="${col}"/></g>`;
+
+function star(cx,cy,R,r){let p='';for(let i=0;i<10;i++){
+  const a=-Math.PI/2+i*Math.PI/5,d=i%2?r:R;
+  p+=(cx+d*Math.cos(a)).toFixed(1)+','+(cy+d*Math.sin(a)).toFixed(1)+' ';}return p;}
+
+function pebbles(){let s='';for(let i=0;i<9;i++){
+  const x=Math.random()*W,r=3+Math.random()*6,
+    y=sandTop+6+Math.random()*Math.max(H-sandTop-14,8);
+  s+=`<ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="${r.toFixed(1)}" ry="${(r*.6).toFixed(1)}" fill="rgba(90,68,44,.3)"/>`;}
+  return s;}
+
+function buildStatic(){
+  W=innerWidth;H=innerHeight;S=Math.min(Math.max(W/1400,.55),1.15);
+  sandTop=H*.87;                                  /* seafloor = bottom ~13% */
+  const ray=(x,tw,bw,sh)=>`<polygon points="${x},-10 ${x+tw},-10 ${x+tw+sh+bw},${H*.82} ${x+sh},${H*.82}" fill="url(#ray)"/>`;
+  bg.innerHTML=`
+  <rect width="${W}" height="${H}" fill="url(#water)"/>
+  <path d="M0 ${sandTop} Q ${W*.14} ${sandTop-30} ${W*.28} ${sandTop-8} T ${W*.52} ${sandTop-16} T ${W*.74} ${sandTop-4} T ${W} ${sandTop-12} L ${W} ${H} L 0 ${H} Z" fill="url(#sand)"/>
+  <ellipse cx="${W*.42}" cy="${H*.94}" rx="${W*.16}" ry="${H*.03}" fill="rgba(122,92,58,.25)"/>
+  <ellipse cx="${W*.8}" cy="${H*.965}" rx="${W*.12}" ry="${H*.02}" fill="rgba(122,92,58,.2)"/>
+  <g>
+  <ellipse cx="${W*.16}" cy="${sandTop-6}" rx="52" ry="24" fill="#7d7060"/>
+  <ellipse cx="${W*.16-18}" cy="${sandTop-16}" rx="26" ry="13" fill="#948773"/>
+  <ellipse cx="${W*.845}" cy="${sandTop-2}" rx="38" ry="18" fill="#6e6154"/>
+  <ellipse cx="${W*.845+22}" cy="${sandTop+4}" rx="20" ry="10" fill="#867a68"/>
+  </g>
+  <polygon points="${star(W*.62,sandTop+14,20,9)}" fill="#e2795c" stroke="#e2795c" stroke-width="8" stroke-linejoin="round"/>
+  ${pebbles()}
+  <g class="rays">${ray(W*.14,W*.05,W*.09,W*.05)}${ray(W*.44,W*.04,W*.07,W*.04)}${ray(W*.66,W*.06,W*.10,W*.06)}</g>`;
+  weeds.innerHTML=
+    weed(W*.055,.26,12,-.4,'#2f8f5b','sw1')+weed(W*.078,.19,9,.9,'#27794c','sw2')+
+    weed(W*.096,.13,8,2.1,'#3aa668','sw3')+weed(W*.205,.07,6,0,'#27794c','sw3')+
+    weed(W*.30,.09,7,1.2,'#3aa668','sw1')+weed(W*.885,.22,11,.2,'#2f8f5b','sw2')+
+    weed(W*.908,.15,8,-1.6,'#1f6b43','sw3');
+}
+
+/* ---- actors ---- */
+buildStatic();
+fl.innerHTML=fishA+fishB;
+const gA=$('fishA'),gB=$('fishB');
+const FA={x:W*.2,fr:.40},FB={x:W*.72,fr:.62};
+const bubbles=[],specks=[],vents=[.30,.55,.72];
+
+function drawB(b){b.el.innerHTML=
+  `<circle r="${b.r.toFixed(1)}" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.65)" stroke-width="1.4"/>`+
+  `<circle cx="${(-b.r*.38).toFixed(1)}" cy="${(-b.r*.38).toFixed(1)}" r="${(b.r*.3).toFixed(1)}" fill="rgba(255,255,255,.55)"/>`;}
+function respawn(b,scatter){
+  b.vf=vents[Math.random()*vents.length|0];      /* vent on the seafloor */
+  b.j=Math.random()*80-40;
+  b.r=4+Math.random()*9;
+  b.v=150-b.r*9;                                  /* smaller bubbles rise faster */
+  b.w=.8+Math.random()*1.5;b.p=Math.random()*6.28;b.a=6+Math.random()*12;
+  b.y=scatter?H*(.25+Math.random()*.6):sandTop-4; /* loop respawn near seafloor */
+  drawB(b);
+}
+for(let i=0;i<9;i++){
+  const g=document.createElementNS(NS,'g');fx.appendChild(g);
+  const b={el:g};respawn(b,true);bubbles.push(b);
+}
+for(let i=0;i<14;i++){
+  const c=document.createElementNS(NS,'circle');
+  c.setAttribute('r',(1+Math.random()*1.6).toFixed(1));
+  c.setAttribute('fill','rgba(255,255,255,.25)');
+  fx.appendChild(c);
+  specks.push({el:c,x:Math.random()*W,y:Math.random()*H,v:6+Math.random()*10,p:Math.random()*6});
+}
+
+/* ---- animation loop: fish swim + wrap, bubbles loop, specks drift ---- */
+let last=performance.now();
+function frame(now){
+  const t=now/1000,dt=Math.min((now-last)/1000,.05);last=now;
+
+  FA.x+=(W/18)*dt; if(FA.x-135*S>W)FA.x=-135*S;           /* wrap right -> left */
+  const bA=Math.sin(t*1.1)*12*S;
+  gA.setAttribute('transform',
+    `translate(${FA.x} ${H*FA.fr+bA}) rotate(${-Math.cos(t*1.1)*4}) scale(${S})`);
+
+  FB.x-=(W/8)*dt; if(FB.x+85*S<0)FB.x=W+85*S;             /* wrap left -> right */
+  const bB=Math.sin(t*1.55+2)*9*S;
+  gB.setAttribute('transform',
+    `translate(${FB.x} ${H*FB.fr+bB}) rotate(${Math.cos(t*1.55+2)*4}) scale(${S})`);
+
+  for(const b of bubbles){
+    b.y-=b.v*dt;
+    if(b.y<-24)respawn(b,false);
+    b.el.setAttribute('transform',
+      `translate(${(W*b.vf+b.j+Math.sin(t*b.w+b.p)*b.a).toFixed(1)} ${b.y.toFixed(1)})`);
+  }
+  for(const s of specks){
+    s.y-=s.v*dt;
+    if(s.y<-4){s.y=H+4;s.x=Math.random()*W;}
+    s.el.setAttribute('transform',
+      `translate(${(s.x+Math.sin(t*.5+s.p)*10).toFixed(1)} ${s.y.toFixed(1)})`);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+addEventListener('resize',()=>{
+  buildStatic();
+  FA.x=Math.min(FA.x,W+135*S);
+  FB.x=Math.max(FB.x,-135*S);
+});
+</script>
+</body>
+</html>

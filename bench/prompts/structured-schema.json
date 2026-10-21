@@ -1,0 +1,98 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["store", "categories", "products", "summary"],
+  "properties": {
+    "store": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "catalog_version", "currency"],
+      "properties": {
+        "name": {"type": "string"},
+        "catalog_version": {"type": "string"},
+        "currency": {"type": "string"}
+      }
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "description"],
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "description": {"type": "string"}
+        }
+      }
+    },
+    "products": {
+      "type": "array",
+      "minItems": 120,
+      "maxItems": 120,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sku", "name", "category", "description", "price", "stock", "weight_kg", "dimensions", "tags",
+                     "supplier", "warranty_months", "variants"],
+        "properties": {
+          "sku": {"type": "string"},
+          "name": {"type": "string"},
+          "category": {"type": "string"},
+          "description": {"type": "string"},
+          "price": {"type": "number"},
+          "stock": {"type": "integer"},
+          "weight_kg": {"type": "number"},
+          "dimensions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["width_cm", "height_cm", "depth_cm"],
+            "properties": {
+              "width_cm": {"type": "number"},
+              "height_cm": {"type": "number"},
+              "depth_cm": {"type": "number"}
+            }
+          },
+          "tags": {"type": "array", "minItems": 3, "maxItems": 5, "items": {"type": "string"}},
+          "supplier": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "country"],
+            "properties": {
+              "name": {"type": "string"},
+              "country": {"type": "string"}
+            }
+          },
+          "warranty_months": {"type": "integer", "enum": [0, 12, 24, 36]},
+          "variants": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["sku_suffix", "label", "price"],
+              "properties": {
+                "sku_suffix": {"type": "string"},
+                "label": {"type": "string"},
+                "price": {"type": "number"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_products", "products_per_category", "average_price_per_category"],
+      "properties": {
+        "total_products": {"type": "integer"},
+        "products_per_category": {"type": "object", "additionalProperties": {"type": "integer"}},
+        "average_price_per_category": {"type": "object", "additionalProperties": {"type": "number"}}
+      }
+    }
+  }
+}

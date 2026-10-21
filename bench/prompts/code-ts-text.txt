@@ -1,0 +1,16 @@
+Output the full source code of a small TypeScript inventory service, right here in this reply. Begin your reply with the first file's path, then its code in a fenced block, then the next file, and so on until every file below is written in full. No placeholders, no "..." and no "rest omitted". This is a writing task, not an agent task: you have no tools and no filesystem.
+
+Files:
+1. `package.json` and `tsconfig.json` (strict mode, ES2022, Node 20).
+2. `src/domain/types.ts` — types for Product, Warehouse, StockLevel, StockMovement (receive, ship, transfer, adjust) and a discriminated-union Result type.
+3. `src/domain/errors.ts` — a small error hierarchy with codes.
+4. `src/store/InMemoryStore.ts` — a generic repository with get / list / upsert / delete, optimistic versioning, and a transaction helper that rolls back on error.
+5. `src/services/InventoryService.ts` — receive, ship, transfer between warehouses and adjust stock, with validation (no negative stock, unknown SKU, same-warehouse transfer), an audit log of every movement, and low-stock detection against per-product reorder points.
+6. `src/services/ReportService.ts` — stock value per warehouse, top movers over a date range, and a reorder list sorted by urgency.
+7. `src/http/router.ts` — a minimal router on node:http with JSON bodies, routes for every service method, input validation and proper status codes.
+8. `src/index.ts` — wires everything, seeds 20 products across 3 warehouses, starts the server.
+9. `test/inventory.test.ts` — at least 25 tests with node:test covering every rule and every error path.
+
+Use clear names and brief doc comments on the public methods.
+
+Answer directly in this reply: write every file in full right here. Do not call tools, do not explore, do not ask questions — there is no existing project, start from nothing.

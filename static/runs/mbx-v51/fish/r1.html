@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reef Drift — an animated SVG seascape</title>
+<style>
+:root{
+  --ink:#e9f8ff;--dim:#9dc3d6;
+  --display:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --body:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#051d31}
+body{font-family:var(--body);color:var(--ink);-webkit-font-smoothing:antialiased}
+#sea{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+.hit{cursor:pointer}
+.fish{transition:opacity .45s ease}
+.aura{opacity:0;transition:opacity .5s ease}
+svg.focus .fish{opacity:.28}
+svg.focus-a #fishA,svg.focus-b #fishB{opacity:1}
+svg.focus-a #auraA,svg.focus-b #auraB{opacity:1}
+.fish.dart{filter:brightness(1.25) saturate(1.15)}
+
+.ui{position:fixed;inset:0;z-index:5;pointer-events:none}
+.ui>*{pointer-events:auto}
+.panel{background:rgba(3,20,34,.5);border:1px solid rgba(163,224,246,.18);
+  padding:16px 18px;backdrop-filter:blur(4px);
+  box-shadow:0 18px 44px -22px rgba(0,0,0,.9)}
+.panel::after{content:"";position:absolute;right:9px;bottom:9px;width:12px;height:12px;
+  border-right:1px solid rgba(163,224,246,.5);border-bottom:1px solid rgba(163,224,246,.5)}
+
+.plate{position:absolute;top:28px;left:30px;max-width:min(34ch,52vw)}
+.eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(190,232,250,.66);margin-bottom:10px}
+.plate h1{font-family:var(--display);font-weight:300;font-size:clamp(36px,5.6vw,78px);
+  line-height:.9;letter-spacing:-.025em;margin:0 0 12px;text-shadow:0 6px 30px rgba(0,20,35,.7)}
+.plate h1 em{font-style:italic;font-weight:600;color:#ffd9a2}
+.plate p{margin:0;font-size:13px;line-height:1.65;color:var(--dim);max-width:31ch;
+  border-left:1px solid rgba(163,224,246,.3);padding-left:12px}
+
+.spec{position:absolute;left:30px;bottom:28px}
+.spec h2{font-family:var(--display);font-weight:400;font-size:19px;letter-spacing:.01em;
+  margin:0 0 10px;color:#d8f2ff}
+.row{display:flex;flex-direction:column;gap:2px;padding:8px 10px;margin:0 0 4px;cursor:pointer;
+  border-left:2px solid transparent;transition:background .3s,border-color .3s,transform .3s}
+.row:hover{background:rgba(9,48,72,.55);border-left-color:currentColor;transform:translateX(3px)}
+.row b{font-size:13.5px;font-weight:600;letter-spacing:.01em;color:#f2fbff}
+.row i{font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--dim)}
+.sw{display:block;width:52px;height:5px;margin-bottom:6px;border-radius:3px}
+.ctrl{display:flex;align-items:center;gap:14px;margin-top:12px;padding-top:12px;
+  border-top:1px solid rgba(163,224,246,.14)}
+.ctrl label{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.ctrl b{color:#c9f3ff;font-size:11px;letter-spacing:.06em;min-width:38px}
+input[type=range]{width:104px;accent-color:#79e0c4;background:none;cursor:pointer}
+button{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:#dff4ff;background:transparent;border:1px solid rgba(163,224,246,.4);padding:7px 12px;
+  cursor:pointer;transition:background .25s,color .25s,letter-spacing .25s}
+button:hover{background:rgba(163,224,246,.16);letter-spacing:.26em}
+button[aria-pressed=false]{color:#8fb9cc;border-color:rgba(163,224,246,.2)}
+
+.rule{position:absolute;top:0;right:0;bottom:0;width:76px;display:flex;flex-direction:column;
+  justify-content:space-between;align-items:flex-end;padding:22px 14px 22px 0;pointer-events:none}
+.rule span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:rgba(180,222,242,.4)}
+.rule span::before{content:"";display:inline-block;vertical-align:middle;width:14px;height:1px;
+  background:rgba(180,222,242,.35);margin-right:6px}
+
+@keyframes sway{to{transform:rotate(4.5deg) skewX(-3deg) translateX(3px)}}
+@keyframes breathe{to{transform:scale(1.09,1.14)}}
+@keyframes drift{to{transform:translate(16px,-52px)}}
+@keyframes wave{to{transform:translateX(240px)}}
+@keyframes flick{0%,100%{opacity:.05}50%{opacity:.22}}
+@media (max-height:540px){.rule{display:none}.plate p{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+</style>
+</head>
+<body>
+<svg id="sea" preserveAspectRatio="xMidYMid slice" aria-label="Animated underwater scene">
+<defs>
+<linearGradient id="water" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="800">
+<stop offset="0" stop-color="#a9ecf2"/><stop offset=".08" stop-color="#5fc6e0"/>
+<stop offset=".28" stop-color="#2091b8"/><stop offset=".55" stop-color="#0f5b86"/>
+<stop offset=".8" stop-color="#0a3253"/><stop offset="1" stop-color="#051d31"/></linearGradient>
+<linearGradient id="sand" gradientUnits="userSpaceOnUse" x1="0" y1="660" x2="0" y2="800">
+<stop offset="0" stop-color="#f4e0ae"/><stop offset=".3" stop-color="#d3a96d"/>
+<stop offset=".7" stop-color="#a87a48"/><stop offset="1" stop-color="#6f4d2c"/></linearGradient>
+<linearGradient id="rock" gradientUnits="userSpaceOnUse" x1="0" y1="520" x2="0" y2="760">
+<stop offset="0" stop-color="#3a6a80"/><stop offset="1" stop-color="#132c3a"/></linearGradient>
+<linearGradient id="farrock" gradientUnits="userSpaceOnUse" x1="0" y1="480" x2="0" y2="700">
+<stop offset="0" stop-color="#1e5f80" stop-opacity=".8"/><stop offset="1" stop-color="#0a2c45" stop-opacity=".9"/></linearGradient>
+<linearGradient id="rayg" gradientUnits="userSpaceOnUse" x1="0" y1="-30" x2="0" y2="540">
+<stop offset="0" stop-color="#eafeff" stop-opacity=".55"/><stop offset="1" stop-color="#eafeff" stop-opacity="0"/></linearGradient>
+<linearGradient id="surf" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="120">
+<stop offset="0" stop-color="#ffffff" stop-opacity=".42"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
+<radialGradient id="bub"><stop offset="0" stop-color="#ffffff" stop-opacity=".7"/>
+<stop offset=".55" stop-color="#bfeeff" stop-opacity=".16"/><stop offset="1" stop-color="#e9fbff" stop-opacity=".5"/></radialGradient>
+<radialGradient id="vig" cx=".5" cy=".52" r=".78"><stop offset=".42" stop-color="#00121e" stop-opacity="0"/>
+<stop offset="1" stop-color="#00121e" stop-opacity=".6"/></radialGradient>
+<radialGradient id="spot"><stop offset="0" stop-color="#dffaff" stop-opacity=".2"/>
+<stop offset="1" stop-color="#dffaff" stop-opacity="0"/></radialGradient>
+<linearGradient id="bodyA" gradientUnits="userSpaceOnUse" x1="-30" y1="-58" x2="34" y2="58">
+<stop offset="0" stop-color="#ffbf74"/><stop offset=".45" stop-color="#f4762f"/>
+<stop offset="1" stop-color="#b3371a"/></linearGradient>
+<linearGradient id="finA" gradientUnits="userSpaceOnUse" x1="-140" y1="-60" x2="44" y2="60">
+<stop offset="0" stop-color="#ffdda9" stop-opacity=".95"/><stop offset="1" stop-color="#d95f28" stop-opacity=".82"/></linearGradient>
+<radialGradient id="glowA" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="170">
+<stop offset="0" stop-color="#ffbe7a" stop-opacity=".5"/><stop offset="1" stop-color="#ffbe7a" stop-opacity="0"/></radialGradient>
+<linearGradient id="bodyB" gradientUnits="userSpaceOnUse" x1="-40" y1="-22" x2="50" y2="22">
+<stop offset="0" stop-color="#eeffa0"/><stop offset=".5" stop-color="#a9dc55"/>
+<stop offset="1" stop-color="#4c9544"/></linearGradient>
+<linearGradient id="finB" gradientUnits="userSpaceOnUse" x1="-140" y1="0" x2="60" y2="0">
+<stop offset="0" stop-color="#f4ffc4" stop-opacity=".95"/><stop offset="1" stop-color="#79c24f" stop-opacity=".82"/></linearGradient>
+<radialGradient id="glowB" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="150">
+<stop offset="0" stop-color="#d9ff8f" stop-opacity=".5"/><stop offset="1" stop-color="#d9ff8f" stop-opacity="0"/></radialGradient>
+<clipPath id="clipA"><ellipse cx="0" cy="0" rx="66" ry="56"/></clipPath>
+<clipPath id="clipB"><path d="M86 0C54 -20 8 -23 -30 -15C-58 -9 -72 -5 -78 0C-72 5 -58 9 -30 15C8 23 54 20 86 0Z"/></clipPath>
+</defs>
+
+<rect id="water1" x="0" y="0" width="1200" height="800" fill="url(#water)"/>
+<g id="rays" pointer-events="none"></g>
+<g id="surface" pointer-events="none"></g>
+<g id="far" pointer-events="none"></g>
+<g id="midweed" pointer-events="none"></g>
+<g id="floor"></g>
+<g id="plants"></g>
+
+<g id="fishA" class="fish">
+  <ellipse id="auraA" cx="0" cy="0" rx="168" ry="122" fill="url(#glowA)"/>
+  <g id="ta">
+    <path d="M-52 0L-136 -52Q-113 0 -136 52Z" fill="url(#finA)"/>
+    <path d="M-60 0L-125 -40M-60 0L-125 40" stroke="#7e2a17" stroke-width="2.4" opacity=".28"/>
+  </g>
+  <path d="M-28 -44Q4 -110 48 -50Q14 -60 -28 -44Z" fill="url(#finA)"/>
+  <path d="M-30 42Q-2 88 36 48Q2 56 -30 42Z" fill="url(#finA)"/>
+  <ellipse cx="0" cy="0" rx="66" ry="56" fill="url(#bodyA)"/>
+  <g clip-path="url(#clipA)">
+    <path d="M-64 -22Q0 -50 62 -16" stroke="#7e2a17" stroke-width="22" fill="none" opacity=".16"/>
+    <path d="M-34 -62Q-22 0 -34 62" stroke="#ffdcae" stroke-width="14" fill="none" opacity=".48"/>
+    <path d="M6 -66Q20 0 6 66" stroke="#ffdcae" stroke-width="17" fill="none" opacity=".42"/>
+    <path d="M44 -58Q54 0 44 58" stroke="#ffdcae" stroke-width="9" fill="none" opacity=".34"/>
+  </g>
+  <g id="pa">
+    <path d="M14 4Q66 16 32 56Q6 30 14 4Z" fill="#ffd08a" opacity=".72"/>
+    <path d="M20 11Q48 22 31 46" stroke="#b8481f" stroke-width="1.6" fill="none" opacity=".45"/>
+  </g>
+  <path d="M56 8L75 15L56 27Q50 17 56 8Z" fill="#5b1f10"/>
+  <circle cx="42" cy="-18" r="12.5" fill="#fff6e6"/>
+  <circle cx="44.5" cy="-18" r="6.3" fill="#2a1409"/>
+  <circle cx="41" cy="-21.5" r="2.1" fill="#fff"/>
+  <path class="hit" d="M-140 -62Q0 -112 70 -62L76 34Q0 98 -140 58Z" fill="rgba(0,0,0,0)"/>
+</g>
+
+<g id="fishB" class="fish">
+  <ellipse id="auraB" cx="0" cy="0" rx="145" ry="86" fill="url(#glowB)"/>
+  <g id="tb">
+    <path d="M-66 0L-138 -44Q-114 0 -138 44Z" fill="url(#finB)"/>
+    <path d="M-73 0L-127 -32M-73 0L-127 32" stroke="#2f6b1e" stroke-width="1.8" opacity=".3"/>
+  </g>
+  <path d="M-26 -14L4 -44L34 -11Q2 -20 -26 -14Z" fill="url(#finB)"/>
+  <path d="M-22 16Q2 44 32 17Q2 24 -22 16Z" fill="url(#finB)"/>
+  <path d="M86 0C54 -20 8 -23 -30 -15C-58 -9 -72 -5 -78 0C-72 5 -58 9 -30 15C8 23 54 20 86 0Z" fill="url(#bodyB)"/>
+  <g clip-path="url(#clipB)">
+    <path d="M-72 2Q0 -9 82 -1" stroke="#1f7a46" stroke-width="7" fill="none" opacity=".42"/>
+    <path d="M-72 7Q0 -3 82 4" stroke="#f4ffdc" stroke-width="4" fill="none" opacity=".3"/>
+    <path d="M-74 -14Q0 -30 84 -8" stroke="#3d7a2e" stroke-width="9" fill="none" opacity=".3"/>
+  </g>
+  <g id="pb"><path d="M24 5Q58 12 37 40Q15 22 24 5Z" fill="#f2ffd2" opacity=".78"/></g>
+  <path d="M73 4L89 8L73 13Z" fill="#1d4d2c"/>
+  <circle cx="58" cy="-5" r="8" fill="#f8fff2"/>
+  <circle cx="60" cy="-5" r="4.1" fill="#16321b"/>
+  <circle cx="57.2" cy="-7.3" r="1.4" fill="#fff"/>
+  <path class="hit" d="M-140 -34Q0 -56 92 -14L92 20Q0 52 -140 32Z" fill="rgba(0,0,0,0)"/>
+</g>
+
+<g id="bubbles" pointer-events="none"></g>
+<g id="motes" pointer-events="none"></g>
+<circle id="glow" r="190" fill="url(#spot)" pointer-events="none" style="mix-blend-mode:screen"/>
+<rect id="vig" x="0" y="0" width="1200" height="800" fill="url(#vig)" pointer-events="none"/>
+</svg>
+
+<div class="ui">
+  <div class="plate panel" style="position:absolute">
+    <div class="eyebrow">Plate XVII · vector bathyscape</div>
+    <h1>Reef <em>Drift</em></h1>
+    <p>Two residents, one column of escaping air, and the slow arithmetic of light going out.</p>
+  </div>
+  <div class="spec panel">
+    <h2>Catalogue</h2>
+    <div class="row" data-f="a" style="color:#ff9d55"><span class="sw" style="background:linear-gradient(90deg,#ffbf74,#b3371a)"></span>
+      <b>Discus, copper</b><i>0.34 m·s — broad &amp; unhurried</i></div>
+    <div class="row" data-f="b" style="color:#c6ee63"><span class="sw" style="background:linear-gradient(90deg,#eeffa0,#4c9544)"></span>
+      <b>Dart, lime</b><i>1.18 m·s — narrow &amp; restless</i></div>
+    <div class="ctrl">
+      <button id="btn" aria-pressed="true">Hold current</button>
+      <label>Flow <b id="cv">1.00×</b><input id="rng" type="range" min="0" max="220" value="100"></label>
+    </div>
+  </div>
+  <div class="rule"><span>0 m</span><span>4 m</span><span>8 m</span><span>12 m</span><span>16 m</span><span>20 m</span></div>
+</div>
+
+<script>
+const NS="http://www.w3.org/2000/svg", svg=document.getElementById("sea");
+const G=id=>document.getElementById(id);
+const r1=n=>Math.round(n*10)/10;
+function mk(n,a,p){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;}
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const VH=800, FL=696;            /* world height, seafloor crest */
+let VW=1200, running=true, cur=1, boostA=0, boostB=0;
+
+/* ---------- plants ---------- */
+function weed(p,x,base,h,w,ph,fill,op){
+  let d="",N=13,i,t,y,s,ww;
+  for(i=0;i<=N;i++){t=i/N;y=base-h*t;s=Math.sin(t*3.4+ph)*w*1.9*t;ww=w*(1-t*.78);
+    d+=(i?"L":"M")+r1(x+s-ww)+" "+r1(y)+" ";}
+  for(i=N;i>=0;i--){t=i/N;y=base-h*t;s=Math.sin(t*3.4+ph)*w*1.9*t;ww=w*(1-t*.78);
+    d+="L"+r1(x+s+ww)+" "+r1(y)+" ";}
+  const e=mk("path",{d:d+"Z",fill:fill,opacity:op||1},p);
+  e.style.cssText+="transform-box:fill-box;transform-origin:50% 100%;animation:sway "+r1(rnd(6,11))+"s ease-in-out "+r1(-rnd(0,7))+"s infinite alternate";
+}
+function branch(p,x,y,ang,len,w,d,col){
+  if(d<=0||len<6)return;
+  const x2=x+Math.cos(ang)*len, y2=y-Math.sin(ang)*len, mx=x+Math.cos(ang+.35)*len*.5, my=y-Math.sin(ang+.3)*len*.55;
+  mk("path",{d:"M"+r1(x)+" "+r1(y)+"Q"+r1(mx)+" "+r1(my)+" "+r1(x2)+" "+r1(y2),fill:"none",stroke:col,"stroke-width":r1(w),"stroke-linecap":"round"},p);
+  branch(p,x2,y2,ang+.5+rnd(0,.25),len*.7,w*.65,d-1,col);
+  branch(p,x2,y2,ang-.45-rnd(0,.25),len*.68,w*.62,d-1,col);
+}
+
+/* ---------- builders ---------- */
+function buildRays(){const p=G("rays");p.textContent="";
+  for(let i=0;i<5;i++){const x=VW*(i+.5)/5+rnd(-70,70), w1=rnd(26,64), x2=x+rnd(110,230), w2=w1*rnd(2.2,3.4);
+    const e=mk("polygon",{points:r1(x-w1/2)+",-40 "+r1(x+w1/2)+",-40 "+r1(x2+w2/2)+",520 "+r1(x2-w2/2)+",520",fill:"url(#rayg)"},p);
+    e.style.animation="flick "+r1(rnd(6,13))+"s ease-in-out "+r1(-rnd(0,8))+"s infinite alternate";}
+}
+function buildSurface(){const p=G("surface");p.textContent="";
+  mk("rect",{x:0,y:0,width:VW,height:90,fill:"url(#surf)"},p);
+  let d="M-1200 9";for(let i=0;i<46;i++)d+="q60 -11 120 0q60 11 120 0";
+  const w=mk("path",{d:d,fill:"none",stroke:"#f0ffff","stroke-width":3,opacity:.42},p);
+  w.style.cssText+="transform-box:fill-box;animation:wave 9s linear infinite";}
+function buildFar(){const p=G("far");p.textContent="";
+  for(let i=0;i<4;i++){const x=VW*rnd(-.05,1), w=rnd(260,520), h=rnd(90,190);
+    mk("path",{d:"M"+r1(x-w/2)+" 700Q"+r1(x-w/5)+" "+r1(700-h)+" "+r1(x)+" "+r1(700-h*.86)+
+      "Q"+r1(x+w/4)+" "+r1(700-h*.55)+" "+r1(x+w/2)+" 700Z",fill:"url(#farrock)",opacity:.55},p);}
+function buildFloor(){const p=G("floor");p.textContent="";
+  const n=Math.max(7,Math.round(VW/95)), st=VW/n; let top="M0 "+FL;
+  for(let i=1;i<=n;i++){const x=st*i;
+    top+="Q"+r1(x-st/2)+" "+r1(FL-13*Math.sin((i-.5)*1.9))+" "+r1(x)+" "+r1(FL-7*Math.sin(i*1.9)-4*Math.sin(i*.7));}
+  mk("path",{d:top+"L"+VW+" 830L0 830Z",fill:"url(#sand)"},p);
+  mk("path",{d:top,fill:"none",stroke:"#5d3f22","stroke-width":4,opacity:.3,transform:"translate(0,4)"},p);
+  mk("path",{d:top,fill:"none",stroke:"#ffeec2","stroke-width":2.4,opacity:.5},p);
+  for(let i=0;i<9;i++){const x=rnd(0,VW),y=rnd(FL+26,792),w=rnd(30,90);
+    mk("path",{d:"M"+r1(x)+" "+r1(y)+"q"+r1(w/2)+" -7 "+r1(w)+" 0",fill:"none",stroke:"#6b4a29","stroke-width":1.4,opacity:.35},p);}
+  for(let i=0;i<7;i++){mk("circle",{cx:r1(rnd(0,VW)),cy:r1(rnd(FL+22,796)),r:r1(rnd(2,6)),fill:"#8d6738",opacity:.5},p);}
+  for(let i=0;i<4;i++){const x=VW*rnd(.05,.95),s=rnd(22,58);
+    mk("path",{d:"M"+r1(x-s)+" 706L"+r1(x-s*.55)+" "+r1(706-s*.8)+"L"+r1(x-s*.1)+" "+r1(706-s*1.15)+
+      "L"+r1(x+s*.5)+" "+r1(706-s*.7)+"L"+r1(x+s)+" 706Z",fill:"url(#rock)"},p);}
+}
+function buildPlants(){const p=G("plants");p.textContent="";
+  const set=[[.05,200,7,"#2e7a55"],[.17,258,8,"#3f9a5c"],[.31,150,6,"#25684b"],
+              [.5,215,7,"#43a061"],[.66,132,5,"#2f7f57"],[.8,250,8,"#317f57"],[.94,168,6,"#3f9a5c"]];
+  set.forEach(s=>{const x=VW*s[0];weed(p,x,700,s[1],s[2],rnd(0,6),s[3]);weed(p,x+12,700,s[1]*.7,s[2]*.8,rnd(0,6),s[3]);});
+  for(let i=0;i<3;i++){const x=VW*rnd(.08,.92),g=mk("g",{},p);
+    branch(g,x,700,rnd(1.2,1.9),rnd(40,64),6,3,"#c2557a");
+    g.setAttribute("opacity",.75);}
+  for(let i=0;i<2;i++){const x=VW*rnd(.1,.9),a=mk("g",{},p);
+    a.style.cssText+="transform-box:fill-box;transform-origin:50% 100%;animation:breathe "+r1(rnd(4,7))+"s ease-in-out "+r1(-rnd(0,4))+"s infinite alternate";
+    for(let k=0;k<11;k++){const t=(k/10-.5)*1.5;
+      mk("path",{d:"M"+r1(x)+" 694Q"+r1(x+Math.sin(t)*16)+" 672 "+r1(x+Math.sin(t)*30)+" "+r1(652+Math.abs(Math.sin(t))*14),
+        fill:"none",stroke:"#ff9ec2","stroke-width":2.6,"stroke-linecap":"round",opacity:.85},a);}
+    mk("ellipse",{cx:r1(x),cy:696,rx:16,ry:9,fill:"#c0577c"},a);}
+}
+function buildMotes(){const p=G("motes");p.textContent="";
+  for(let i=0;i<28;i++){const c=mk("circle",{cx:r1(rnd(0,VW)),cy:r1(rnd(50,690)),r:r1(rnd(.6,2.2)),fill:"#e2f8ff"},p);
+    c.style.cssText+="opacity:"+r1(rnd(.08,.3))+";animation:drift "+r1(rnd(9,22))+"s linear "+r1(-rnd(0,20))+"s infinite alternate";}
+}
+
+/* ---------- bubbles ---------- */
+const bub=[],emit=[.14,.48,.83];
+function respawn(o,init,temp,tx,ty){
+  o.temp=!!temp;
+  o.r=temp?rnd(1.6,5):rnd(2.2,9.5);
+  o.sp=temp?rnd(90,150):15+190/o.r;
+  o.sw=temp?rnd(6,16):rnd(3,11); o.ph=rnd(0,7);
+  o.x0=temp?tx:VW*emit[(Math.random()*3)|0]+rnd(-15,15);
+  o.y=temp?ty:(init?rnd(40,FL):FL+rnd(2,26));
+  o.life=temp?rnd(.8,1.5):1; o.max=o.life;
+  o.c.setAttribute("r",o.r.toFixed(2));
+  o.hl.setAttribute("r",(o.r*.27).toFixed(2));
+  o.hl.setAttribute("cx",(-o.r*.3).toFixed(2));
+  o.hl.setAttribute("cy",(-o.r*.34).toFixed(2));
+}
+function newBubble(init,temp,tx,ty){
+  const ge=mk("g",{},G("bubbles"));
+  const o={e:ge,c:mk("circle",{fill:"url(#bub)",stroke:"rgba(222,250,255,.55)","stroke-width":.7},ge),
+           hl:mk("circle",{fill:"rgba(255,255,255,.85)"},ge)};
+  respawn(o,init,temp,tx,ty); bub.push(o); return o;
+}
+function buildBubbles(){G("bubbles").textContent="";bub.length=0;for(let i=0;i<16;i++)newBubble(true);}
+function updateBubbles(dt){
+  for(let i=bub.length-1;i>=0;i--){const o=bub[i];
+    o.y-=o.sp*dt; o.ph+=dt*1.5;
+    if(o.temp){o.life-=dt;o.e.setAttribute("opacity",Math.max(0,o.life/o.max).toFixed(2));}
+    if(o.y<-24||(o.temp&&o.life<=0)){ if(o.temp){bub.splice(i,1);o.e.remove();} else respawn(o); continue; }
+    const x=o.x0+Math.sin(o.ph)*o.sw*(.35+(FL-o.y)/FL);
+    o.e.setAttribute("transform","translate("+r1(x)+","+r1(o.y)+")");}
+}
+
+/* ---------- fish ---------- */
+const A={el:G("fishA"),x:VW*.25,sp:36,dir:1,s:1,ph:.4,amp:15,lane:298,
+  tail:{el:G("ta"),px:-52,amp:9,spd:1.7},fin:{el:G("pa"),ox:14,oy:4,amp:13,spd:2.3},b:0};
+const B={el:G("fishB"),x:VW*.72,sp:122,dir:-1,s:.7,ph:2.1,amp:11,lane:452,
+  tail:{el:G("tb"),px:-66,amp:13,spd:4.3},fin:{el:G("pb"),ox:24,oy:5,amp:17,spd:5},b:0};
+let t=0,last=performance.now();
+function loop(now){
+  requestAnimationFrame(loop);
+  let dt=(now-last)/1000; last=now; if(dt>.06)dt=.06;
+  if(!running)dt=0;
+  const step=dt*cur; t+=step;
+  A.b+= (0-A.b)*Math.min(1,dt*1.8); B.b+=(0-B.b)*Math.min(1,dt*1.8);
+  for(const f of [A,B]){
+    f.x+=f.sp*(1+f.b)*f.dir*step;
+    const lead=210*f.s, trail=150*f.s;
+    if(f.x>VW+lead)f.x=-trail; if(f.x<-trail)f.x=VW+lead;
+    const y=f.lane+Math.sin(t*.6+f.ph)*f.amp;
+    f.el.setAttribute("transform","translate("+r1(f.x)+" "+r1(y)+") scale("+(f.dir*f.s)+" "+f.s+")");
+    const w=Math.sin(t*(.7+f.b*1.6)*f.tail.spd+f.ph);
+    f.tail.el.setAttribute("transform","rotate("+r1(w*f.tail.amp)+" "+f.tail.px+" 0)");
+    f.fin.el.setAttribute("transform","rotate("+r1(w*f.fin.amp)+" "+f.fin.ox+" "+f.fin.oy+")");
+  }
+  updateBubbles(step);
+}
+
+/* ---------- layout ---------- */
+function layout(){
+  VW=Math.max(420,Math.min(2600,VH*innerWidth/innerHeight));
+  svg.setAttribute("viewBox","0 0 "+r1(VW)+" "+VH);
+  const w=String(VW),h=String(VH);
+  const wt=G("water1");wt.setAttribute("width",w);wt.setAttribute("height",h);
+  const vg=G("vig");vg.setAttribute("width",w);vg.setAttribute("height",h);
+  buildRays();buildSurface();buildFar();buildFloor();buildPlants();buildMotes();buildBubbles();
+  emit=[rnd(.08,.2),rnd(.4,.56),rnd(.76,.92)];
+  if(A.x>VW+260)A.x=VW*.3; if(B.x>VW+260)B.x=VW*.6;
+}
+let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(layout,140);});
+layout(); requestAnimationFrame(loop);
+
+/* ---------- interaction ---------- */
+let px=0,py=0;
+addEventListener("pointermove",e=>{
+  px=e.clientX/innerWidth-.5; py=e.clientY/innerHeight-.5;
+  G("rays").setAttribute("transform","translate("+r1(px*26)+" "+r1(py*10)+")");
+  G("far").setAttribute("transform","translate("+r1(-px*18)+" "+r1(-py*6)+")");
+  G("midweed").setAttribute("transform","translate("+r1(-px*34)+" 0)");
+  const p=toUser(e.clientX,e.clientY);
+  G("glow").setAttribute("transform","translate("+r1(p.x)+" "+r1(p.y)+")");
+});
+function toUser(cx,cy){const m=svg.getScreenCTM().inverse(),p=svg.createSVGPoint();p.x=cx;p.y=cy;return p.matrixTransform(m);}
+svg.addEventListener("pointerdown",e=>{
+  const p=toUser(e.clientX,e.clientY);
+  for(let i=0;i<9;i++){const b=newBubble(false,true,p.x+rnd(-14,14),p.y+rnd(-8,8));b.y=p.y;}
+});
+[[A,"fishA"],[B,"fishB"]].forEach(([f,id])=>{
+  G(id).addEventListener("pointerdown",e=>{e.stopPropagation();f.b=2.6;f.el.classList.add("dart");
+    setTimeout(()=>f.el.classList.remove("dart"),700);});
+});
+document.querySelectorAll(".row").forEach(r=>{
+  const k=r.dataset.f;
+  r.addEventListener("mouseenter",()=>{svg.classList.add("focus","focus-"+k);A.el.style.opacity;});
+  r.addEventListener("mouseleave",()=>svg.classList.remove("focus","focus-"+k));
+});
+const rng=G("rng"),cv=G("cv"),btn=G("btn");
+rng.addEventListener("input",()=>{cur=rng.value/100;cv.textContent=cur.toFixed(2)+"×";});
+btn.addEventListener("click",()=>{running=!running;btn.setAttribute("aria-pressed",running);
+  btn.textContent=running?"Hold current":"Resume flow";});
+addEventListener("keydown",e=>{if(e.code==="Space"){e.preventDefault();btn.click();}});
+</script>
+</body>
+</html>

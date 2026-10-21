@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Animated Pasture</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#a8e0ff}
+#scene{position:fixed;left:0;top:0;width:100vw;height:100vh;display:block}
+@keyframes hop{0%,100%{transform:translateY(0)}45%,55%{transform:translateY(var(--amp,-13px))}}
+.hop{animation:hop .68s ease-in-out infinite both}
+.hop.cow{animation-duration:.66s;animation-delay:-.05s}
+.hop.sheep{animation-duration:.58s;animation-delay:-.23s}
+.hop.pig{animation-duration:.62s;animation-delay:-.41s}
+.hop.horse{animation-duration:.72s;animation-delay:-.11s}
+</style>
+</head>
+<body>
+<svg id="scene" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#76c7ff"/><stop offset="1" stop-color="#d9f5ff"/></linearGradient>
+<linearGradient id="grassG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ed15d"/><stop offset="1" stop-color="#4d9738"/></linearGradient>
+<radialGradient id="sunG"><stop offset="0" stop-color="#fff9b4" stop-opacity=".95"/><stop offset=".55" stop-color="#fff37d" stop-opacity=".35"/><stop offset="1" stop-color="#fff37d" stop-opacity="0"/></radialGradient>
+<pattern id="grassP" width="36" height="18" patternUnits="userSpaceOnUse"><path d="M8 18 L11 6 L13 18 M26 18 L29 9 L31 18" stroke="#3f7f30" stroke-width="1.2" fill="none" opacity=".35"/></pattern>
+</defs>
+
+<rect id="sky" x="0" y="0" width="1600" height="585" fill="url(#skyG)"/>
+
+<g id="sun">
+<circle r="72" fill="url(#sunG)"/>
+<g stroke="#fff27c" stroke-width="7" stroke-linecap="round" opacity=".8">
+<line x1="26" y1="0" x2="66" y2="0"/>
+<line x1="26" y1="0" x2="66" y2="0" transform="rotate(30)"/>
+<line x1="26" y1="0" x2="66" y2="0" transform="rotate(60)"/>
+<line x1="26" y1="0" x2="66" y2="0" transform="rotate(90)"/>
+<line x1="26" y1="0" x2="66" y2="0" transform="rotate(120)"/>
+<line x1="26" y1="0" x2="66" y2="0" transform="rotate(150)"/>
+<line x1="26" y1="0" x2="66" y2="0" transform="rotate(180)"/>
+<line x1="26" y1="0" x2="66" y2="0" transform="rotate(210)"/>
+<line x1="26" y1="0" x2="66" y2="0" transform="rotate(240)"/>
+<line x1="26" y1="0" x2="66" y2="0" transform="rotate(270)"/>
+<line x1="26" y1="0" x2="66" y2="0" transform="rotate(300)"/>
+<line x1="26" y1="0" x2="66" y2="0" transform="rotate(330)"/>
+</g>
+<circle r="32" fill="#ffd83c"/>
+</g>
+
+<g id="clouds">
+<g id="cloud1"><ellipse cx="0" cy="0" rx="31" ry="17" fill="#fff"/><ellipse cx="-33" cy="6" rx="23" ry="13" fill="#f7fbf8"/><ellipse cx="33" cy="6" rx="22" ry="12" fill="#fff"/><ellipse cx="2" cy="-14" rx="19" ry="13" fill="#fff"/></g>
+<g id="cloud2"><ellipse cx="0" cy="0" rx="28" ry="15" fill="#fff"/><ellipse cx="-28" cy="5" rx="20" ry="12" fill="#f8fbfa"/><ellipse cx="28" cy="5" rx="21" ry="11" fill="#fff"/><ellipse cx="-1" cy="-12" rx="17" ry="11" fill="#fff"/></g>
+<g id="cloud3"><ellipse cx="0" cy="0" rx="34" ry="16" fill="#fff"/><ellipse cx="-37" cy="7" rx="25" ry="13" fill="#fbfdfc"/><ellipse cx="37" cy="6" rx="23" ry="12" fill="#fff"/><ellipse cx="5" cy="-13" rx="18" ry="12" fill="#fff"/></g>
+</g>
+
+<rect id="grass" x="0" y="585" width="1600" height="315" fill="url(#grassG)"/>
+<rect id="grassTex" x="0" y="585" width="1600" height="315" fill="url(#grassP)" opacity=".18"/>
+<rect id="horizon" x="0" y="585" width="1600" height="5" fill="#437a2f"/>
+
+<g id="trees">
+<g id="tree1"><path d="M-9 0 L-6 -112 L6 -112 L9 0 Z" fill="#8a5a31"/><g fill="#3d8f37"><circle cx="0" cy="-149" r="34"/><circle cx="-33" cy="-129" r="27"/><circle cx="33" cy="-129" r="27"/><circle cx="-20" cy="-168" r="23"/><circle cx="20" cy="-168" r="23"/><circle cx="0" cy="-116" r="26"/></g></g>
+<g id="tree2"><path d="M-9 0 L-6 -112 L6 -112 L9 0 Z" fill="#8a5a31"/><g fill="#3d8f37"><circle cx="0" cy="-149" r="34"/><circle cx="-33" cy="-129" r="27"/><circle cx="33" cy="-129" r="27"/><circle cx="-20" cy="-168" r="23"/><circle cx="20" cy="-168" r="23"/><circle cx="0" cy="-116" r="26"/></g></g>
+</g>
+
+<g id="animals">
+<g id="cow" class="animal cow"><g class="hop cow">
+<rect class="leg" x="-46" y="-36" width="10" height="36" rx="4" fill="#ece9da"/>
+<rect class="leg" x="-26" y="-36" width="10" height="36" rx="4" fill="#ece9da"/>
+<rect class="leg" x="19" y="-36" width="10" height="36" rx="4" fill="#ece9da"/>
+<rect class="leg" x="40" y="-36" width="10" height="36" rx="4" fill="#ece9da"/>
+<ellipse class="body" cx="0" cy="-54" rx="58" ry="29" fill="#f5f3e8"/>
+<ellipse class="patch" cx="-31" cy="-65" rx="20" ry="15" fill="#232222"/>
+<ellipse class="patch" cx="3" cy="-46" rx="16" ry="11" fill="#232222"/>
+<ellipse class="patch" cx="33" cy="-66" rx="14" ry="11" fill="#232222"/>
+<ellipse class="udder" cx="7" cy="-23" rx="10" ry="7" fill="#ef99af"/>
+<path class="neck" d="M55 -80 L78 -88 L78 -65 L57 -52 Z" fill="#f5f3e8"/>
+<ellipse class="head" cx="81" cy="-83" rx="18" ry="15" fill="#f5f3e8"/>
+<ellipse class="ear" cx="67" cy="-95" rx="7" ry="4.5" fill="#e5e2d3" transform="rotate(-28 67 -95)"/>
+<ellipse class="ear" cx="93" cy="-95" rx="7" ry="4.5" fill="#e5e2d3" transform="rotate(28 93 -95)"/>
+<ellipse class="eye" cx="75" cy="-86" rx="2.8" ry="3.5" fill="#191919"/>
+<ellipse class="eye" cx="86" cy="-86" rx="2.8" ry="3.5" fill="#191919"/>
+<ellipse class="snout" cx="90" cy="-78" rx="10" ry="7" fill="#f198af"/>
+<ellipse cx="87" cy="-79" rx="1.5" ry="2.2" fill="#7c3b4d"/>
+<ellipse cx="93" cy="-77" rx="1.5" ry="2.2" fill="#7c3b4d"/>
+</g></g>
+
+<g id="sheep" class="animal sheep"><g class="hop sheep">
+<rect class="leg" x="-36" y="-28" width="8" height="28" rx="3" fill="#353535"/>
+<rect class="leg" x="-17" y="-28" width="8" height="28" rx="3" fill="#353535"/>
+<rect class="leg" x="17" y="-28" width="8" height="28" rx="3" fill="#353535"/>
+<rect class="leg" x="36" y="-28" width="8" height="28" rx="3" fill="#353535"/>
+<g class="wool" fill="#f6f9f5">
+<ellipse cx="0" cy="-46" rx="46" ry="28"/>
+<circle cx="-34" cy="-54" r="18"/>
+<circle cx="-13" cy="-69" r="18"/>
+<circle cx="13" cy="-69" r="17"/>
+<circle cx="34" cy="-53" r="17"/>
+<circle cx="-26" cy="-38" r="14"/>
+<circle cx="2" cy="-32" r="14"/>
+<circle cx="27" cy="-38" r="14"/>
+</g>
+<ellipse class="head" cx="48" cy="-58" rx="16" ry="17" fill="#3d3d3d"/>
+<ellipse class="ear" cx="34" cy="-70" rx="7" ry="4.5" fill="#525252" transform="rotate(-32 34 -70)"/>
+<ellipse class="ear" cx="62" cy="-70" rx="7" ry="4.5" fill="#525252" transform="rotate(32 62 -70)"/>
+<ellipse class="eye" cx="42" cy="-61" rx="3.2" ry="4.2" fill="#fdfdfd"/>
+<ellipse class="eye" cx="54" cy="-60" rx="3.2" ry="4.2" fill="#fdfdfd"/>
+</g></g>
+
+<g id="pig" class="animal pig"><g class="hop pig">
+<rect class="leg" x="-36" y="-28" width="8" height="28" rx="3" fill="#e792a1"/>
+<rect class="leg" x="-16" y="-28" width="8" height="28" rx="3" fill="#e792a1"/>
+<rect class="leg" x="16" y="-28" width="8" height="28" rx="3" fill="#e792a1"/>
+<rect class="leg" x="36" y="-28" width="8" height="28" rx="3" fill="#e792a1"/>
+<ellipse class="body" cx="0" cy="-45" rx="50" ry="28" fill="#f6bac6"/>
+<path class="tail" d="M-50 -45 q -17 3 -4 10 q 14 8 -3 15" stroke="#e0889c" stroke-width="5" fill="none" stroke-linecap="round"/>
+<ellipse class="head" cx="53" cy="-48" rx="18" ry="17" fill="#f6bac6"/>
+<path class="ear" d="M42 -64 L49 -76 L56 -67 Z" fill="#eb9bad"/>
+<path class="ear" d="M57 -65 L65 -74 L68 -63 Z" fill="#eb9bad"/>
+<ellipse class="eye" cx="48" cy="-52" rx="2.8" ry="3.5" fill="#242424"/>
+<ellipse class="eye" cx="59" cy="-51" rx="2.8" ry="3.5" fill="#242424"/>
+<ellipse class="snout" cx="65" cy="-47" rx="12" ry="8" fill="#ef8ca1"/>
+<ellipse cx="62" cy="-48" rx="1.8" ry="2.4" fill="#7f3e50"/>
+<ellipse cx="68" cy="-46" rx="1.8" ry="2.4" fill="#7f3e50"/>
+</g></g>
+
+<g id="horse" class="animal horse"><g class="hop horse">
+<rect class="leg" x="-67" y="-72" width="11" height="72" rx="4" fill="#6f4728"/>
+<rect class="leg" x="-31" y="-72" width="11" height="72" rx="4" fill="#6f4728"/>
+<rect class="leg" x="26" y="-72" width="11" height="72" rx="4" fill="#6f4728"/>
+<rect class="leg" x="60" y="-72" width="11" height="72" rx="4" fill="#6f4728"/>
+<ellipse class="body" cx="0" cy="-70" rx="82" ry="33" fill="#8f623b"/>
+<path class="neck" d="M53 -96 L99 -131 L114 -104 L66 -69 Z" fill="#8f623b"/>
+<path class="mane" d="M58 -101 L98 -131 L104 -137" stroke="#503219" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse class="head" cx="111" cy="-117" rx="19" ry="14" fill="#8f623b"/>
+<path class="muzzle" d="M121 -114 q 11 1 11 6 q 0 6 -10 5 Z" fill="#6b4427"/>
+<path class="ear" d="M102 -131 L106 -119 L112 -129 Z" fill="#5d3a22"/>
+<path class="ear" d="M113 -133 L119 -121 L121 -131 Z" fill="#684226"/>
+<ellipse class="eye" cx="106" cy="-120" rx="2.8" ry="3.5" fill="#161616"/>
+<ellipse class="eye" cx="116" cy="-121" rx="2.8" ry="3.5" fill="#161616"/>
+<path class="tail" d="M-77 -78 q -24 -6 -18 -34 q 2 -17 -7 -25 q 15 8 18 26 q 3 15 12 29 Z" fill="#54361d"/>
+</g></g>
+</g>
+</svg>
+
+<script>
+var $ = function(id){return document.getElementById(id);};
+var scene = $('scene'), sky = $('sky'), grass = $('grass'), tex = $('grassTex'), horizon = $('horizon'),
+    sun = $('sun'), tree1 = $('tree1'), tree2 = $('tree2');
+var clouds = [
+  {e:$('cloud1'), y:.16, sp:37, ph:.02, s:1},
+  {e:$('cloud2'), y:.28, sp:52, ph:.36, s:1},
+  {e:$('cloud3'), y:.12, sp:29, ph:.69, s:1}
+];
+
+function layout(){
+  var w = innerWidth, h = innerHeight, gy = Math.round(h * .65);
+  var s, ss, ts, ty, feet, amp, i, p, g, places = [['cow',.13],['sheep',.37],['pig',.61],['horse',.83]];
+  scene.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+
+  sky.setAttribute('width', w); sky.setAttribute('height', gy);
+  grass.setAttribute('y', gy); grass.setAttribute('width', w); grass.setAttribute('height', Math.max(1, h - gy));
+  tex.setAttribute('y', gy); tex.setAttribute('width', w); tex.setAttribute('height', Math.max(1, h - gy));
+  horizon.setAttribute('y', gy); horizon.setAttribute('width', w); horizon.setAttribute('height', Math.max(2, h * .008));
+
+  s = Math.min(h / 780, w / 810, 1.35);
+  if (!(s > 0)) s = 0.05;
+
+  ss = Math.max(.7, Math.min(1.35, h / 850));
+  sun.setAttribute('transform', 'translate(' + (w * .17) + ',' + (gy * .38) + ') scale(' + ss + ')');
+
+  ts = s * .85;
+  ty = gy + Math.min(14, h * .03);
+  tree1.setAttribute('transform', 'translate(' + (w * .07) + ',' + ty + ') scale(' + ts + ')');
+  tree2.setAttribute('transform', 'translate(' + (w * .95) + ',' + ty + ') scale(' + ts + ')');
+
+  feet = gy + Math.max(8, Math.min(h * .09, 36));
+  if (feet > h - 2) feet = h - 2;
+
+  amp = (-14 / s).toFixed(2) + 'px';
+  for (i = 0; i < places.length; i++) {
+    p = places[i];
+    g = $(p[0]);
+    g.setAttribute('transform', 'translate(' + (w * p[1]) + ',' + feet + ') scale(' + s + ')');
+    g.querySelector('.hop').style.setProperty('--amp', amp);
+  }
+
+  for (i = 0; i < clouds.length; i++) {
+    clouds[i].s = Math.max(.75, Math.min(1.4, s * 1.45));
+  }
+}
+
+function tick(t){
+  var w = innerWidth, h = innerHeight, sec = t / 1000, i, c, span, x;
+  for (i = 0; i < clouds.length; i++) {
+    c = clouds[i];
+    span = w + 340 * c.s;
+    x = ((sec * c.sp) + c.ph * span) % span;
+    x = x - 170 * c.s;
+    c.e.setAttribute('transform', 'translate(' + x + ',' + (c.y * h) + ') scale(' + c.s + ')');
+  }
+  requestAnimationFrame(tick);
+}
+
+addEventListener('resize', layout);
+layout();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

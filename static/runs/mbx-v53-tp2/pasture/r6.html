@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Morning Pasture — a live field plate</title>
+<style>
+:root{
+  --sky1:#5db4e4; --sky2:#a6dcf2; --sky3:#eef9fc;
+  --grass1:#93cd63; --grass2:#63ac48; --grass3:#3a7a33;
+  --sun:#ffd23f; --sunGlow:#ffe98a;
+  --ink:#1e2a1b; --cream:#f7f1e2; --pink:#f4a9bd; --pinkD:#c2748c;
+  --panel:#fbf7ec; --barn:#a8342c; --brass:#c98a2b;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,sans-serif;
+  --disp:"Hoefler Text","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#cfeaf6}
+body{font-family:var(--sans);color:var(--ink)}
+#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+stop{transition:stop-color 1.1s ease}
+.k1{stop-color:var(--sky1)} .k2{stop-color:var(--sky2)} .k3{stop-color:var(--sky3)}
+.g1{stop-color:var(--grass1)} .g2{stop-color:var(--grass2)} .g3{stop-color:var(--grass3)}
+.sunCore{fill:var(--sun)} .sunHalo{fill:var(--sunGlow)} .ray{fill:var(--sunGlow);opacity:.75}
+#rays{animation:spin 120s linear infinite;transform-box:fill-box;transform-origin:50% 50%}
+.sunG{animation:breathe 6s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 50%}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes breathe{0%,100%{opacity:.42;transform:scale(1)}50%{opacity:.7;transform:scale(1.06)}}
+.cloud ellipse{fill:#fff}
+.cloud .und{fill:#dfeef6}
+.drift{animation:drift var(--dt) linear infinite;animation-delay:var(--dl)}
+@keyframes drift{from{transform:translateX(-340px)}to{transform:translateX(1990px)}}
+.bird path{fill:none;stroke:#3f5a6b;stroke-width:2.4;stroke-linecap:round}
+.bird{animation:drift var(--dt) linear infinite;animation-delay:var(--dl)}
+.bird .fl{animation:flap .42s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 50%}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.35)}}
+.tuft{stroke:#2f6b2c;stroke-width:2.6;fill:none;stroke-linecap:round;opacity:.5}
+.stem{stroke:#3d7d34;stroke-width:1.8;fill:none}
+.fly{fill:#fff3ae;opacity:0;transition:opacity 1.2s ease}
+body.dusk .fly{opacity:1;animation:flick var(--ft) ease-in-out infinite}
+@keyframes flick{0%,100%{opacity:.15}45%{opacity:1}}
+#dusk-veil{transition:opacity 1.1s ease}
+body.dusk #dusk-veil{opacity:1}
+/* ---------- animals ---------- */
+.animal{cursor:pointer}
+.sh{fill:url(#gSh);pointer-events:none}
+.ring{fill:none;stroke:#fff8dc;stroke-width:3;opacity:0;pointer-events:none;transform-box:fill-box;transform-origin:50% 50%}
+.animal.ping .ring{animation:ring .95s ease-out}
+@keyframes ring{0%{opacity:.95;transform:scale(.5)}100%{opacity:0;transform:scale(1.5)}}
+.hit{fill:none;pointer-events:all}
+.hop{animation:hop var(--hd,1s) cubic-bezier(.3,.1,.5,.9) infinite;animation-delay:var(--hl,0s);
+     transform-box:fill-box;transform-origin:50% 100%}
+@keyframes hop{
+  0%,100%{transform:translateY(0) scale(1,1)}
+  12%{transform:translateY(-1px) scale(1.05,.92)}
+  42%{transform:translateY(-18px) scale(.97,1.05)}
+  72%{transform:translateY(-3px) scale(1.03,.96)}
+}
+.animal.spook .hop{animation:spook .72s cubic-bezier(.3,-.3,.4,1.35) 1}
+@keyframes spook{
+  0%{transform:translateY(0) scale(1,1)}
+  22%{transform:translateY(-46px) scale(.93,1.13)}
+  52%{transform:translateY(0) scale(1.11,.88)}
+  76%{transform:translateY(-16px) scale(.98,1.03)}
+  100%{transform:translateY(0) scale(1,1)}
+}
+.pop{transition:transform .4s cubic-bezier(.2,.8,.25,1);transform-box:fill-box;transform-origin:50% 100%}
+.animal:hover .pop,.animal.focus .pop{transform:scale(1.06)}
+.cowL{fill:#f8f3e6;stroke:#5b4f45;stroke-width:2}
+.cowD{fill:#2c2726} .cowD2{fill:#4a403e}
+.pink{fill:var(--pink);stroke:#d4849c;stroke-width:1.5} .pinkD{fill:#e18ba2}
+.wool{fill:#fcfbf6;stroke:#ddd6c6;stroke-width:1.8}
+.face{fill:#48414a} .faceL{fill:#6d636e} .earS{fill:#4f4854} .legN,.legD{fill:#3a343c}
+.hoof{fill:#221e24}
+.pig{fill:#f7b7c6;stroke:#dd8ba2;stroke-width:2} .legP{fill:#f3a5ba;stroke:#dd8ba2;stroke-width:1.6}
+.legDp{fill:#e894ac} .snout{fill:#ee8fab;stroke:#cf7490;stroke-width:1.6} .nstril{fill:#b25b76}
+.earP{fill:#f2a1b6;stroke:#d47f99;stroke-width:1.6}
+.horse,.neck{fill:#9c6236;stroke:#5f3a1f;stroke-width:2} .legNh{fill:#8e5730;stroke:#5f3a1f;stroke-width:1.8}
+.legDh{fill:#6f4322} .hoofh{fill:#33210f} .earIn{fill:#5c3a20}
+.blk{fill:#241d19} .wht{fill:#fff}
+.tail,.maneS{fill:none;stroke:#472b18;stroke-linecap:round}
+.swish{animation:swish 3.4s ease-in-out infinite;transform-box:fill-box;transform-origin:60% 4%}
+@keyframes swish{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(7deg)}}
+.wag{animation:wag 1.1s ease-in-out infinite;transform-box:fill-box;transform-origin:100% 30%}
+@keyframes wag{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(10deg)}}
+.twitch{animation:twitch 4.3s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes twitch{0%,86%,100%{transform:rotate(0)}90%{transform:rotate(-13deg)}94%{transform:rotate(6deg)}}
+.tag,.bubble{opacity:0;transition:opacity .28s ease,transform .28s ease;pointer-events:none}
+.tag rect,.bubble rect{fill:var(--panel);stroke:#2a3a26;stroke-width:1.6}
+.tag path,.bubble path{fill:var(--panel);stroke:#2a3a26;stroke-width:1.6;stroke-linejoin:round}
+.tag text,.bubble text{text-anchor:middle;font-family:var(--sans);fill:#22301f}
+.tag text{font-size:12px;font-weight:700;letter-spacing:.16em}
+.bubble text{font-family:var(--disp);font-size:17px;font-style:italic}
+.animal:hover .tag,.animal.focus .tag{opacity:1}
+.animal.say .bubble{opacity:1}
+/* ---------- trees ---------- */
+.sway{animation:sway var(--st,7s) ease-in-out infinite;animation-delay:var(--sl,0s);
+      transform-box:fill-box;transform-origin:50% 100%}
+@keyframes sway{0%,100%{transform:rotate(-1.1deg)}50%{transform:rotate(1.3deg)}}
+/* ---------- bugs ---------- */
+.flit{animation:flit var(--ft) ease-in-out infinite alternate}
+@keyframes flit{from{transform:translate(0,0) rotate(-5deg)}to{transform:translate(190px,-34px) rotate(7deg)}}
+.wingf{animation:wing .18s linear infinite alternate;transform-box:fill-box;transform-origin:50% 50%}
+@keyframes wing{from{transform:scaleX(1)}to{transform:scaleX(.3)}}
+/* ---------- HUD ---------- */
+#ui{position:fixed;top:26px;left:26px;z-index:5;user-select:none}
+.plate{background:var(--panel);border:1px solid #d9cfb8;border-left:6px solid var(--barn);
+  padding:16px 20px 14px;max-width:296px;box-shadow:0 18px 34px -18px rgba(18,44,20,.65),0 2px 0 rgba(255,255,255,.7) inset}
+.eyebrow{font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:#8a7b5c;font-weight:700}
+h1{font-family:var(--disp);font-weight:400;font-size:31px;line-height:.95;margin:8px 0 2px;letter-spacing:-.01em}
+h1 em{font-style:italic;color:var(--barn)}
+.rule{height:2px;background:linear-gradient(90deg,var(--brass),rgba(201,138,43,0));margin:11px 0 9px}
+#legend{list-style:none;margin:0;padding:0}
+#legend li{display:flex;align-items:baseline;gap:8px;padding:5px 6px 5px 4px;border-radius:2px;cursor:pointer;
+  border-bottom:1px dotted #ddd3bd;transition:background .2s,transform .2s,padding-left .2s}
+#legend li:hover,#legend li.on{background:#f1e8d2;transform:translateX(3px)}
+#legend .dot{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none;align-self:center;
+  box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+#legend b{font-size:12.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:700}
+#legend i{margin-left:auto;font-family:var(--disp);font-style:italic;font-size:12px;color:#7d7159}
+.foot{display:flex;align-items:center;gap:10px;margin-top:12px}
+#dusk{font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  background:#2a3a26;color:#f4ecd8;border:0;padding:8px 12px;cursor:pointer;transition:background .25s,letter-spacing .25s}
+#dusk:hover{background:var(--barn);letter-spacing:.24em}
+.hint{font-size:10.5px;color:#8a7b5c;letter-spacing:.06em;font-style:italic;font-family:var(--disp)}
+#credit{position:fixed;right:18px;bottom:14px;z-index:5;font-size:9.5px;letter-spacing:.22em;
+  text-transform:uppercase;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(20,50,20,.6)}
+body.dusk .plate{background:#f3ead9}
+@media (max-width:640px){.plate{max-width:230px;padding:12px 14px 10px}h1{font-size:24px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" role="img"
+     aria-label="A pasture with a horse, cow, sheep and pig bouncing in place under drifting clouds">
+<defs>
+  <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" class="k1"/><stop offset=".55" class="k2"/><stop offset="1" class="k3"/>
+  </linearGradient>
+  <linearGradient id="gGrass" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" class="g1"/><stop offset=".45" class="g2"/><stop offset="1" class="g3"/>
+  </linearGradient>
+  <linearGradient id="gHillA" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#a6d8e4"/><stop offset="1" stop-color="#7fbba0"/>
+  </linearGradient>
+  <linearGradient id="gHillB" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8fc478"/><stop offset="1" stop-color="#5e9b4d"/>
+  </linearGradient>
+  <linearGradient id="gTrunk" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#5d3a20"/><stop offset=".45" stop-color="#8a5a34"/><stop offset="1" stop-color="#5a3620"/>
+  </linearGradient>
+  <radialGradient id="gCan" cx=".35" cy=".25" r=".85">
+    <stop offset="0" stop-color="#96cf63"/><stop offset=".6" stop-color="#54a043"/><stop offset="1" stop-color="#2f7233"/>
+  </radialGradient>
+  <radialGradient id="gHalo">
+    <stop offset="0" stop-color="var(--sunGlow)" stop-opacity=".95"/>
+    <stop offset=".45" stop-color="var(--sunGlow)" stop-opacity=".45"/>
+    <stop offset="1" stop-color="var(--sunGlow)" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="gSh">
+    <stop offset="0" stop-color="#1b431c" stop-opacity=".4"/>
+    <stop offset="1" stop-color="#1b431c" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="gVeil" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#ff9a4a" stop-opacity=".55"/>
+    <stop offset=".5" stop-color="#b06a9e" stop-opacity=".22"/>
+    <stop offset="1" stop-color="#1a2a55" stop-opacity=".38"/>
+  </linearGradient>
+  <pattern id="tufts" width="52" height="38" patternUnits="userSpaceOnUse">
+    <path d="M8 38q3-13 1-20" stroke="#2f6b2c" stroke-width="2.4" fill="none" opacity=".33"/>
+    <path d="M13 38q-3-11-7-15" stroke="#2f6b2c" stroke-width="2.4" fill="none" opacity=".28"/>
+    <path d="M33 38q2-15 6-21" stroke="#a9dc82" stroke-width="2.2" fill="none" opacity=".38"/>
+    <path d="M40 38q4-9 9-12" stroke="#2f6b2c" stroke-width="2" fill="none" opacity=".22"/>
+  </pattern>
+  <clipPath id="cCow">
+    <ellipse cx="0" cy="-88" rx="68" ry="45"/><ellipse cx="80" cy="-108" rx="28" ry="25"/>
+  </clipPath>
+  <g id="tree">
+    <path d="M-14 2C-11-30-9-66-9-92h18c0 26 3 62 6 94z" fill="url(#gTrunk)"/>
+    <path d="M-19 3q7-9 19-9t19 9z" fill="#5d3a20"/>
+    <g>
+      <ellipse cx="1" cy="-128" rx="61" ry="53" fill="url(#gCan)"/>
+      <circle cx="-40" cy="-104" r="30" fill="url(#gCan)"/><circle cx="40" cy="-107" r="32" fill="url(#gCan)"/>
+      <circle cx="-21" cy="-154" r="34" fill="url(#gCan)"/><circle cx="25" cy="-157" r="30" fill="url(#gCan)"/>
+      <circle cx="2" cy="-117" r="43" fill="url(#gCan)"/>
+      <g fill="#b6e089" opacity=".3">
+        <circle cx="-30" cy="-146" r="15"/><circle cx="-6" cy="-166" r="12"/><circle cx="18" cy="-150" r="10"/>
+      </g>
+      <g fill="#2c6d33" opacity=".28">
+        <circle cx="-14" cy="-96" r="18"/><circle cx="26" cy="-92" r="16"/>
+      </g>
+    </g>
+  </g>
+</defs>
+
+<rect id="sky" x="0" y="0" width="1600" fill="url(#gSky)"/>
+<g id="sun" transform="translate(1352,140)">
+  <circle class="sunG" r="126" fill="url(#gHalo)"/>
+  <g id="rays"></g>
+  <circle class="sunHalo" r="66" opacity=".38"/>
+  <circle class="sunCore" r="47"/>
+  <circle r="47" fill="none" stroke="#fff2b0" stroke-width="3" opacity=".7"/>
+</g>
+<g id="clouds"></g>
+<g id="birds"></g>
+<g id="hillA" transform="translate(0,585)">
+  <path d="M-20 4q180-116 356-38 172 76 336-14 168-92 340 22 176 112 588 30v24H-20z" fill="url(#gHillA)"/>
+</g>
+<g id="hillB" transform="translate(0,585)">
+  <path d="M-20 22q140-72 300-26 160 46 300-14 152-64 300 6 156 72 340 20v36H-20z" fill="url(#gHillB)" opacity=".85"/>
+</g>
+<rect id="grass" x="0" y="585" width="1600" height="315" fill="url(#gGrass)"/>
+<rect id="hline" x="0" y="585" width="1600" height="2.5" fill="#2c6d33" opacity=".45"/>
+<rect id="tex" x="0" y="585" width="1600" height="315" fill="url(#tufts)" opacity=".5"/>
+<g id="farTrees"></g>
+<g id="fence" transform="translate(0,585)"></g>
+<g id="decor"></g>
+<g id="nearTrees"></g>
+<g id="animals">
+
+  <!-- ============ HORSE ============ -->
+  <g class="animal" data-sp="horse" data-name="Horse" data-snd="Neigh!">
+    <ellipse class="sh" cx="8" cy="2" rx="102" ry="13"/>
+    <ellipse class="ring" cx="8" cy="1" rx="102" ry="13"/>
+    <g class="hop" style="--hd:1.16s;--hl:.14s"><g class="pop"><g class="art">
+      <g class="swish"><path class="tail" d="M-56-112q-30 12-32 52-1 24 9 40" stroke-width="15"/></g>
+      <rect class="legDh" x="-56" y="-80" width="13" height="80" rx="6"/>
+      <rect class="legDh" x="28" y="-80" width="13" height="80" rx="6"/>
+      <rect class="hoofh" x="-57" y="-11" width="15" height="12" rx="3"/>
+      <rect class="hoofh" x="27" y="-11" width="15" height="12" rx="3"/>
+      <ellipse class="horse" cx="0" cy="-112" rx="64" ry="36"/>
+      <path class="neck" d="M34-134C46-158 58-176 74-190l30 22C86-150 74-130 62-110z"/>
+      <path d="M72-190C56-172 44-150 34-128" class="tail" stroke-width="15"/>
+      <path d="M44-146l-13 6M56-164l-12 8" stroke="#472b18" stroke-width="5" stroke-linecap="round"/>
+      <rect class="legNh" x="-36" y="-80" width="14" height="80" rx="6"/>
+      <rect class="legNh" x="46" y="-80" width="14" height="80" rx="6"/>
+      <rect class="hoofh" x="-37" y="-11" width="16" height="12" rx="3"/>
+      <rect class="hoofh" x="45" y="-11" width="16" height="12" rx="3"/>
+      <path d="M-40-88q40 16 80-2" fill="none" stroke="#6f4526" stroke-width="3" opacity=".45"/>
+      <g transform="rotate(30 96-178)">
+        <rect class="horse" x="60" y="-194" width="74" height="33" rx="16"/>
+        <ellipse class="muzzle" cx="128" cy="-177" rx="12" ry="14" fill="#c8946a" stroke="#7b4c28" stroke-width="1.5"/>
+        <ellipse class="blk" cx="131" cy="-176" rx="2.6" ry="3.6"/>
+        <ellipse class="blk" cx="124" cy="-166" rx="2.2" ry="3"/>
+        <circle class="blk" cx="82" cy="-186" r="4.6"/><circle class="wht" cx="83.4" cy="-187.4" r="1.6"/>
+        <circle class="blk" cx="98" cy="-188" r="4.6"/><circle class="wht" cx="99.4" cy="-189.4" r="1.6"/>
+        <path d="M112-168q10 4 18-1" fill="none" stroke="#6f4526" stroke-width="2.4" stroke-linecap="round"/>
+      </g>
+      <path class="horse" d="M66-206 68-228 86-206z"/><path class="horse" d="M86-196 98-220 108-196z"/>
+      <path class="earIn" d="M69-207 70-222 82-208z"/><path class="earIn" d="M89-198 97-215 104-199z"/>
+      <path d="M76-212q-8 10-2 20 12-6 16-18z" fill="#472b18"/>
+    </g>
+    <g class="tag"><rect x="-46" y="-27" width="92" height="23" rx="3"/><path d="M-6-5l6 11 6-11z"/><text y="-11">HORSE</text></g>
+    <g class="bubble"><rect x="-44" y="-52" width="88" height="32" rx="8"/><path d="M-7-21l7 13 7-13z"/><text y="-30">Neigh!</text></g>
+    </g></g>
+  </g>
+
+  <!-- ============ COW ============ -->
+  <g class="animal" data-sp="cow" data-name="Cow" data-snd="Moo!">
+    <ellipse class="sh" cx="6" cy="2" rx="90" ry="12"/>
+    <ellipse class="ring" cx="6" cy="1" rx="90" ry="12"/>
+    <g class="hop" style="--hd:1.02s;--hl:0s"><g class="pop"><g class="art">
+      <path class="tail" d="M-62-104q-20 30-12 66" stroke="#2e2928" stroke-width="7"/>
+      <circle class="cowD" cx="-73" cy="-34" r="9"/>
+      <rect class="cowD" x="-48" y="-58" width="14" height="58" rx="6"/>
+      <rect class="cowD" x="30" y="-58" width="14" height="58" rx="6"/>
+      <rect class="cowD2" x="-49" y="-11" width="16" height="12" rx="4"/>
+      <rect class="cowD2" x="29" y="-11" width="16" height="12" rx="4"/>
+      <rect x="-28" y="-58" width="15" height="58" rx="6" fill="#f8f3e6" stroke="#5b4f45" stroke-width="2"/>
+      <rect x="50" y="-58" width="15" height="58" rx="6" fill="#f8f3e6" stroke="#5b4f45" stroke-width="2"/>
+      <rect class="cowD2" x="-29" y="-11" width="17" height="12" rx="4"/>
+      <rect class="cowD2" x="49" y="-11" width="17" height="12" rx="4"/>
+      <ellipse class="pink" cx="6" cy="-46" rx="20" ry="13"/>
+      <ellipse class="pinkD" cx="0" cy="-36" rx="4" ry="6"/><ellipse class="pinkD" cx="12" cy="-36" rx="4" ry="6"/>
+      <ellipse class="cowL" cx="0" cy="-88" rx="68" ry="45"/>
+      <g clip-path="url(#cCow)">
+        <ellipse class="cowD" cx="-28" cy="-114" rx="25" ry="17"/>
+        <ellipse class="cowD" cx="22" cy="-74" rx="21" ry="16"/>
+        <ellipse class="cowD" cx="-54" cy="-64" rx="16" ry="13"/>
+        <ellipse class="cowD" cx="-4" cy="-54" rx="12" ry="8"/>
+      </g>
+      <ellipse class="cowL" cx="80" cy="-108" rx="28" ry="25"/>
+      <ellipse class="cowD" cx="62" cy="-100" rx="9" ry="7"/>
+      <g class="twitch">
+        <ellipse class="cowD" cx="56" cy="-128" rx="13" ry="7" transform="rotate(-24 56-128)"/>
+        <ellipse class="cowD" cx="104" cy="-128" rx="13" ry="7" transform="rotate(24 104-128)"/>
+      </g>
+      <path d="M66-130q-8-13 4-19" fill="none" stroke="#e9d9ae" stroke-width="5.5" stroke-linecap="round"/>
+      <path d="M92-130q9-12-2-20" fill="none" stroke="#e9d9ae" stroke-width="5.5" stroke-linecap="round"/>
+      <ellipse class="pink" cx="92" cy="-94" rx="18" ry="14"/>
+      <ellipse class="pinkD" cx="86" cy="-95" rx="3" ry="4"/><ellipse class="pinkD" cx="98" cy="-93" rx="3" ry="4"/>
+      <circle class="blk" cx="70" cy="-116" r="4.4"/><circle class="wht" cx="71.4" cy="-117.4" r="1.5"/>
+      <circle class="blk" cx="90" cy="-118" r="4.4"/><circle class="wht" cx="91.4" cy="-119.4" r="1.5"/>
+    </g>
+    <g class="tag"><rect x="-40" y="-27" width="80" height="23" rx="3"/><path d="M-6-5l6 11 6-11z"/><text y="-11">COW</text></g>
+    <g class="bubble"><rect x="-38" y="-52" width="76" height="32" rx="8"/><path d="M-7-21l7 13 7-13z"/><text y="-30">Moo!</text></g>
+    </g></g>
+  </g>
+
+  <!-- ============ SHEEP ============ -->
+  <g class="animal" data-sp="sheep" data-name="Sheep" data-snd="Baa!">
+    <ellipse class="sh" cx="4" cy="2" rx="62" ry="10"/>
+    <ellipse class="ring" cx="4" cy="1" rx="62" ry="10"/>
+    <g class="hop" style="--hd:.94s;--hl:.28s"><g class="pop"><g class="art">
+      <rect class="legD" x="-34" y="-46" width="10" height="48" rx="5"/>
+      <rect class="legD" x="14" y="-46" width="10" height="48" rx="5"/>
+      <rect class="hoof" x="-35" y="-9" width="12" height="10" rx="3"/>
+      <rect class="hoof" x="13" y="-9" width="12" height="10" rx="3"/>
+      <rect class="legN" x="-20" y="-46" width="11" height="48" rx="5"/>
+      <rect class="legN" x="28" y="-46" width="11" height="48" rx="5"/>
+      <rect class="hoof" x="-21" y="-9" width="13" height="10" rx="3"/>
+      <rect class="hoof" x="27" y="-9" width="13" height="10" rx="3"/>
+      <g class="wool">
+        <circle cx="-34" cy="-56" r="23"/><circle cx="-8" cy="-66" r="27"/><circle cx="18" cy="-58" r="23"/>
+        <circle cx="-42" cy="-36" r="18"/><circle cx="-14" cy="-36" r="23"/><circle cx="12" cy="-38" r="21"/>
+        <circle cx="32" cy="-48" r="17"/><circle cx="-24" cy="-80" r="17"/><circle cx="4" cy="-84" r="16"/>
+      </g>
+      <ellipse class="earS" cx="30" cy="-88" rx="13" ry="7.5" transform="rotate(-22 30-88)"/>
+      <ellipse class="earS" cx="66" cy="-88" rx="13" ry="7.5" transform="rotate(22 66-88)"/>
+      <ellipse class="face" cx="48" cy="-74" rx="22" ry="19"/>
+      <ellipse class="faceL" cx="55" cy="-63" rx="13" ry="10"/>
+      <circle class="blk" cx="41" cy="-80" r="4.4"/><circle class="wht" cx="42.4" cy="-81.4" r="1.5"/>
+      <circle class="blk" cx="57" cy="-81" r="4.4"/><circle class="wht" cx="58.4" cy="-82.4" r="1.5"/>
+      <ellipse class="blk" cx="59" cy="-64" rx="2.4" ry="1.8"/>
+      <circle class="wool" cx="40" cy="-92" r="11"/><circle class="wool" cx="53" cy="-95" r="9"/>
+    </g>
+    <g class="tag"><rect x="-44" y="-27" width="88" height="23" rx="3"/><path d="M-6-5l6 11 6-11z"/><text y="-11">SHEEP</text></g>
+    <g class="bubble"><rect x="-34" y="-52" width="68" height="32" rx="8"/><path d="M-7-21l7 13 7-13z"/><text y="-30">Baa!</text></g>
+    </g></g>
+  </g>
+
+  <!-- ============ PIG ============ -->
+  <g class="animal" data-sp="pig" data-name="Pig" data-snd="Oink!">
+    <ellipse class="sh" cx="6" cy="2" rx="54" ry="9"/>
+    <ellipse class="ring" cx="6" cy="1" rx="54" ry="9"/>
+    <g class="hop" style="--hd:1.12s;--hl:.55s"><g class="pop"><g class="art">
+      <rect class="legDp" x="-30" y="-28" width="11" height="30" rx="5"/>
+      <rect class="legDp" x="14" y="-28" width="11" height="30" rx="5"/>
+      <rect class="hoof" x="-31" y="-8" width="13" height="9" rx="3"/>
+      <rect class="hoof" x="13" y="-8" width="13" height="9" rx="3"/>
+      <circle class="pig" cx="52" cy="-58" r="25"/>
+      <rect class="legP" x="-16" y="-28" width="12" height="30" rx="5"/>
+      <rect class="legP" x="28" y="-28" width="12" height="30" rx="5"/>
+      <rect class="hoof" x="-17" y="-8" width="14" height="9" rx="3"/>
+      <rect class="hoof" x="27" y="-8" width="14" height="9" rx="3"/>
+      <g class="wag"><path d="M-46-58q-15-3-13-14 2-9 11-5" fill="none" stroke="#e18ba2" stroke-width="5" stroke-linecap="round"/></g>
+      <ellipse class="pig" cx="-2" cy="-52" rx="49" ry="31"/>
+      <path d="M-28-33q26 11 52 0" fill="none" stroke="#e79ab0" stroke-width="3" opacity=".7"/>
+      <path class="earP" d="M36-78 44-98 56-80z"/>
+      <path class="earP" d="M56-80 68-96 74-74z"/>
+      <ellipse class="snout" cx="72" cy="-56" rx="12" ry="10"/>
+      <ellipse class="nstril" cx="69" cy="-57" rx="2.6" ry="3.6"/>
+      <ellipse class="nstril" cx="76" cy="-55" rx="2.6" ry="3.6"/>
+      <circle class="blk" cx="56" cy="-68" r="3.8"/><circle class="wht" cx="57.3" cy="-69.3" r="1.3"/>
+      <circle class="blk" cx="68" cy="-70" r="3.8"/><circle class="wht" cx="69.3" cy="-71.3" r="1.3"/>
+      <ellipse cx="48" cy="-50" rx="7" ry="4" fill="#ec8aa4" opacity=".5"/>
+    </g>
+    <g class="tag"><rect x="-38" y="-27" width="76" height="23" rx="3"/><path d="M-6-5l6 11 6-11z"/><text y="-11">PIG</text></g>
+    <g class="bubble"><rect x="-36" y="-52" width="72" height="32" rx="8"/><path d="M-7-21l7 13 7-13z"/><text y="-30">Oink!</text></g>
+    </g></g>
+  </g>
+
+</g>
+<g id="bugs"></g>
+<rect id="dusk-veil" x="0" y="0" width="1600" height="900" fill="url(#gVeil)" opacity="0" pointer-events="none"/>
+</svg>
+
+<div id="ui">
+  <div class="plate">
+    <div class="eyebrow">Field plate № 4 · grazing hour</div>
+    <h1>The Morning <em>Pasture</em></h1>
+    <div class="rule"></div>
+    <ul id="legend">
+      <li data-sp="horse"><span class="dot" style="--c:#9c6236"></span><b>Horse</b><i>Equus ferus</i></li>
+      <li data-sp="cow"><span class="dot" style="--c:#2c2726"></span><b>Cow</b><i>Bos taurus</i></li>
+      <li data-sp="sheep"><span class="dot" style="--c:#48414a"></span><b>Sheep</b><i>Ovis aries</i></li>
+      <li data-sp="pig"><span class="dot" style="--c:#f7b7c6"></span><b>Pig</b><i>Sus scrofa</i></li>
+    </ul>
+    <div class="foot"><button id="dusk" type="button">Dusk</button><span class="hint">tap a creature</span></div>
+  </div>
+</div>
+<div id="credit">four species · one meadow</div>
+
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg",scene=document.getElementById("scene");
+function mk(t,a,p){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
+var sd=987654321;function rn(){sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;}
+var clamp=function(v,a,b){return v<a?a:(v>b?b:v);};
+
+/* sun rays */
+var rays=document.getElementById("rays"),i;
+for(i=0;i<12;i++){mk("path",{d:"M-7 -66 L7 -66 L0 -104 Z",transform:"rotate("+(i*30)+")","class":"ray"},rays);}
+for(i=0;i<12;i++){mk("path",{d:"M-3 -108 L3 -108 L0 -128 Z",transform:"rotate("+(i*30+15)+")","class":"ray",opacity:".45"},rays);}
+
+/* clouds (each built from 5 overlapping ellipses) */
+var cloudLayer=document.getElementById("clouds"),clouds=[];
+[[.10,1.05,84,-8],[.23,.70,112,-52],[.34,.92,96,-30],[.17,.55,130,-72],[.44,.80,104,-95]].forEach(function(c){
+  var g=mk("g",{"class":"cloud"},cloudLayer),d=mk("g",{"class":"drift"},g),s=mk("g",{transform:"scale("+c[1]+")"},d);
+  mk("ellipse",{cx:6,cy:16,rx:64,ry:16,"class":"und"},s);
+  [[-40,4,26,20],[-12,-10,34,27],[20,-4,29,23],[44,8,23,17],[2,12,46,20]].forEach(function(e){
+    mk("ellipse",{cx:e[0],cy:e[1],rx:e[2],ry:e[3]},s);});
+  d.style.setProperty("--dt",c[2]+"s");d.style.setProperty("--dl",c[3]+"s");
+  clouds.push({g:g,y:c[0]});
+});
+
+/* birds */
+var birdLayer=document.getElementById("birds");
+[[.20,150,-20],[.28,118,-70],[.14,180,-120]].forEach(function(b){
+  var g=mk("g",{"class":"bird"},birdLayer),f=mk("g",{"class":"fl"},g);
+  mk("path",{d:"M-12 0q6-8 12 0q6-8 12 0"},f);
+  g.style.setProperty("--dt",b[1]+"s");g.style.setProperty("--dl",b[2]+"s");
+  clouds.push({g:g,y:b[0]});
+});
+
+/* fence */
+var fence=document.getElementById("fence");
+for(i=-30;i<1660;i+=86){mk("rect",{x:i,y:-56,width:9,height:62,rx:2,fill:"#9c7247"},fence);
+  mk("rect",{x:i+1,y:-52,width:7,height:5,fill:"#c19a6b"},fence);}
+mk("rect",{x:-30,y:-46,width:1660,height:6,rx:2,fill:"#a87c4f"},fence);
+mk("rect",{x:-30,y:-26,width:1660,height:6,rx:2,fill:"#946c44"},fence);
+
+/* trees */
+var farT=document.getElementById("farTrees"),nearT=document.getElementById("nearTrees"),trees=[];
+[[138,.055,1.06,7.4,-.4,nearT],[1462,.045,.92,8.6,-2.1,nearT],[404,.012,.44,9.8,-1.2,farT],[1152,.008,.40,11,.6,farT]]
+.forEach(function(t){
+  var g=mk("g",{"class":"tree"},t[5]),w=mk("g",{"class":"sway"},g);
+  mk("use",{href:"#tree"},w);
+  w.style.setProperty("--st",t[4]+"s");w.style.setProperty("--sl",t[5===5?3:3]+"s");
+  trees.push({g:g,x:t[0],by:t[1],s:t[2]});
+});
+
+/* ground decor */
+var decorLayer=document.getElementById("decor"),decor=[];
+for(i=0;i<40;i++){
+  var p=mk("path",{d:"M0 0q3-12 1-19M0 0q-4-9-9-13M0 0q5-8 10-11","class":"tuft"},decorLayer);
+  decor.push({el:p,nx:rn(),ny:.04+rn()*.94,s:.65+rn()*1.15});
+}
+for(i=0;i<26;i++){
+  var f=mk("g",{},decorLayer),t=rn();
+  mk("path",{d:"M0 0q-3-9 0-15","class":"stem"},f);
+  if(t<.4){[0,1,2,3,4].forEach(function(k){var a=k*1.2566;mk("circle",{cx:(Math.cos(a)*4).toFixed(1),cy:(-16+Math.sin(a)*4).toFixed(1),r:3,fill:"#fdfaf0"},f);});
+    mk("circle",{cx:0,cy:-16,r:2.4,fill:"#f2c33c"},f);}
+  else if(t<.7){mk("circle",{cx:0,cy:-17,r:4.6,fill:"#d8483f"},f);mk("circle",{cx:0,cy:-17,r:1.8,fill:"#5a2420"},f);}
+  else{mk("circle",{cx:0,cy:-16,r:4,fill:"#f6cf3f"},f);mk("circle",{cx:-3,cy:-19,r:2.4,fill:"#ffe58a"},f);}
+  decor.push({el:f,nx:rn(),ny:.06+rn()*.92,s:.8+rn()*.9});
+}
+for(i=0;i<16;i++){
+  var c=mk("circle",{r:2.4,"class":"fly"},decorLayer);
+  c.style.setProperty("--ft",(1.6+rn()*2.4).toFixed(2)+"s");
+  c.style.animationDelay=(-rn()*4).toFixed(2)+"s";
+  decor.push({el:c,nx:rn(),ny:.1+rn()*.6,fly:1});
+}
+/* butterflies */
+var bugs=document.getElementById("bugs");
+[[.20,.80,9],[.63,.90,12]].forEach(function(b){
+  var g=mk("g",{},bugs),f=mk("g",{"class":"flit"},g),w=mk("g",{"class":"wingf"},f);
+  mk("ellipse",{cx:-6,cy:-4,rx:7,ry:5,fill:"#f5c542",stroke:"#c98a2b","stroke-width":1},w);
+  mk("ellipse",{cx:6,cy:-4,rx:7,ry:5,fill:"#f5c542",stroke:"#c98a2b","stroke-width":1},w);
+  mk("ellipse",{cx:-5,cy:3,rx:5,ry:3.6,fill:"#f9e08f"},w);
+  mk("ellipse",{cx:5,cy:3,rx:5,ry:3.6,fill:"#f9e08f"},w);
+  mk("ellipse",{cx:0,cy:0,rx:2,ry:7,fill:"#4a3a1e"},f);
+  f.style.setProperty("--ft",b[2]+"s");
+  decor.push({el:g,nx:b[0],ny:b[1],s:1,fix:1});
+});
+
+/* animals: config, hit areas, label placement */
+var SPEC={horse:{x:.795,by:.128,s:1.0},cow:{x:.548,by:.163,s:.94},
+          sheep:{x:.328,by:.192,s:.87},pig:{x:.168,by:.218,s:.83}};
+var A={},popEl={};
+Array.prototype.forEach.call(document.querySelectorAll(".animal"),function(a){
+  var sp=a.getAttribute("data-sp"),art=a.querySelector(".art"),pop=a.querySelector(".pop"),
+      tag=a.querySelector(".tag"),bub=a.querySelector(".bubble"),n=a.querySelector(".tag text");
+  n.textContent=a.getAttribute("data-name").toUpperCase();
+  bub.querySelector("text").textContent=a.getAttribute("data-snd");
+  var bb=art.getBBox();
+  mk("rect",{"class":"hit",x:bb.x-6,y:bb.y-6,width:bb.width+12,height:bb.height+12},pop);
+  pop.insertBefore(pop.lastChild.previousSibling===tag?pop.firstChild:pop.firstChild,pop.firstChild);
+  a._bb=bb;a._tag=tag;a._bub=bub;A[sp]=a;popEl[sp]=pop;
+});
+
+var Vh=900,H=585;
+var skyR=document.getElementById("sky"),grass=document.getElementById("grass"),
+    tex=document.getElementById("tex"),hl=document.getElementById("hline"),
+    hA=document.getElementById("hillA"),hB=document.getElementById("hillB"),
+    sun=document.getElementById("sun"),veil=document.getElementById("dusk-veil");
+
+function layout(){
+  var w=window.innerWidth||1600,h=window.innerHeight||900;
+  Vh=Math.round(1600*h/w);Vh=clamp(Vh,430,3400);
+  scene.setAttribute("viewBox","0 0 1600 "+Vh);
+  H=Math.round(Vh*.65);
+  skyR.setAttribute("height",H+2);
+  grass.setAttribute("y",H);grass.setAttribute("height",Vh-H+2);
+  tex.setAttribute("y",H);tex.setAttribute("height",Vh-H+2);
+  hl.setAttribute("y",H);veil.setAttribute("height",Vh);
+  hA.setAttribute("transform","translate(0,"+H+")");
+  hB.setAttribute("transform","translate(0,"+H+")");
+  fence.setAttribute("transform","translate(0,"+H+")");
+  sun.setAttribute("transform","translate(1358,"+(Vh*.15).toFixed(0)+") scale("+clamp(Vh/900,.7,1.15).toFixed(3)+")");
+  var gs=clamp(Vh/900,.8,1.55);
+  clouds.forEach(function(c){c.g.setAttribute("transform","translate(0,"+(H*c.y).toFixed(1)+")");});
+  trees.forEach(function(t){t.g.setAttribute("transform","translate("+t.x+","+(H+Vh*t.by).toFixed(1)+") scale("+(t.s*gs).toFixed(3)+")");});
+  for(var sp in SPEC){var a=A[sp],c2=SPEC[sp];
+    if(!a)continue;
+    a.setAttribute("transform","translate("+(1600*c2.x)+","+(H+Vh*c2.by).toFixed(1)+") scale("+(c2.s*gs).toFixed(3)+")");
+    var s=c2.s*gs,bb=a._bb;
+    a._tag.setAttribute("transform","translate(0,"+(bb.y-20).toFixed(1)+") scale("+(1/s).toFixed(3)+")");
+    a._bub.setAttribute("transform","translate(0,"+(bb.y-22).toFixed(1)+") scale("+(1/s).toFixed(3)+")");
+  }
+  var gh=Vh-H;
+  decor.forEach(function(d){
+    var y=(d.fly?H+gh*d.ny:(H+gh*d.ny)),x=d.nx*1600,s=d.s||1;
+    d.el.setAttribute("transform","translate("+x.toFixed(1)+","+y.toFixed(1)+") scale("+s+")");
+  });
+}
+layout();
+var raf;window.addEventListener("resize",function(){cancelAnimationFrame(raf);raf=requestAnimationFrame(layout);});
+
+/* interaction */
+function say(a){a.classList.add("say","ping","focus");
+  clearTimeout(a._t);a._t=setTimeout(function(){a.classList.remove("say");},1500);}
+function spook(a){a.classList.remove("spook");void a.offsetWidth;a.classList.add("spook","ping");
+  clearTimeout(a._s);a._s=setTimeout(function(){a.classList.remove("ping");},950);
+  setTimeout(function(){a.classList.remove("spook");},760);}
+for(var sp in A){(function(a){
+  a.addEventListener("click",function(){spook(a);say(a);});
+  a.addEventListener("mouseenter",function(){a.classList.add("focus");});
+  a.addEventListener("mouseleave",function(){a.classList.remove("focus");a._hide();});
+  a._hide=function(){if(!document.querySelector('#legend li[data-sp="'+a.dataset.sp+'"].on'))a.classList.remove("focus");};
+})(A[sp]);}
+
+Array.prototype.forEach.call(document.querySelectorAll("#legend li"),function(li){
+  var a=A[li.getAttribute("data-sp")];if(!a)return;
+  li.addEventListener("mouseenter",function(){a.classList.add("focus");});
+  li.addEventListener("mouseleave",function(){a.classList.remove("focus");});
+  li.addEventListener("click",function(){spook(a);say(a);});
+});
+
+var btn=document.getElementById("dusk");
+btn.addEventListener("click",function(){
+  var on=document.body.classList.toggle("dusk");
+  btn.textContent=on?"Noon":"Dusk";
+});
+})();
+</script>
+</body>
+</html>

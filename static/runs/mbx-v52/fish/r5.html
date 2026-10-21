@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animated Underwater Scene</title>
+<style>
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #02101f;
+  }
+  #scene {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+  }
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#59d1ff"/>
+      <stop offset=".45" stop-color="#1889cc"/>
+      <stop offset=".77" stop-color="#06497e"/>
+      <stop offset="1" stop-color="#020f1c"/>
+    </linearGradient>
+
+    <linearGradient id="sandGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ecd79a"/>
+      <stop offset=".40" stop-color="#cba765"/>
+      <stop offset=".75" stop-color="#8d6b3f"/>
+      <stop offset="1" stop-color="#5c4224"/>
+    </linearGradient>
+
+    <radialGradient id="bubbleGrad" cx="30%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+      <stop offset=".45" stop-color="#b6ebff" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".13"/>
+    </radialGradient>
+
+    <linearGradient id="body1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe9b0"/>
+      <stop offset=".45" stop-color="#ff9a3f"/>
+      <stop offset="1" stop-color="#c74d12"/>
+    </linearGradient>
+
+    <linearGradient id="body2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c9fbff"/>
+      <stop offset=".55" stop-color="#31d1c8"/>
+      <stop offset="1" stop-color="#0b7b93"/>
+    </linearGradient>
+  </defs>
+
+  <rect id="bg" x="0" y="0" width="100%" height="100%" fill="url(#water)"/>
+
+  <g id="seafloor">
+    <path id="sandPath" fill="url(#sandGrad)"/>
+    <ellipse class="rock" data-fx=".18" data-fy=".20" data-rx="34" data-ry="13" fill="#775834"/>
+    <ellipse class="rock" data-fx=".43" data-fy=".35" data-rx="52" data-ry="18" fill="#8c683d"/>
+    <ellipse class="rock" data-fx=".66" data-fy=".15" data-rx="30" data-ry="11" fill="#6a4a29"/>
+    <ellipse class="rock" data-fx=".88" data-fy=".40" data-rx="58" data-ry="19" fill="#7f5c33"/>
+  </g>
+
+  <g id="plants">
+    <g class="plant">
+      <g>
+        <animateTransform attributeName="transform" type="skewX" values="-6;6;-6" dur="6.5s" repeatCount="indefinite"/>
+        <path d="M0 0 C 11 -33 -9 -63 7 -95 C 24 -129 -8 -163 10 -192"
+              fill="none" stroke="#17b96c" stroke-width="10" stroke-linecap="round"/>
+        <ellipse cx="11" cy="-63" rx="16" ry="6" fill="#1fca7d" opacity=".8"/>
+        <ellipse cx="-6" cy="-127" rx="18" ry="6" fill="#129f63" opacity=".8"/>
+      </g>
+    </g>
+    <g class="plant">
+      <g>
+        <animateTransform attributeName="transform" type="skewX" values="5;-5;5" dur="8.2s" repeatCount="indefinite"/>
+        <path d="M0 0 C -10 -30 9 -60 -7 -94 C -24 -128 9 -160 -9 -188"
+              fill="none" stroke="#2bd07d" stroke-width="9" stroke-linecap="round"/>
+        <ellipse cx="-10" cy="-60" rx="15" ry="5.5" fill="#17b96c" opacity=".82"/>
+        <ellipse cx="8" cy="-123" rx="18" ry="6" fill="#20c273" opacity=".78"/>
+      </g>
+    </g>
+  </g>
+
+  <g id="fish2" transform="translate(800 450)">
+    <polygon points="-55,-24 -116,0 -55,24" fill="#22969a"/>
+    <ellipse cx="0" cy="0" rx="62" ry="19" fill="url(#body2)"/>
+    <path d="M-18,-17 Q2,-42 26,-16 Q5,-20 -18,-17Z" fill="#ffd95e"/>
+    <path d="M-3,15 Q-26,38 -10,48 Q12,32 17,17Z" fill="#ffdd74" opacity=".85"/>
+    <circle cx="42" cy="-3" r="8" fill="#fffdf8"/>
+    <circle cx="44" cy="-3" r="3" fill="#0e1c26"/>
+    <path d="M56,1 Q63,6 56,11" fill="none" stroke="#0f5f58" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+
+  <g id="fish1" transform="translate(180 300)">
+    <polygon points="-60,-36 -140,0 -60,36" fill="#c0591c"/>
+    <ellipse cx="0" cy="0" rx="72" ry="53" fill="url(#body1)"/>
+    <path d="M-25,-47 Q5,-93 35,-50 Q10,-55 -25,-47Z" fill="#f8791d"/>
+    <path d="M-5,22 Q-35,58 -13,76 Q13,53 23,24Z" fill="#ffa862" opacity=".8"/>
+    <circle cx="47" cy="-14" r="12" fill="#fffdf8"/>
+    <circle cx="50" cy="-13" r="4.4" fill="#10171f"/>
+    <path d="M64,7 Q73,13 66,24" fill="none" stroke="#752f0a" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <g id="bubbles"></g>
+</svg>
+
+<script>
+var NS = "http://www.w3.org/2000/svg";
+var w = window.innerWidth;
+var h = window.innerHeight;
+var floor = h * .875;
+var t = 0;
+var last = performance.now();
+var inited = false;
+
+var sandPath = document.getElementById("sandPath");
+var rocks = Array.prototype.slice.call(document.querySelectorAll(".rock"));
+var plants = Array.prototype.slice.call(document.querySelectorAll(".plant"));
+var bubbleLayer = document.getElementById("bubbles");
+
+var fishData = [
+  { el: document.getElementById("fish1"), x: w * .25, yf: .38, v: 31, sl: 150, sr: 80, ba: 12, bs: .55 },
+  { el: document.getElementById("fish2"), x: w * .72, yf: .61, v: 69, sl: 118, sr: 64, ba: 9, bs: 1.15 }
+];
+
+var bubbles = [];
+
+function makeSand() {
+  floor = h * .875;
+  var steps = Math.max(18, Math.min(64, Math.floor(w / 35)));
+  var d = "M0 " + floor.toFixed(1);
+  var i, x, y;
+
+  for (i = 0; i <= steps; i++) {
+    x = w * i / steps;
+    y = floor + 6 + Math.sin(x * .009 + .7) * 7 +
+        Math.sin(x * .0032 + 2.1) * 10 +
+        (x / (w || 1)) * 16;
+    d += " L" + x.toFixed(1) + " " + y.toFixed(1);
+  }
+
+  d += " L" + w + " " + h + " L0 " + h + "Z";
+  sandPath.setAttribute("d", d);
+
+  var scale = Math.max(.55, Math.min(1.5, w / 1300));
+  for (i = 0; i < rocks.length; i++) {
+    var r = rocks[i];
+    r.setAttribute("cx", ((+r.getAttribute("data-fx")) * w).toFixed(1));
+    r.setAttribute("cy", (floor + 25 + (+r.getAttribute("data-fy")) * 35).toFixed(1));
+    r.setAttribute("rx", ((+r.getAttribute("data-rx")) * scale).toFixed(1));
+    r.setAttribute("ry", ((+r.getAttribute("data-ry")) * scale).toFixed(1));
+  }
+}
+
+function placePlants() {
+  var scale = Math.max(.62, Math.min(1.25, h / 720));
+  var xs = [.12, .78, .5];
+  for (var i = 0; i < plants.length; i++) {
+    var xf = xs[i] === undefined ? .5 : xs[i];
+    plants[i].setAttribute("transform",
+      "translate(" + (xf * w).toFixed(1) + " " + (floor + 18).toFixed(1) + ") scale(" + scale.toFixed(3) + ")");
+  }
+}
+
+function newBubble() {
+  var r = 2.6 + Math.random() * 7.8;
+  var el = document.createElementNS(NS, "circle");
+  el.setAttribute("r", r.toFixed(2));
+  el.setAttribute("fill", "url(#bubbleGrad)");
+  el.setAttribute("stroke", "rgba(226,248,255,.5)");
+  el.setAttribute("stroke-width", r > 7 ? ".7" : "1");
+
+  var b = {
+    r: r,
+    el: el,
+    baseX: Math.random() * w,
+    x: 0,
+    y: floor + Math.random() * 16,
+    v: (215 / r + 10) * (.75 + Math.random() * .6),
+    amp: 3 + Math.random() * 9,
+    fr: .3 + Math.random() * .9,
+    ph: Math.random() * 6.283
+  };
+
+  b.x = b.baseX;
+  el.setAttribute("cx", b.x.toFixed(1));
+  el.setAttribute("cy", b.y.toFixed(1));
+  bubbleLayer.appendChild(el);
+  bubbles.push(b);
+}
+
+function makeBubbles(n) {
+  while (bubbles.length > n) {
+    bubbleLayer.removeChild(bubbles.pop().el);
+  }
+  while (bubbles.length < n) {
+    newBubble();
+  }
+}
+
+function layout() {
+  w = window.innerWidth;
+  h = window.innerHeight;
+
+  if (!inited) {
+    fishData[0].x = w * .25;
+    fishData[1].x = w * .72;
+    inited = true;
+  }
+
+  makeSand();
+  placePlants();
+
+  var i;
+  for (i = 0; i < bubbles.length; i++) {
+    var b = bubbles[i];
+    if (b.x < -30 || b.x > w + 30 || b.y > h + 30 || b.y < -30) {
+      b.y = floor + 3 + Math.random() * 14;
+      b.baseX = Math.random() * w;
+      b.x = b.baseX;
+    }
+    b.el.setAttribute("cx", b.x.toFixed(1));
+    b.el.setAttribute("cy", b.y.toFixed(1));
+  }
+
+  for (i = 0; i < fishData.length; i++) {
+    var f = fishData[i];
+    var fy = Math.max(90, Math.min(h - 80, h * f.yf));
+    f.el.setAttribute("transform", "translate(" + f.x.toFixed(1) + " " + fy.toFixed(1) + ")");
+  }
+}
+
+function frame(now) {
+  var dt = (now - last) / 1000;
+  last = now;
+  if (dt > .083) dt = .083;
+  if (dt < 0) dt = 0;
+  t += dt;
+
+  var swimScale = Math.max(.6, Math.min(1.8, w / 1200));
+  var riseScale = Math.max(.8, Math.min(1.8, h / 800));
+  var i;
+
+  for (i = 0; i < fishData.length; i++) {
+    var f = fishData[i];
+
+    f.x += f.v * swimScale * dt;
+    if (f.x - f.sl > w) {
+      f.x = -f.sl;
+    } else if (f.x + f.sr < 0) {
+      f.x = w + f.sr;
+    }
+
+    var fy = Math.max(85, Math.min(h - 75, h * f.yf + Math.sin(t * f.bs) * f.ba));
+    f.el.setAttribute("transform", "translate(" + f.x.toFixed(1) + " " + fy.toFixed(1) + ")");
+  }
+
+  for (i = 0; i < bubbles.length; i++) {
+    var b = bubbles[i];
+
+    b.y -= b.v * riseScale * dt;
+    if (b.y + b.r < 0) {
+      b.y = floor + 3 + Math.random() * 14;
+      b.baseX = Math.random() * w;
+      b.x = b.baseX;
+    } else {
+      b.x = b.baseX + Math.sin(t * b.fr + b.ph) * b.amp;
+      if (b.x < 0) b.x = 0;
+      if (b.x > w) b.x = w;
+    }
+
+    b.el.setAttribute("cx", b.x.toFixed(1));
+    b.el.setAttribute("cy", b.y.toFixed(1));
+  }
+
+  requestAnimationFrame(frame);
+}
+
+window.addEventListener("resize", layout);
+layout();
+makeBubbles(14);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

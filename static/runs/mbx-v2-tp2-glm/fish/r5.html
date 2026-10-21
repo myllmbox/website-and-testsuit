@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiet Reef</title>
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0c3b5e}
+svg{display:block;width:100vw;height:100vh}
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" aria-label="Animated underwater reef scene with two fish, rising bubbles and swaying seaweed">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#8ed4e4"/><stop offset=".5" stop-color="#3d8fb4"/><stop offset="1" stop-color="#0c3b5e"/>
+</linearGradient>
+<linearGradient id="sandG" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#e0c48f"/><stop offset="1" stop-color="#ab8452"/>
+</linearGradient>
+<radialGradient id="bodyA" cx=".38" cy=".32" r=".95">
+<stop offset="0" stop-color="#f49a52"/><stop offset="1" stop-color="#cd561d"/>
+</radialGradient>
+<radialGradient id="bodyB" cx=".38" cy=".32" r=".95">
+<stop offset="0" stop-color="#e8d87e"/><stop offset="1" stop-color="#a8913a"/>
+</radialGradient>
+<linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+</linearGradient>
+</defs>
+<rect width="100%" height="100%" fill="url(#water)"/>
+<g id="backdrop"></g>
+
+<!-- Fish 1: large, round-bodied reef fish -->
+<g id="fishA"><g>
+<path d="M-34,26 Q-48,50 -64,40 Q-48,38 -36,18 Z" fill="#b64f1a"/>
+<g id="tailA">
+<polygon points="-56,0 -106,-36 -106,36" fill="#b64f1a"/>
+<polygon points="-58,0 -90,-19 -90,19" fill="#ca6028" opacity=".75"/>
+</g>
+<path d="M-36,-38 Q-2,-84 38,-35 Q0,-50 -36,-38 Z" fill="#b64f1a"/>
+<ellipse rx="70" ry="47" fill="url(#bodyA)"/>
+<path d="M6,-40 Q-4,0 6,40" stroke="#a84715" stroke-width="8" fill="none" opacity=".28" stroke-linecap="round"/>
+<path d="M-22,-38 Q-31,0 -22,38" stroke="#a84715" stroke-width="7" fill="none" opacity=".22" stroke-linecap="round"/>
+<path d="M-62,18 Q0,52 60,14 Q0,38 -62,18 Z" fill="#ffd9a6" opacity=".5"/>
+<path d="M30,-27 Q21,0 30,27" stroke="#9c3f10" stroke-width="4" fill="none" opacity=".45" stroke-linecap="round"/>
+<g id="finA"><path d="M20,6 Q4,34 -14,46 Q10,44 26,26 Q32,15 20,6 Z" fill="#a84715" opacity=".95"/></g>
+<circle cx="42" cy="-13" r="9.5" fill="#fdfdfd"/>
+<circle cx="45" cy="-13" r="4.7" fill="#20242c"/>
+<circle cx="46.7" cy="-15.2" r="1.7" fill="#fff"/>
+<path d="M67,4 Q60,12 51,9" stroke="#8c3a10" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+</g></g>
+
+<g id="bubbleLayer"></g>
+
+<!-- Fish 2: small, slender golden fish -->
+<g id="fishB"><g>
+<path d="M-26,9 Q-40,24 -54,16 Q-38,16 -28,5 Z" fill="#8f7a2e"/>
+<g id="tailB">
+<polygon points="-36,0 -74,-18 -74,18" fill="#8f7a2e"/>
+<polygon points="-38,0 -62,-11 -62,11" fill="#a08a3c" opacity=".75"/>
+</g>
+<path d="M-10,-11 Q4,-36 20,-10 Q4,-16 -10,-11 Z" fill="#8f7a2e"/>
+<ellipse rx="46" ry="15" fill="url(#bodyB)"/>
+<path d="M-42,3 Q0,10 38,-2" stroke="#6d5c1e" stroke-width="3.5" fill="none" opacity=".5" stroke-linecap="round"/>
+<path d="M-36,7 Q0,14 34,5 Q0,10 -36,7 Z" fill="#f4ecb8" opacity=".45"/>
+<g id="finB"><path d="M10,2 Q2,15 -7,19 Q4,17 13,8 Z" fill="#8f7a2e"/></g>
+<circle cx="31" cy="-4" r="5" fill="#fdfdfd"/>
+<circle cx="33" cy="-4" r="2.5" fill="#20242c"/>
+<circle cx="34.2" cy="-5.6" r=".9" fill="#fff"/>
+<path d="M44.5,2.5 Q41,6.5 36,5.5" stroke="#6d5c1e" stroke-width="2" fill="none" stroke-linecap="round"/>
+</g></g>
+
+<g id="beams" opacity=".8"></g>
+<g id="foreground"></g>
+<g id="specks"></g>
+</svg>
+
+<script>
+(function(){
+'use strict';
+var NS='http://www.w3.org/2000/svg';
+var svg=document.getElementById('scene');
+function $(id){return document.getElementById(id);}
+function el(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
+function clear(g){while(g.firstChild)g.removeChild(g.firstChild);}
+
+var W=window.innerWidth,H=window.innerHeight,ready=false;
+var fishA={x:0,dir:1,yF:.34,ph:0,ext:118,wag:5.5,fw:7,speed:60};
+var fishB={x:0,dir:-1,yF:.58,ph:2.3,ext:84,wag:8.5,fw:11,speed:130};
+fishA.el=$('fishA');fishB.el=$('fishB');
+var tailA=$('tailA'),finA=$('finA'),tailB=$('tailB'),finB=$('finB');
+var bubbles=[],specks=[],blades=[],beams=[];
+var bubbleLayer=$('bubbleLayer'),speckLayer=$('specks');
+
+function dune(top,amp){
+  return 'M0 '+(top+amp)+' C '+(W*.2)+' '+(top-amp)+' '+(W*.35)+' '+(top+amp)+' '+(W*.5)+' '+top+
+    ' C '+(W*.65)+' '+(top-amp)+' '+(W*.8)+' '+(top+amp)+' '+W+' '+(top-amp*.5)+' L '+W+' '+H+' L 0 '+H+' Z';
+}
+function weedPath(h){
+  var s=h*.16;
+  return 'M0 0 C '+(-s)+' '+(-h*.25)+' '+s+' '+(-h*.45)+' '+(-s*.8)+' '+(-h*.68)+
+    ' S '+(s*.7)+' '+(-h*.9)+' 0 '+(-h);
+}
+function rock(p,x,y,rx,ry,c){
+  el('ellipse',{cx:x,cy:y,rx:rx,ry:ry,fill:c},p);
+  el('ellipse',{cx:x-rx*.25,cy:y-ry*.4,rx:rx*.5,ry:ry*.45,fill:'#a68f6d',opacity:.4},p);
+}
+function weedClump(p,x,y,h,c,ph){
+  var g=el('g',{transform:'translate('+x+' '+y+')'},p);
+  el('ellipse',{cx:0,cy:1,rx:14,ry:4.5,fill:'#8a7458',opacity:.55},g);
+  for(var i=0;i<3;i++){
+    var bh=h*(.65+.35*Math.random());
+    var b=el('path',{d:weedPath(bh),stroke:c,fill:'none','stroke-width':Math.max(4.5,bh*.032).toFixed(1),'stroke-linecap':'round'},g);
+    blades.push({el:b,lean:(i-1)*16+(Math.random()*8-4),ph:ph+i*.9,amp:2+Math.random()*2.5});
+  }
+}
+function buildScene(){
+  W=window.innerWidth;H=window.innerHeight;
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  fishA.speed=42+W*.013;
+  fishB.speed=fishA.speed*2.15;
+  if(!ready){fishA.x=W*.22;fishB.x=W*.68;ready=true;}
+  var back=$('backdrop'),fg=$('foreground'),bl=$('beams');
+  clear(back);clear(fg);clear(bl);
+  blades.length=0;beams.length=0;
+  el('path',{d:dune(H*.852,H*.01),fill:'#c2a069',opacity:.85},back);
+  el('path',{d:dune(H*.872,H*.012),fill:'url(#sandG)'},back);
+  rock(back,W*.16,H*.885,46,19,'#7c6850');
+  rock(back,W*.195,H*.89,25,12,'#8f7a5e');
+  rock(back,W*.72,H*.888,56,22,'#74604a');
+  rock(back,W*.757,H*.892,28,13,'#8a7458');
+  weedClump(back,W*.30,H*.878,H*.19,'#2e7d4b',0);
+  weedClump(back,W*.335,H*.882,H*.15,'#3a9660',1.3);
+  weedClump(back,W*.62,H*.88,H*.21,'#256b40',2.4);
+  weedClump(back,W*.655,H*.884,H*.14,'#3a9660',.7);
+  weedClump(fg,W*.06,H*.92,H*.26,'#1d5c36',1.9);
+  weedClump(fg,W*.095,H*.925,H*.19,'#257344',3.4);
+  weedClump(fg,W*.93,H*.922,H*.24,'#1d5c36',.4);
+  for(var i=0;i<3;i++){
+    var x=W*(.16+.3*i),wt=W*.045,sl=W*.055;
+    beams.push({el:el('polygon',{points:x+',0 '+(x+wt)+',0 '+(x+wt+sl)+','+(H*.72)+' '+(x+sl*.35)+','+(H*.72),fill:'url(#beam)'},bl),ph:i*2.1});
+  }
+}
+function sizeBubble(b){
+  b.c.setAttribute('r',b.r);
+  b.c.setAttribute('stroke-width',Math.max(1,b.r*.16).toFixed(2));
+  b.hl.setAttribute('cx',(-b.r*.35).toFixed(2));
+  b.hl.setAttribute('cy',(-b.r*.38).toFixed(2));
+  b.hl.setAttribute('r',Math.max(.9,b.r*.3).toFixed(2));
+}
+function respawn(b,scatter){
+  b.r=2.5+Math.random()*6.5;
+  b.xf=Math.random();
+  b.speed=30+240/b.r;
+  b.drift=6+Math.random()*16;
+  b.ph=Math.random()*6.28;
+  b.y=scatter?Math.random()*H:H*(.86+Math.random()*.03);
+  sizeBubble(b);
+}
+function makeBubble(scatter){
+  var g=el('g',{},bubbleLayer);
+  var b={g:g,
+    c:el('circle',{fill:'rgba(255,255,255,.12)',stroke:'rgba(233,247,255,.65)'},g),
+    hl:el('circle',{fill:'rgba(255,255,255,.85)'},g)};
+  respawn(b,scatter);
+  bubbles.push(b);
+}
+var i;
+for(i=0;i<9;i++)makeBubble(true);
+for(i=0;i<12;i++){
+  var c=el('circle',{r:(.8+Math.random()*1.1).toFixed(2),fill:'#fff',opacity:(.1+Math.random()*.14).toFixed(2)},speckLayer);
+  specks.push({el:c,xf:Math.random(),y:Math.random()*H,v:3+Math.random()*6,ph:Math.random()*6.28});
+}
+function stepFish(f,t,dt,tail,fin,jx,jy,fx,fy){
+  f.x+=f.speed*dt*f.dir;
+  if(f.dir>0&&f.x>W+f.ext)f.x=-f.ext;
+  if(f.dir<0&&f.x<-f.ext)f.x=W+f.ext;
+  var bob=Math.sin(t*1.1+f.ph)*(f===fishA?9:6.5);
+  var pitch=Math.sin(t*1.1+f.ph+.9)*4;
+  f.el.setAttribute('transform','translate('+f.x.toFixed(1)+' '+(f.yF*H+bob).toFixed(1)+') scale('+f.dir+' 1) rotate('+pitch.toFixed(2)+')');
+  tail.setAttribute('transform','rotate('+(Math.sin(t*f.wag+f.ph)*9).toFixed(2)+' '+jx+' '+jy+')');
+  fin.setAttribute('transform','rotate('+(Math.sin(t*f.fw+f.ph+1.1)*7).toFixed(2)+' '+fx+' '+fy+')');
+}
+var last=performance.now();
+function tick(now){
+  var t=now*.001,dt=Math.min(.05,(now-last)*.001);
+  last=now;
+  stepFish(fishA,t,dt,tailA,finA,-56,0,20,6);
+  stepFish(fishB,t,dt,tailB,finB,-36,0,10,2);
+  var j,b,s;
+  for(j=0;j<bubbles.length;j++){
+    b=bubbles[j];
+    b.y-=b.speed*dt;
+    if(b.y<-b.r*2)respawn(b,false);
+    b.g.setAttribute('transform','translate('+((b.xf*W+Math.sin(t*.8+b.ph)*b.drift).toFixed(1))+' '+b.y.toFixed(1)+')');
+  }
+  for(j=0;j<specks.length;j++){
+    s=specks[j];
+    s.y+=s.v*dt;
+    if(s.y>H+4)s.y=-4;
+    s.el.setAttribute('transform','translate('+((s.xf*W+Math.sin(t*.5+s.ph)*10).toFixed(1))+' '+s.y.toFixed(1)+')');
+  }
+  for(j=0;j<blades.length;j++){
+    b=blades[j];
+    b.el.setAttribute('transform','rotate('+(b.lean+Math.sin(t*.55+b.ph)*b.amp).toFixed(2)+')');
+  }
+  for(j=0;j<beams.length;j++){
+    b=beams[j];
+    b.el.setAttribute('opacity',(.13+.09*(.5+.5*Math.sin(t*.21+b.ph))).toFixed(3));
+  }
+  requestAnimationFrame(tick);
+}
+buildScene();
+window.addEventListener('resize',buildScene);
+requestAnimationFrame(function(t){last=t;tick(t);});
+})();
+</script>
+</body>
+</html>

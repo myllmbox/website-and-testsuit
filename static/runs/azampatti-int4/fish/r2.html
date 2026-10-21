@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animated Underwater Scene</title>
+<style>
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #012;
+}
+svg {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+</style>
+</head>
+<body>
+<svg id="scene">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fe2ff"/>
+      <stop offset="0.45" stop-color="#1688cf"/>
+      <stop offset="1" stop-color="#03213a"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8d2a1"/>
+      <stop offset="1" stop-color="#8b6435"/>
+    </linearGradient>
+    <radialGradient id="bubble" cx="0.35" cy="0.35" r="0.65">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="0.55" stop-color="#d9f7ff" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#64c9ff" stop-opacity="0.55"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#water)"/>
+  <rect y="87.5%" width="100%" height="12.5%" fill="url(#sand)"/>
+
+  <g id="plants"></g>
+
+  <g id="fishes">
+    <g id="bigFish">
+      <polygon points="-78,0 -132,-40 -132,40" fill="#d9660d" stroke="#8a3700" stroke-width="2"/>
+      <ellipse rx="80" ry="26" fill="#ff9121" stroke="#c55b00" stroke-width="2"/>
+      <polygon points="-15,-16 16,-60 56,-18" fill="#ffaf61" stroke="#c55b00" stroke-width="2"/>
+      <ellipse rx="18" ry="10" transform="translate(12,13) rotate(25)" fill="#ffc999" stroke="#c55b00" stroke-width="1.5"/>
+      <circle cx="55" cy="-6" r="7" fill="#ffffff" stroke="#663500" stroke-width="1.5"/>
+      <circle cx="57" cy="-6" r="3" fill="#111111"/>
+      <path d="M73,-2 q -8 10 -17 5" stroke="#783b00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </g>
+
+    <g id="smallFish">
+      <polygon points="-29,0 -66,-25 -66,25" fill="#3f55ff" stroke="#1c2ea8" stroke-width="2"/>
+      <ellipse rx="34" ry="31" fill="#6e62ff" stroke="#392fd6" stroke-width="2"/>
+      <polygon points="-5,-21 15,-50 38,-19" fill="#c2bdff" stroke="#392fd6" stroke-width="2"/>
+      <ellipse rx="13" ry="8" transform="translate(2,12) rotate(22)" fill="#dcd9ff" stroke="#392fd6" stroke-width="1.5"/>
+      <circle cx="19" cy="-7" r="6" fill="#ffffff" stroke="#2c277f" stroke-width="1.5"/>
+      <circle cx="21" cy="-7" r="2.8" fill="#111111"/>
+      <path d="M31,-2 q -7 8 -14 4" stroke="#241f86" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <g id="bubbles"></g>
+</svg>
+
+<script>
+(function () {
+  var ns = "http://www.w3.org/2000/svg";
+  var plants = document.getElementById("plants");
+  var bubbleLayer = document.getElementById("bubbles");
+  var bigFish = document.getElementById("bigFish");
+  var smallFish = document.getElementById("smallFish");
+
+  var W = Math.max(1, window.innerWidth);
+  var H = Math.max(1, window.innerHeight);
+  var bubbles = [];
+
+  function baseY() {
+    return H * 0.91;
+  }
+
+  function makePlants() {
+    while (plants.firstChild) plants.removeChild(plants.firstChild);
+
+    var spots = [0.10, 0.28, 0.52, 0.71, 0.90];
+    var colors = ["#1f8f45", "#2fbb5d", "#15733f", "#39c56f", "#1b9e50"];
+
+    for (var i = 0; i < spots.length; i++) {
+      var x;
+      if (W < 120) {
+        x = W * (i + 1) / (spots.length + 1);
+      } else {
+        x = W * spots[i];
+        x = Math.max(28, Math.min(W - 28, x));
+      }
+
+      var by = baseY();
+      var h = Math.max(70, H * (i % 2 ? 0.26 : 0.19));
+      var dir = (i % 2) ? 1 : -1;
+
+      var d = "M " + x.toFixed(1) + " " + by.toFixed(1) +
+              " C " + (x + dir * 38).toFixed(1) + " " + (by - h * 0.35).toFixed(1) + ", " +
+              (x - dir * 30).toFixed(1) + " " + (by - h * 0.70).toFixed(1) + ", " +
+              (x + dir * 14).toFixed(1) + " " + (by - h).toFixed(1);
+
+      var p = document.createElementNS(ns, "path");
+      p.setAttribute("d", d);
+      p.setAttribute("fill", "none");
+      p.setAttribute("stroke", colors[i % colors.length]);
+      p.setAttribute("stroke-width", Math.max(7, H * 0.012).toFixed(1));
+      p.setAttribute("stroke-linecap", "round");
+      plants.appendChild(p);
+    }
+  }
+
+  var fish = [
+    { el: bigFish, baseHW: 155, baseScale: 1.10, x: 0, yRatio: 0.38, speed: 54, size: 1, hw: 155 },
+    { el: smallFish, baseHW: 72, baseScale: 0.55, x: 0, yRatio: 0.63, speed: 122, size: 1, hw: 72 }
+  ];
+
+  function updateScale() {
+    var g = Math.max(0.55, Math.min(1.2, Math.min(W, H) / 650));
+    for (var i = 0; i < fish.length; i++) {
+      fish[i].size = fish[i].baseScale * g;
+      fish[i].hw = fish[i].baseHW * fish[i].size;
+    }
+  }
+
+  function initBubbles() {
+    while (bubbleLayer.firstChild) bubbleLayer.removeChild(bubbleLayer.firstChild);
+    bubbles.length = 0;
+
+    for (var i = 0; i < 16; i++) {
+      var r = 3 + Math.random() * 9;
+      var x = Math.random() * W;
+      var y = baseY() - Math.random() * H * 0.75;
+      var el = document.createElementNS(ns, "circle");
+      el.setAttribute("r", r.toFixed(1));
+      el.setAttribute("cx", x.toFixed(1));
+      el.setAttribute("cy", y.toFixed(1));
+      el.setAttribute("fill", "url(#bubble)");
+      bubbleLayer.appendChild(el);
+
+      bubbles.push({
+        el: el,
+        x: x,
+        y: y,
+        r: r,
+        speed: 16 + (12 - r) * 5.5,
+        phase: Math.random() * 6.283,
+        drift: 10 + Math.random() * 20
+      });
+    }
+  }
+
+  function onResize() {
+    W = Math.max(1, window.innerWidth);
+    H = Math.max(1, window.innerHeight);
+    makePlants();
+    updateScale();
+
+    for (var i = 0; i < bubbles.length; i++) {
+      if (bubbles[i].x > W + 20) bubbles[i].x = Math.random() * W;
+      if (bubbles[i].y < 0 || bubbles[i].y > H) {
+        bubbles[i].y = baseY() + Math.random() * H * 0.04;
+      }
+    }
+  }
+
+  function initScene() {
+    makePlants();
+    initBubbles();
+    updateScale();
+    fish[0].x = W * 0.35;
+    fish[1].x = W * 0.75;
+  }
+
+  initScene();
+  window.addEventListener("resize", onResize);
+
+  var last = performance.now();
+
+  function frame(now) {
+    var dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
+    last = now;
+    var t = now / 1000;
+    var i, f, x, y;
+
+    for (i = 0; i < fish.length; i++) {
+      f = fish[i];
+      f.x += f.speed * dt;
+
+      if (f.x - f.hw > W + 15) f.x = -f.hw - 15;
+
+      x = f.x.toFixed(1);
+      y = (H * f.yRatio).toFixed(1);
+      f.el.setAttribute("transform", "translate(" + x + " " + y + ") scale(" + f.size.toFixed(3) + ")");
+    }
+
+    var range = W + 40;
+    for (i = 0; i < bubbles.length; i++) {
+      var b = bubbles[i];
+      b.y -= b.speed * dt;
+      b.x += Math.sin(t * 1.2 + b.phase) * b.drift * dt;
+
+      if (b.x < -20 || b.x > W + 20) {
+        b.x = ((b.x + 20) % range + range) % range - 20;
+      }
+
+      if (b.y + b.r < 0) {
+        b.x = Math.random() * W;
+        b.y = baseY() + Math.random() * H * 0.04;
+        b.r = 3 + Math.random() * 9;
+        b.speed = 16 + (12 - b.r) * 5.5;
+        b.el.setAttribute("r", b.r.toFixed(1));
+      }
+
+      b.el.setAttribute("cx", b.x.toFixed(1));
+      b.el.setAttribute("cy", b.y.toFixed(1));
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

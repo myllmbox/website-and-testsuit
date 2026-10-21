@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Animated Pasture</title>
+<style>
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #bfe8ff;
+  }
+  #scene {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .bounce {
+    animation: hop 0.75s ease-in-out infinite;
+  }
+  .bCow   { animation-duration: .74s; animation-delay: -0.11s; }
+  .bSheep { animation-duration: .66s; animation-delay: -0.31s; }
+  .bPig   { animation-duration: .86s; animation-delay: -0.50s; }
+  .bHorse { animation-duration: .72s; animation-delay: -0.40s; }
+
+  @keyframes hop {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-16px); }
+  }
+
+  .cloud {
+    fill: #ffffff;
+    fill-opacity: .95;
+  }
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6fb9ff"/>
+      <stop offset=".72" stop-color="#b9e6ff"/>
+      <stop offset="1" stop-color="#e8f8ff"/>
+    </linearGradient>
+
+    <linearGradient id="grassGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#72c677"/>
+      <stop offset=".55" stop-color="#47a055"/>
+      <stop offset="1" stop-color="#2f7a3c"/>
+    </linearGradient>
+
+    <pattern id="grassTex" patternUnits="userSpaceOnUse" width="140" height="64">
+      <rect width="140" height="64" fill="none"/>
+      <ellipse cx="24" cy="18" rx="20" ry="5" fill="#92e298" fill-opacity=".28"/>
+      <ellipse cx="91" cy="43" rx="26" ry="6" fill="#2d7739" fill-opacity=".18"/>
+      <ellipse cx="121" cy="12" rx="10" ry="3" fill="#c9ffd0" fill-opacity=".22"/>
+    </pattern>
+
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#fff9a8" stop-opacity=".95"/>
+      <stop offset="36%" stop-color="#fff19a" stop-opacity=".48"/>
+      <stop offset="100%" stop-color="#fff19a" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="leafGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#69c66d"/>
+      <stop offset="1" stop-color="#2e7f36"/>
+    </linearGradient>
+
+    <linearGradient id="barkGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#946238"/>
+      <stop offset="1" stop-color="#523016"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky / ground -->
+  <rect id="sky" x="0" y="0" width="100%" height="65%" fill="url(#skyGrad)"/>
+  <rect id="grass" x="0" y="65%" width="100%" height="35%" fill="url(#grassGrad)"/>
+  <rect id="grassTexture" x="0" y="65%" width="100%" height="35%" fill="url(#grassTex)" opacity=".42"/>
+  <line id="horizon" x1="0" y1="65%" x2="100%" y2="65%" stroke="#2e7a3a" stroke-width="3" stroke-opacity=".45"/>
+
+  <!-- Sun -->
+  <g id="sunGroup" transform="translate(1250,150)">
+    <g id="sunScale" transform="scale(1)">
+      <circle r="135" fill="url(#halo)"/>
+      <g stroke="#ffd83d" stroke-width="10" stroke-linecap="round" stroke-opacity=".9">
+        <line x1="55"  y1="0"    x2="125"  y2="0"/>
+        <line x1="39"  y1="39"   x2="88"   y2="88"/>
+        <line x1="0"   y1="55"   x2="0"    y2="125"/>
+        <line x1="-39" y1="39"   x2="-88"  y2="88"/>
+        <line x1="-55" y1="0"    x2="-125" y2="0"/>
+        <line x1="-39" y1="-39"  x2="-88"  y2="-88"/>
+        <line x1="0"   y1="-55"  x2="0"    y2="-125"/>
+        <line x1="39"  y1="-39"  x2="88"   y2="-88"/>
+      </g>
+      <circle r="56" fill="#fff6a8" fill-opacity=".65"/>
+      <circle r="38" fill="#ffd83d"/>
+    </g>
+  </g>
+
+  <!-- Clouds -->
+  <g id="cloud1">
+    <g id="cloudScale1" transform="scale(1)" class="cloud">
+      <ellipse cx="-27" cy="2"  rx="19" ry="14"/>
+      <circle  cx="-5"  cy="-7" r="16"/>
+      <circle  cx="16"  cy="-4" r="14"/>
+      <ellipse cx="31"  cy="6"  rx="14" ry="10"/>
+    </g>
+  </g>
+  <g id="cloud2">
+    <g id="cloudScale2" transform="scale(1)" class="cloud">
+      <ellipse cx="-31" cy="3"  rx="18" ry="13"/>
+      <circle  cx="-9"  cy="-8" r="15"/>
+      <circle  cx="14"  cy="-5" r="14"/>
+      <ellipse cx="31"  cy="5"  rx="15" ry="10"/>
+    </g>
+  </g>
+  <g id="cloud3">
+    <g id="cloudScale3" transform="scale(1)" class="cloud">
+      <ellipse cx="-23" cy="4"  rx="15" ry="11"/>
+      <circle  cx="-4"  cy="-6" r="13"/>
+      <circle  cx="13"  cy="-3" r="12"/>
+      <ellipse cx="26"  cy="7"  rx="11" ry="8"/>
+    </g>
+  </g>
+
+  <!-- Trees -->
+  <g id="tree1Group" transform="translate(180,590)">
+    <g id="tree1Scale" transform="scale(1)">
+      <polygon points="-9,0 9,0 6,-80 -6,-80" fill="url(#barkGrad)"/>
+      <g fill="url(#leafGrad)" stroke="#2a6e31" stroke-width="2">
+        <circle cx="0"   cy="-118" r="28"/>
+        <circle cx="-26" cy="-100" r="23"/>
+        <circle cx="27"  cy="-98"  r="23"/>
+        <circle cx="-15" cy="-138" r="18"/>
+        <circle cx="17"  cy="-135" r="18"/>
+        <ellipse cx="0"  cy="-86"  rx="22" ry="13"/>
+      </g>
+    </g>
+  </g>
+
+  <g id="tree2Group" transform="translate(1410,600)">
+    <g id="tree2Scale" transform="scale(1)">
+      <polygon points="-8,0 8,0 5,-68 -5,-68" fill="url(#barkGrad)"/>
+      <g fill="url(#leafGrad)" stroke="#2a6e31" stroke-width="2">
+        <circle cx="0"   cy="-101" r="24"/>
+        <circle cx="-21" cy="-85"  r="20"/>
+        <circle cx="22"  cy="-83"  r="20"/>
+        <circle cx="-11" cy="-116" r="16"/>
+        <circle cx="12"  cy="-114" r="16"/>
+        <ellipse cx="0"  cy="-77"  rx="18" ry="10"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Cow -->
+  <g id="cowGroup" transform="translate(270,790)">
+    <g class="bounce bCow">
+      <g id="cowScale" transform="scale(1)">
+        <g fill="#1d1d1d">
+          <rect x="-27" y="-15" width="7" height="15"/>
+          <rect x="-9"  y="-16" width="7" height="16"/>
+          <rect x="11"  y="-16" width="7" height="16"/>
+          <rect x="29"  y="-15" width="7" height="15"/>
+        </g>
+        <ellipse cx="0" cy="-36" rx="37" ry="25" fill="#f8f6ee" stroke="#d9d6cf"/>
+        <circle  cx="-18" cy="-42" r="9" fill="#151515"/>
+        <ellipse cx="7"   cy="-32" rx="11" ry="8" fill="#151515"/>
+        <circle  cx="21"  cy="-46" r="6" fill="#151515"/>
+
+        <ellipse cx="49" cy="-52" rx="15" ry="14" fill="#f8f6ee" stroke="#d9d6cf"/>
+
+        <ellipse cx="33" cy="-62" rx="6" ry="3.5" fill="#e3c4ae" stroke="#bfa089" transform="rotate(-18 33 -62)"/>
+        <ellipse cx="64" cy="-62" rx="6" ry="3.5" fill="#e3c4ae" stroke="#bfa089" transform="rotate(18 64 -62)"/>
+
+        <ellipse cx="49" cy="-45" rx="9" ry="5.5" fill="#ff9fbe"/>
+        <circle  cx="46" cy="-45" r="1.1" fill="#b3345b"/>
+        <circle  cx="52" cy="-45" r="1.1" fill="#b3345b"/>
+
+        <circle cx="44" cy="-56" r="2.3" fill="#111"/>
+        <circle cx="54" cy="-56" r="2.3" fill="#111"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Sheep -->
+  <g id="sheepGroup" transform="translate(630,795)">
+    <g class="bounce bSheep">
+      <g id="sheepScale" transform="scale(1)">
+        <g fill="#1c1c1c">
+          <rect x="-20" y="-14" width="6" height="14"/>
+          <rect x="-7"  y="-15" width="6" height="15"/>
+          <rect x="8"   y="-15" width="6" height="15"/>
+          <rect x="20"  y="-14" width="6" height="14"/>
+        </g>
+        <g fill="#fbfbfb" stroke="#e2e2e2">
+          <ellipse cx="0"   cy="-32" rx="18" ry="15"/>
+          <circle  cx="-15" cy="-28" r="12"/>
+          <circle  cx="13"  cy="-29" r="12"/>
+          <circle  cx="-7"  cy="-42" r="11"/>
+          <circle  cx="9"   cy="-41" r="11"/>
+          <ellipse cx="-16" cy="-16" rx="9"  ry="8"/>
+          <ellipse cx="16"  cy="-16" rx="9"  ry="8"/>
+          <ellipse cx="0"   cy="-20" rx="17" ry="9"/>
+        </g>
+        <ellipse cx="26" cy="-45" rx="11" ry="13" fill="#2f2f2f"/>
+
+        <ellipse cx="15" cy="-49" rx="8" ry="4" fill="#595959" transform="rotate(-20 15 -49)"/>
+        <ellipse cx="37" cy="-49" rx="8" ry="4" fill="#595959" transform="rotate(20 37 -49)"/>
+
+        <circle cx="22" cy="-49" r="2.4" fill="#fff"/>
+        <circle cx="30" cy="-49" r="2.4" fill="#fff"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Pig -->
+  <g id="pigGroup" transform="translate(945,800)">
+    <g class="bounce bPig">
+      <g id="pigScale" transform="scale(1)">
+        <path d="M-30,-29 c-10,1 -12,11 -2,13 c9,2 11,-9 3,-11"
+              fill="none" stroke="#ff89a9" stroke-width="4" stroke-linecap="round"/>
+        <g fill="#ff97ad">
+          <rect x="-21" y="-12" width="6" height="12"/>
+          <rect x="-9"  y="-13" width="6" height="13"/>
+          <rect x="6"   y="-13" width="6" height="13"/>
+          <rect x="18"  y="-12" width="6" height="12"/>
+        </g>
+        <ellipse cx="-2" cy="-28" rx="30" ry="19" fill="#ffb8c8"/>
+        <ellipse cx="32" cy="-37" rx="17" ry="14" fill="#ffb8c8"/>
+
+        <path d="M24,-51 l-8,-8 l11,-1 z" fill="#ff89a9"/>
+        <path d="M37,-51 l8,-7 l-2,12 z"  fill="#ff89a9"/>
+
+        <circle cx="28" cy="-41" r="2.2" fill="#333"/>
+        <circle cx="39" cy="-41" r="2.2" fill="#333"/>
+
+        <ellipse cx="46" cy="-34" rx="9" ry="6" fill="#ff89a9"/>
+        <ellipse cx="43.5" cy="-34" rx="1.3" ry="1.8" fill="#874053"/>
+        <ellipse cx="48.5" cy="-34" rx="1.3" ry="1.8" fill="#874053"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Horse -->
+  <g id="horseGroup" transform="translate(1270,805)">
+    <g class="bounce bHorse">
+      <g id="horseScale" transform="scale(1)">
+        <g fill="#5d341b">
+          <rect x="-40" y="-33" width="8" height="33"/>
+          <rect x="-22" y="-34" width="8" height="34"/>
+          <rect x="13"  y="-34" width="8" height="34"/>
+          <rect x="29"  y="-33" width="8" height="33"/>
+        </g>
+
+        <path d="M-54,-55 q-19,7 -26,30 q-1,11 9,12"
+              fill="none" stroke="#3c2110" stroke-width="8" stroke-linecap="round"/>
+
+        <ellipse cx="-10" cy="-58" rx="49" ry="23" fill="#8b562f"/>
+        <path d="M7,-66 L45,-100 L58,-89 L18,-48 Z" fill="#8b562f"/>
+
+        <path d="M11,-67 L48,-101" stroke="#3c2110" stroke-width="12" stroke-linecap="round"/>
+
+        <ellipse cx="61" cy="-101" rx="13" ry="15" fill="#8b562f"/>
+        <path d="M52,-111 l-4,11 l9,-2 z" fill="#41230f"/>
+        <path d="M71,-111 l4,11 l-9,-1 z" fill="#41230f"/>
+
+        <circle cx="56" cy="-103" r="2.4" fill="#fff"/>
+        <circle cx="66" cy="-103" r="2.4" fill="#fff"/>
+        <circle cx="61" cy="-94"  r="1.1" fill="#3b2111"/>
+        <circle cx="66" cy="-94"  r="1.1" fill="#3b2111"/>
+      </g>
+    </g>
+  </g>
+</svg>
+
+<script>
+(function () {
+  const svg = document.getElementById('scene');
+  const sky = document.getElementById('sky');
+  const grass = document.getElementById('grass');
+  const grassTexture = document.getElementById('grassTexture');
+  const horizon = document.getElementById('horizon');
+
+  const sunGroup = document.getElementById('sunGroup');
+  const sunScale = document.getElementById('sunScale');
+
+  const tree1Group = document.getElementById('tree1Group');
+  const tree1Scale = document.getElementById('tree1Scale');
+  const tree2Group = document.getElementById('tree2Group');
+  const tree2Scale = document.getElementById('tree2Scale');
+
+  const cowGroup = document.getElementById('cowGroup');
+  const cowScale = document.getElementById('cowScale');
+  const sheepGroup = document.getElementById('sheepGroup');
+  const sheepScale = document.getElementById('sheepScale');
+  const pigGroup = document.getElementById('pigGroup');
+  const pigScale = document.getElementById('pigScale');
+  const horseGroup = document.getElementById('horseGroup');
+  const horseScale = document.getElementById('horseScale');
+
+  const cloud1 = document.getElementById('cloud1');
+  const cloud2 = document.getElementById('cloud2');
+  const cloud3 = document.getElementById('cloud3');
+  const cloudScale1 = document.getElementById('cloudScale1');
+  const cloudScale2 = document.getElementById('cloudScale2');
+  const cloudScale3 = document.getElementById('cloudScale3');
+
+  let cloudS = 1;
+
+  function setT(el, x, y) {
+    el.setAttribute('transform', 'translate(' + x + ',' + y + ')');
+  }
+  function setS(el, s) {
+    el.setAttribute('transform', 'scale(' + s + ')');
+  }
+  function setRect(el, x, y, w, h) {
+    el.setAttribute('x', x);
+    el.setAttribute('y', y);
+    el.setAttribute('width', w);
+    el.setAttribute('height', h);
+  }
+
+  function update() {
+    const w = Math.max(1, window.innerWidth);
+    const h = Math.max(1, window.innerHeight);
+
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+
+    const horizonY = h * 0.65;
+
+    setRect(sky, 0, 0, w, horizonY);
+    setRect(grass, 0, horizonY, w, h - horizonY);
+    setRect(grassTexture, 0, horizonY, w, h - horizonY);
+    horizon.setAttribute('x1', 0);
+    horizon.setAttribute('y1', horizonY);
+    horizon.setAttribute('x2', w);
+    horizon.setAttribute('y2', horizonY);
+
+    const heightLimit = (h * 0.22) / 145;
+    const animalScale = Math.max(0.3,
+      Math.min(0.95,
+        Math.min(w / 1400, h / 850),
+        heightLimit
+      )
+    );
+
+    const treeScale = Math.max(0.35,
+      Math.min(1.12,
+        Math.min(w / 900, h / 650)
+      )
+    );
+
+    const sunScale2 = Math.max(0.45,
+      Math.min(1.05,
+        Math.min(w / 1100, h / 650)
+      )
+    );
+
+    cloudS = Math.max(0.6,
+      Math.min(1.35,
+        Math.min(w / 900, h / 650)
+      )
+    );
+
+    const groundY = h * 0.90;
+    const treeY = h * 0.67;
+
+    setT(sunGroup, w * 0.79, h * 0.17);
+    setS(sunScale, sunScale2);
+
+    setT(tree1Group, w * 0.115, treeY);
+    setS(tree1Scale, treeScale);
+    setT(tree2Group, w * 0.885, treeY);
+    setS(tree2Scale, treeScale);
+
+    setT(cowGroup, w * 0.175, groundY);
+    setS(cowScale, animalScale);
+
+    setT(sheepGroup, w * 0.395, groundY);
+    setS(sheepScale, animalScale);
+
+    setT(pigGroup, w * 0.595, groundY);
+    setS(pigScale, animalScale);
+
+    setT(horseGroup, w * 0.815, groundY);
+    setS(horseScale, animalScale);
+
+    setS(cloudScale1, cloudS);
+    setS(cloudScale2, cloudS * 1.12);
+    setS(cloudScale3, cloudS * 0.86);
+  }
+
+  update();
+  window.addEventListener('resize', update);
+
+  const clouds = [
+    { el: cloud1, y: 15, speed: 13, phase: 0.08 },
+    { el: cloud2, y: 8,  speed: 9,  phase: 0.42 },
+    { el: cloud3, y: 27, speed: 16, phase: 0.73 }
+  ];
+
+  const stamp = function () {
+    return (window.performance && performance.now) ? performance.now() : Date.now();
+  };
+
+  let last = stamp();
+  let clock = 0;
+
+  function tick(ts) {
+    const now = (typeof ts === 'number') ? ts : stamp();
+    const dt = Math.max(0, (now - last) / 1000);
+    last = now;
+    clock += Math.min(0.1, dt);
+
+    const w = Math.max(1, window.innerWidth);
+    const h = Math.max(1, window.innerHeight);
+
+    const margin = Math.max(180, w * 0.08 + 90 * cloudS);
+    const range = w + 2 * margin;
+    const vScale = Math.max(0.8, Math.min(1.8, w / 1200));
+
+    for (let i = 0; i < clouds.length; i++) {
+      const c = clouds[i];
+      const speed = c.speed * vScale;
+      const progress = (clock * speed + c.phase * range) % range;
+      const x = -margin + progress;
+      const y = h * c.y / 100;
+      c.el.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')');
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

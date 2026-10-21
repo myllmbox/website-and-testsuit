@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Littoral Drift — two fish</title>
+<style>
+  html,body{height:100%;margin:0;padding:0;overflow:hidden;background:#04121e}
+  #stage{position:fixed;inset:0;overflow:hidden}
+  #sea{display:block;width:100vw;height:100vh}
+  #vig2{position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,rgba(255,255,255,0) 1px 3px);
+    mix-blend-mode:multiply;opacity:.5}
+  .hud{position:absolute;top:26px;left:34px;pointer-events:none;
+    text-shadow:0 2px 10px rgba(0,10,20,.95);letter-spacing:.02em}
+  .hud h1{margin:0;font-family:"Didot","Bodoni MT",Georgia,"Times New Roman",serif;
+    font-weight:700;font-size:clamp(30px,4.6vw,66px);line-height:.86;color:#eaf8ff}
+  .hud h1 em{font-style:italic;font-weight:400;color:#7fd6ee}
+  .hud .sub{margin-top:11px;display:flex;align-items:center;gap:9px;
+    font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+    font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,248,232,.72)}
+  .pip{width:7px;height:7px;border-radius:50%;background:#a6f2a0;
+    box-shadow:0 0 9px rgba(166,242,160,.9);animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
+  .legend{position:absolute;right:26px;top:50%;transform:translateY(-50%);
+    width:236px;padding:15px 17px 17px;border-left:1px solid rgba(255,255,255,.24);
+    background:rgba(4,26,42,.44);backdrop-filter:blur(2px);pointer-events:none;
+    color:#e6f4ff;font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace}
+  .legend .lt{margin:0 0 10px;font-size:10px;letter-spacing:.34em;color:rgba(255,248,232,.72)}
+  .legend ul{list-style:none;margin:0;padding:0}
+  .legend li{margin:0 0 15px}
+  .legend .name{display:block;font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+    font-size:19px;letter-spacing:.02em;color:#fdf1dd}
+  .legend .kind{display:block;margin-top:2px;font-size:10px;letter-spacing:.16em;
+    text-transform:uppercase;color:rgba(255,248,232,.62)}
+  .legend .num{display:block;margin-top:6px;font-size:10px;letter-spacing:.06em;color:#9fd9ee}
+  .legend .foot{margin-top:14px;padding-top:9px;border-top:1px solid rgba(255,255,255,.14);
+    font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,248,232,.55)}
+</style>
+</head>
+<body>
+<div id="stage">
+<svg id="sea" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a9ed3"/><stop offset=".2" stop-color="#1e72ab"/>
+      <stop offset=".52" stop-color="#12507f"/><stop offset=".8" stop-color="#0a2f52"/>
+      <stop offset="1" stop-color="#062039"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9d6a7"/><stop offset=".42" stop-color="#c6a974"/>
+      <stop offset=".76" stop-color="#9c7e51"/><stop offset="1" stop-color="#6f5437"/>
+    </linearGradient>
+    <linearGradient id="rock" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#71614b"/><stop offset="1" stop-color="#2f2a24"/>
+    </linearGradient>
+    <linearGradient id="rayg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d8f7ff" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#d8f7ff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="shim" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e4faff" stop-opacity="0"/>
+      <stop offset=".42" stop-color="#e4faff" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#e4faff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="halo">
+      <stop offset="0" stop-color="#b7ebff" stop-opacity=".26"/>
+      <stop offset="1" stop-color="#b7ebff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="shadow">
+      <stop offset="0" stop-color="#12180f" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#12180f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="vigv" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000814" stop-opacity="0"/>
+      <stop offset=".45" stop-color="#000814" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#000814" stop-opacity=".72"/>
+    </linearGradient>
+    <linearGradient id="vig" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#000814" stop-opacity=".55"/>
+      <stop offset=".5" stop-color="#000814" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000814" stop-opacity=".55"/>
+    </linearGradient>
+    <linearGradient id="bodyA" x1="0" y1="0" x2=".28" y2="1">
+      <stop offset="0" stop-color="#ffeec2"/><stop offset=".46" stop-color="#f2913e"/>
+      <stop offset="1" stop-color="#91358f"/>
+    </linearGradient>
+    <linearGradient id="bodyB" x1="0" y1="0" x2=".2" y2="1">
+      <stop offset="0" stop-color="#ffeab0"/><stop offset=".52" stop-color="#f2663f"/>
+      <stop offset="1" stop-color="#7d2f4b"/>
+    </linearGradient>
+    <filter id="soft" x="-60%" y="-220%" width="220%" height="560%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+    <filter id="soft2" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4.5"/>
+    </filter>
+  </defs>
+
+  <rect x="-240" y="-240" width="2100" height="1420" fill="url(#water)"/>
+  <ellipse id="halo" cx="640" cy="420" rx="720" ry="430" fill="url(#halo)"/>
+
+  <g id="rays" fill="url(#rayg)" filter="url(#soft)">
+    <polygon points="150,-240 296,-240 420,560 336,560"/>
+    <polygon points="432,-240 528,-240 468,610 414,610"/>
+    <polygon points="692,-240 846,-240 946,500 866,500"/>
+    <polygon points="982,-240 1062,-240 1128,640 1068,640"/>
+    <polygon points="1242,-240 1372,-240 1294,520 1236,520"/>
+    <polygon points="1444,-240 1522,-240 1452,600 1404,600"/>
+  </g>
+  <g id="caustic" fill="url(#shim)">
+    <rect x="-520" y="-24" width="360" height="28" rx="14" opacity=".5"/>
+    <rect x="210" y="686" width="420" height="26" rx="13" opacity=".34"/>
+    <rect x="940" y="-14" width="330" height="24" rx="12" opacity=".42"/>
+    <rect x="1210" y="522" width="310" height="21" rx="11" opacity=".26"/>
+  </g>
+
+  <ellipse id="shadow" cx="720" cy="826" rx="960" ry="72" fill="url(#shadow)"/>
+  <rect x="-240" y="768" width="2100" height="174" fill="url(#sand)"/>
+  <path d="M -240 796 Q 90 774 300 792 T 820 796 T 1320 786 T 1860 794 L 1860 900 L -240 900 Z"
+        fill="#a98d63" opacity=".5"/>
+  <path d="M -240 846 Q 180 826 420 842 T 980 838 T 1460 848 T 1860 842 L 1860 900 L -240 900 Z"
+        fill="#7a5f3c" opacity=".42"/>
+  <path d="M -240 770 Q 120 752 320 768 T 760 764 T 1180 772 T 1860 762"
+        fill="none" stroke="#f2e1b4" stroke-width="2.5" stroke-opacity=".4"/>
+
+  <g id="flats" fill="#356553" fill-opacity=".52">
+    <ellipse cx="248" cy="778" rx="128" ry="13"/>
+    <ellipse cx="412" cy="789" rx="58" ry="8"/>
+    <ellipse cx="702" cy="772" rx="104" ry="11"/>
+    <ellipse cx="1032" cy="776" rx="78" ry="10"/>
+    <ellipse cx="1196" cy="786" rx="118" ry="12"/>
+    <ellipse cx="1476" cy="770" rx="94" ry="11"/>
+  </g>
+
+  <g id="rocks">
+    <ellipse cx="392" cy="796" rx="58" ry="20" fill="url(#rock)"/>
+    <ellipse cx="392" cy="787" rx="43" ry="12" fill="#96866b" opacity=".45"/>
+    <ellipse cx="762" cy="782" rx="38" ry="15" fill="url(#rock)"/>
+    <ellipse cx="1122" cy="792" rx="66" ry="21" fill="url(#rock)"/>
+    <ellipse cx="1122" cy="782" rx="48" ry="12" fill="#96866b" opacity=".42"/>
+    <ellipse cx="1418" cy="776" rx="34" ry="13" fill="url(#rock)"/>
+    <ellipse cx="986" cy="792" rx="26" ry="10" fill="url(#rock)"/>
+    <ellipse cx="212" cy="788" rx="21" ry="8" fill="url(#rock)"/>
+  </g>
+
+  <g id="kelp"></g>
+
+  <g id="drift">
+    <circle cx="128" cy="330" r="2.4" fill="#eafaff" opacity=".3" pointer-events="auto"/>
+    <circle cx="352" cy="212" r="1.9" fill="#eafaff" opacity=".26" pointer-events="auto"/>
+    <circle cx="586" cy="398" r="3" fill="#eafaff" opacity=".24" pointer-events="auto"/>
+    <circle cx="742" cy="180" r="2.2" fill="#eafaff" opacity=".3" pointer-events="auto"/>
+    <circle cx="904" cy="512" r="2.6" fill="#eafaff" opacity=".22" pointer-events="auto"/>
+    <circle cx="1082" cy="286" r="2" fill="#eafaff" opacity=".28" pointer-events="auto"/>
+    <circle cx="1288" cy="440" r="2.7" fill="#eafaff" opacity=".22" pointer-events="auto"/>
+    <circle cx="1462" cy="244" r="2.1" fill="#eafaff" opacity=".26" pointer-events="auto"/>
+    <circle cx="452" cy="644" r="2.5" fill="#eafaff" opacity=".2" pointer-events="auto"/>
+    <circle cx="1176" cy="668" r="2.3" fill="#eafaff" opacity=".2" pointer-events="auto"/>
+  </g>
+
+  <g id="bubbles"></g>
+
+  <g id="fishLayer" pointer-events="none">
+    <g id="fishA" opacity="0">
+      <path d="M -18 -12 C -30 -44, -56 -50, -72 -32 C -58 -24, -44 -16, -28 -6 Z" fill="#6b8fd0" opacity=".9"/>
+      <path d="M -6 -52 C 14 -54, 34 -44, 44 -26 C 26 -33, 8 -36, -6 -38 Z" fill="#6b8fd0" opacity=".82"/>
+      <ellipse cx="-16" cy="3" rx="94" ry="73" fill="#0d2c48" opacity=".32" filter="url(#soft2)"/>
+      <ellipse cx="0" cy="0" rx="93" ry="72" fill="url(#bodyA)"/>
+      <path d="M -14 64 Q 18 71 46 56 Q 22 63 -10 67 Z" fill="#fff2d8" opacity=".34"/>
+      <ellipse cx="-50" cy="12" rx="30" ry="22" fill="#274a63" opacity=".2"/>
+      <polygon points="-58,-26 -28,-7 -28,7 -58,26 -45,0" fill="#2d4658"/>
+      <polygon points="-58,-26 -28,-7 -28,7 -58,26 -45,0" fill="#7fb4d4" opacity=".5"/>
+      <polygon points="-51,-17 -33,-5 -33,5 -51,17 -44,0" fill="#26394a"/>
+      <rect x="-62" y="-9" width="7" height="18" rx="3" fill="#24485c" opacity=".75"/>
+      <ellipse cx="22" cy="-24" rx="26" ry="13" transform="rotate(-34 0 -24)" fill="#6d4a63" opacity=".92"/>
+      <rect x="-22" y="-32" width="4.5" height="60" rx="2.2" fill="#24485c" opacity=".24"/>
+      <ellipse cx="-8" cy="30" rx="15" ry="8" fill="#e26d9a" opacity=".26"/>
+      <g fill="#2b4257" opacity=".45">
+        <circle cx="-18" cy="-14" r="2.6"/><circle cx="-2" cy="-22" r="2.1"/><circle cx="-28" cy="2" r="2.3"/>
+        <circle cx="-12" cy="16" r="2"/><circle cx="10" cy="-16" r="2.2"/><circle cx="4" cy="12" r="1.9"/>
+      </g>
+      <path d="M 64 34 Q 74 41 84 33" fill="none" stroke="#2a3168" stroke-width="4.2" stroke-linecap="round"/>
+      <path d="M 76 -18 Q 58 -12 46 -18" fill="none" stroke="#4a5580" stroke-width="2.2" stroke-opacity=".6"/>
+      <circle cx="78" cy="0" r="7" fill="#12212e" opacity=".35"/>
+      <circle cx="78" cy="0" r="7" fill="#e2004f" opacity=".85"/>
+      <circle cx="78" cy="0" r="5.6" fill="#fdf7ea"/>
+      <circle cx="81.4" cy="0" r="3.2" fill="#152033"/>
+      <circle cx="82.6" cy="-1.4" r="1" fill="#ffffff" opacity=".85"/>
+    </g>
+    <g id="fishB" opacity="0">
+      <path d="M -10 -10 C -22 -34, -46 -40, -60 -22 C -46 -16, -30 -10, -16 -4 Z" fill="#d6614e" opacity=".88"/>
+      <path d="M 2 -12 C -8 -26, -24 -30, -36 -24 C -24 -20, -10 -16, 2 -12 Z" fill="#d6614e" opacity=".86"/>
+      <polygon points="-52,-21 -26,-3 -52,21 -42,0" fill="#d97a4a"/>
+      <polygon points="-52,-21 -26,-3 -52,21 -42,0" fill="#ffb27a" opacity=".5"/>
+      <polygon points="-46,-14 -30,-3 -46,10 -40,0" fill="#a4422a"/>
+      <rect x="-54" y="-7" width="5" height="14" rx="2.5" fill="#7a2a30" opacity=".8"/>
+      <ellipse cx="0" cy="2" rx="57" ry="24" fill="#0d2c48" opacity=".3" filter="url(#soft2)"/>
+      <ellipse cx="0" cy="0" rx="57" ry="24" fill="url(#bodyB)"/>
+      <ellipse cx="22" cy="-6" rx="18" ry="9" transform="rotate(-34 0 -24)" fill="#8e3b52" opacity=".92"/>
+      <g fill="#7a2a30" opacity=".4">
+        <polygon points="-14,-21 -6,-21 -10,21 -18,21"/>
+        <polygon points="6,-19 13,-18 10,20 3,20"/>
+        <polygon points="26,-14 31,-13 29,14 24,14"/>
+      </g>
+      <path d="M 41 13 Q 47 17 52 12" fill="none" stroke="#7c1f2e" stroke-width="3.4" stroke-linecap="round"/>
+      <circle cx="40" cy="0" r="5.8" fill="#1a2530" opacity=".35"/>
+      <circle cx="40" cy="0" r="5.8" fill="#f0d6bb"/>
+      <circle cx="42.6" cy="0" r="2.7" fill="#171f2e"/>
+      <circle cx="43.6" cy="-1.2" r=".9" fill="#ffffff" opacity=".85"/>
+    </g>
+  </g>
+
+  <g id="fx" pointer-events="none"></g>
+  <rect x="-240" y="-240" width="2100" height="1420" fill="url(#vigv)" opacity=".72"/>
+  <rect x="-240" y="-240" width="2100" height="1420" fill="url(#vig)" opacity=".8"/>
+</svg>
+
+<div id="vig2"></div>
+
+<header class="hud">
+  <h1>Littoral<br><em>Drift</em></h1>
+  <div class="sub"><span class="pip"></span><span>two fish · drifting</span></div>
+</header>
+
+<aside class="legend">
+  <p class="lt">POPULATION</p>
+  <ul>
+    <li id="lgA"></li>
+    <li id="lgB"></li>
+  </ul>
+  <p class="foot"><span id="count">20</span> bubbles · rising</p>
+  <p class="foot">move the cursor to bend the current</p>
+</aside>
+</div>
+
+<script>
+(function(){
+"use strict";
+try{
+  var NS="http://www.w3.org/2000/svg", U=1600;
+  var stage=document.getElementById("stage"),
+      svg=document.getElementById("sea"),
+      kelp=document.getElementById("kelp"),
+      bub=document.getElementById("bubbles"),
+      drift=document.getElementById("drift"),
+      fx=document.getElementById("fx");
+
+  function mk(p,tag,at){
+    var n=document.createElementNS(NS,tag);
+    for(var k in at) n.setAttribute(k,at[k]);
+    if(p) p.appendChild(n);
+    return n;
+  }
+
+  /* --- seaweed: spines + overlapping leaf ellipses, rooted in the sand --- */
+  var K=[{x:62,h:216,w:16,sw:11,c:"#2f7b4d"},{x:96,h:296,w:19,sw:13,c:"#256542"},
+         {x:128,h:190,w:14,sw:10,c:"#43976a"},{x:162,h:252,w:17,sw:12,c:"#2c7450"},
+         {x:206,h:156,w:12,sw:9,c:"#4a9e66"},{x:498,h:236,w:15,sw:12,c:"#2f7b4d"},
+         {x:528,h:310,w:18,sw:13,c:"#215c3e"},{x:572,h:186,w:14,sw:10,c:"#43976a"},
+         {x:616,h:242,w:16,sw:11,c:"#2c7450"},{x:872,h:276,w:18,sw:12,c:"#256542"},
+         {x:948,h:196,w:14,sw:10,c:"#43976a"},{x:1246,h:226,w:15,sw:11,c:"#2f7b4d"},
+         {x:1276,h:324,w:19,sw:13,c:"#215c3e"},{x:1312,h:196,w:14,sw:10,c:"#43976a"},
+         {x:1352,h:256,w:17,sw:12,c:"#2c7450"}];
+  var weeds=[];
+  K.forEach(function(k,i){
+    var n=Math.max(6,Math.round(k.h/27)),
+        a=mk(0,"g",{transform:"translate("+k.x+",792)"}),
+        sw=mk(a,"g"),
+        sp=mk(sw,"polyline",{fill:"none",stroke:k.c,"stroke-width":Math.max(2,k.w*.26),
+          "stroke-linecap":"round","stroke-opacity":.75}),
+        leaves=[], p="M 0 0", j;
+    for(j=1;j<=n;j++){
+      var t=j/n;
+      p+=" L "+(18*Math.sin(t*4.3+k.x*.07)*(.35+t*.65)).toFixed(2)+" "+(-k.h*t).toFixed(1);
+    }
+    sp.setAttribute("points",p);
+    for(j=0;j<=n;j++){
+      var t2=j/n;
+      leaves.push(mk(sw,"ellipse",{cx:(18*Math.sin(t2*4.3+k.x*.07)*(.35+t2*.65)).toFixed(2),
+        cy:(-k.h*t2).toFixed(1), rx:(k.w*(1-t2*.55)).toFixed(2),
+        ry:(k.w*(1-t2*.5)*.62).toFixed(2), fill:k.c,
+        opacity:(.84-t2*.16).toFixed(2)}));
+    }
+    weeds.push({a:a,sw:sw,x:k.x,h:k.h,ph:i*1.7,amp:5.5+(i%3)*2.2,leaves:leaves});
+  });
+
+  /* --- bubbles --- */
+  var VB=svg.createSVGPoint();
+  function bFill(r){
+    return r<3.1 ? "rgba(228,247,255,0.5)" : (r<4.9 ? "rgba(201,241,255,0.3)" : "rgba(255,255,255,0.14)");
+  }
+  function seed(t){
+    var S="196,786|292,794|742,774|1128,788|1238,796|1492,778|944,782|330,398|1310,362|520,300|770,428|1170,318|1452,452|214,588|830,562|1394,612|664,528",
+        out=[],p=S.split("|");
+    p.forEach(function(pair,i){
+      var c=pair.split(",");
+      out.push({x:+c[0],y:+c[1],r:2.2+((i*7)%5)*1.15,ph:(i*1.7)%6.28});
+    });
+    return out;
+  }
+  function bubNode(b){
+    var g=mk(0,"g",{transform:"translate("+b.x+","+b.y+")","pointer-events":"auto",cursor:"crosshair"});
+    mk(g,"circle",{r:b.r.toFixed(2),fill:bFill(b.r),stroke:"rgba(230,248,255,.55)","stroke-width":.9});
+    mk(g,"circle",{r:(b.r*.36).toFixed(2),cx:(-b.r*.32).toFixed(2),cy:(-b.r*.34).toFixed(2),
+      fill:"#f4feff",opacity:".75"});
+    b.g=g; b.vy=(14+b.r*2.1)*(0.62+(7.8-b.r)*0.125);
+    b.wob=4+b.r*1.3; b.t=Math.random()*6.28; b.op=0; b.pop=0;
+    bub.appendChild(g);
+    return b;
+  }
+  function respawn(b){
+    b.x=70+Math.random()*1420;
+    b.y=774+Math.random()*22;
+    b.r=2.2+Math.random()*5.6;
+    b.g.setAttribute("opacity","1");
+    b.op=1; b.pop=0; b.t=Math.random()*6.28; b.ph=Math.random()*6.28;
+    b.g.firstChild.setAttribute("r",b.r.toFixed(2));
+    b.g.firstChild.setAttribute("stroke","rgba(230,248,255,.55)");
+    b.g.firstChild.setAttribute("fill",bFill(b.r));
+    var hi=b.g.childNodes[1];
+    hi.setAttribute("r",(b.r*.36).toFixed(2));
+    hi.setAttribute("cx",(-b.r*.32).toFixed(2));
+    hi.setAttribute("cy",(-b.r*.34).toFixed(2));
+    b.vy=(14+b.r*2.1)*(0.62+(7.8-b.r)*0.125);
+  }
+
+  var bubbles=seed().map(bubNode);
+  document.getElementById("count").textContent=bubbles.length+drift.childNodes.length;
+
+  svg.addEventListener("pointerdown",function(e){
+    if(!e.target||!e.target.tagName||e.target.tagName.toLowerCase()!=="circle")return;
+    var host=e.target.parentNode;
+    if(host&&host.id!=="bubbles"&&host.id!=="drift")return;
+    e.target.parentNode.setAttribute("opacity","1");
+    var b=bubbles.filter(function(x){return x.g===host;})[0];
+    if(b) b.pop=0.18;
+  });
+
+  /* --- fish --- */
+  function poly(p,pts,fill,op){
+    return mk(p,"polygon",{points:pts,fill:fill,opacity:op===undefined?1:op});
+  }
+  function pth(p,d,fill,stroke,sw,op){
+    return mk(p,"path",{d:d,fill:fill||"none",stroke:stroke||"none",
+      "stroke-width":sw||0,"stroke-linecap":"round",opacity:op===undefined?1:op});
+  }
+  [[document.getElementById("fishA"),0],[document.getElementById("fishB"),1]].forEach(function(f){
+    f[0].style.transformBox="fill-box"; f[0].style.transformOrigin="center";
+    f[1]=f[1]===0?"moonfish":"darter";
+  });
+
+  var A={n:"Cyclops moonfish",k:"disc · slow grazer",w:186,h:144,dur:178,y0:250,
+    ya:44,yp:41,ph:2.1,bob:11,bp:4.7,d:-1,x:1720,y:250,spd:14.7,
+    p:function(t){var p=(t+2.1)%220;return p<110?-p/110:p/110-3;}},
+      B={n:"Ember darter",k:"slender · fast dart",w:114,h:48,dur:66,
+    yb:452,ya:34,yp:25.5,yp2:47.5,ph:.4,bob:14,bp:3.6,d:-1,x:520,y:452,spd:24.7,
+    p:function(t){return Math.sin(6.28318*t/25.5+.4)+Math.sin(6.28318*t/47.5+2.2);}};
+
+  document.getElementById("lgA").innerHTML="<span class='name'>"+A.n+"</span><span class='kind'>"+A.k+
+    "</span><span class='num'>length ~"+Math.round(A.w*1.34)+" u · ~"+A.spd.toFixed(1)+
+    " u/s · 2.9 body-lengths/s</span>";
+  document.getElementById("lgB").innerHTML="<span class='name'>"+B.n+"</span><span class='kind'>"+B.k+
+    "</span><span class='num'>length ~"+Math.round(B.w*1.34)+" u · ~"+B.spd.toFixed(1)+
+    " u/s · 21 u/s · darts</span>";
+
+  var fish=[
+    {g:document.getElementById("fishA"),f:A,vx:-1,vy:0,vy0:0},
+    {g:document.getElementById("fishB"),f:B,vx:-1,vy:0,vy0:0}
+  ];
+  fish.forEach(function(o){o.g.setAttribute("opacity","1");});
+
+  /* --- render helpers --- */
+  var V=svg.createSVGPoint();
+  function scr(x,y){V.x=x;V.y=y;return V.matrixTransform(svg.getScreenCTM().inverse());}
+  function uns(x,y){V.x=x;V.y=y;return V.matrixTransform(svg.getScreenCTM().inverse().inverse());}
+
+  var W=1600,H=900,M=200;
+  function measure(){
+    var r=stage.getBoundingClientRect(),
+        s=Math.max(r.width/r.width,r.height/r.height);
+    W=r.width*U/s; H=r.height*U/s;
+  }
+
+  /* --- current streaks + ripples --- */
+  var streaks=[];
+  for(var s=0;s<14;s++) streaks.push({n:mk(fx,"path",{fill:"none",stroke:"#e4f7ff","stroke-width":1,
+    "stroke-linecap":"round","stroke-opacity":0}),on:0,x:0,y:0,a:0,t:0});
+  var rings=[];
+  for(var r2=0;r2<6;r2++) rings.push({n:mk(fx,"circle",{r:4,fill:"none",stroke:"#d5f3ff",
+    "stroke-width":1.4,"stroke-opacity":0}),on:0,x:0,y:0,t:0});
+
+  var px=0,py=0,last=null,lastNow=performance.now(),time=0;
+
+  function place(o){
+    var rot=Math.max(-42,Math.min(42,Math.atan2(o.vy,o.vx)*57.2958)),
+        tr="translate("+o.x.toFixed(1)+","+o.y.toFixed(1)+") rotate("+rot.toFixed(2)+
+            ") scale("+o.s.toFixed(2)+",1)";
+    o.g.setAttribute("transform",tr);
+    o.g.setAttribute("opacity",o.op.toFixed(2));
+  }
+
+  function loop(now){
+    var dt=Math.min((now-lastNow)/1000,0.05);
+    lastNow=now; time+=dt;
+    var i,o,t,dx,dy,d,ang;
+
+    for(i=0;i<weeds.length;i++){
+      var wd=weeds[i];
+      wd.a.setAttribute("transform","translate("+wd.x+",792) skewX("+
+        (wd.amp*Math.sin(time*0.85+wd.ph)).toFixed(2)+")");
+    }
+
+    for(i=0;i<bubbles.length;i++){
+      var b=bubbles[i];
+      if(b.pop>0){
+        b.pop-=dt;
+        b.op=Math.max(0,b.op-dt*5);
+        b.g.setAttribute("opacity",b.op.toFixed(2));
+        b.g.setAttribute("transform","translate("+b.x.toFixed(1)+","+b.y.toFixed(1)+") scale("+
+          (1+(0.18-b.pop)*3.4).toFixed(2)+")");
+        if(b.pop<=0) respawn(b);
+        continue;
+      }
+      b.t+=dt; b.ph+=dt*1.1;
+      b.y-=b.vy*(0.78+0.44*Math.sin(b.ph))*dt;
+      b.x+=Math.sin(b.t*1.35+i)*b.wob*dt;
+      if(b.y<-18){ respawn(b); }
+      else b.g.setAttribute("transform","translate("+b.x.toFixed(1)+","+b.y.toFixed(1)+")");
+    }
+
+    var pts=pointer?[{x:pointer.x,y:pointer.y}]:[];
+    if(pts.length){
+      if(last===null) last=pts[0];
+      var dd=Math.hypot(pointer.x-last.x,pointer.y-last.y);
+      if(dd>5){
+        var free=streaks.filter(function(s2){return !s2.on;});
+        if(free.length){
+          var st=free[0], a=Math.atan2(pointer.y-last.y,pointer.x-last.x);
+          st.on=1; st.t=0; st.x=pointer.x; st.y=pointer.y; st.a=a;
+          var p1=scr(st.x,st.y), p2=uns(st.x-Math.cos(a)*34,st.y-Math.sin(a)*34);
+          st.n.setAttribute("d","M "+p1.x.toFixed(1)+" "+p1.y.toFixed(1)+" L "+
+            p2.x.toFixed(1)+" "+p2.y.toFixed(1));
+          st.n.setAttribute("stroke-opacity",.45);
+        }
+        var fr=rings.filter(function(r3){return !r3.on;})[0];
+        if(fr){
+          var pc=scr(pointer.x,pointer.y);
+          fr.on=1; fr.t=0; fr.x=pointer.x; fr.y=pointer.y;
+          fr.n.setAttribute("transform","");
+          fr.n.setAttribute("cx",pc.x.toFixed(1));
+          fr.n.setAttribute("cy",pc.y.toFixed(1));
+          fr.n.setAttribute("r","4");
+          fr.n.setAttribute("stroke-opacity",.55);
+        }
+        last={x:pointer.x,y:pointer.y};
+      }
+    }
+
+    fish.forEach(function(o){
+      var f=o.f;
+      var py0=f===A
+        ? f.y0 - f.ya*Math.sin(6.28318*time/f.yp - 1.05) + f.bob*Math.sin(6.28318*time/f.bp+1.2)
+        : f.yb + f.ya*Math.sin(6.28318*time/f.yp + f.ph) + f.bob*Math.sin(6.28318*time/f.bp+2.6);
+      o.vy0=(py0-o.y)*2.1;
+      o.vy=Math.max(-30,Math.min(30,o.vy0));
+      for(var q=0;q<pts.length;q++){
+        dx=o.x-pts[q].x; dy=o.y-pts[q].y; d=Math.hypot(dx,dy);
+        if(d<190&&d>0.001) o.vy+=dy/d*(190-d)*0.24;
+      }
+      o.vy=Math.max(-42,Math.min(42,o.vy));
+      o.s=o.x<240?o.s+dt*1.1:o.s-dt*1.1;
+      o.s=Math.max(1,Math.min(1.14,o.s));
+      o.x+=Math.cos(Math.atan2(o.vy,o.vx))*o.spd*dt*612/612*612*dt;
+      o.y+=Math.sin(Math.atan2(o.vy,o.vx))*o.spd*dt;
+      if(o.x>W+M) o.x=-M;
+      else if(o.x<-M) o.x=W+M;
+      place({g:o.g,x:o.x,y:o.y,vx:o.vx,vy:o.vy,s:o.s});
+    });
+
+    streaks.forEach(function(s2){
+      if(!s2.on)return; s2.t+=dt;
+      if(s2.t>0.34){s2.on=0;s2.n.setAttribute("stroke-opacity",0);return;}
+      s2.n.setAttribute("stroke-opacity",(0.45*(1-s2.t/0.34)).toFixed(3));
+    });
+    rings.forEach(function(r3){
+      if(!r3.on)return; r3.t+=dt;
+      if(r3.t>0.7){r3.on=0;r3.n.setAttribute("stroke-opacity",0);return;}
+      var k=r3.t/0.7;
+      r3.n.setAttribute("r",(4+k*26).toFixed(1));
+      r3.n.setAttribute("stroke-opacity",(0.55*(1-k)).toFixed(3));
+      var c=scr(r3.x,r3.y);
+      r3.n.setAttribute("cx",c.x.toFixed(1)); r3.n.setAttribute("cy",c.y.toFixed(1));
+    });
+
+    requestAnimationFrame(loop);
+  }
+
+  /* pointer-driven current */
+  var pointer=null;
+  stage.addEventListener("pointermove",function(e){pointer={x:e.clientX,y:e.clientY};},{passive:true});
+  stage.addEventListener("pointerleave",function(){pointer=null;last=null;});
+
+  var ro=(typeof ResizeObserver!=="undefined")?new ResizeObserver(measure):null;
+  if(ro) ro.observe(stage); else window.addEventListener("resize",measure);
+  measure();
+  requestAnimationFrame(function(n){lastNow=n;requestAnimationFrame(loop);});
+}catch(err){}
+})();
+</script>
+</body>
+</html>

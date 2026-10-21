@@ -1,0 +1,37 @@
+Task: Generate a comprehensive, Production-Ready Technical Specification and Complete Implementation Blueprint for a Global Multi-Tenant Enterprise Resource Planning (ERP) and Supply Chain Management (SCM) System.
+
+Your output must be a single Markdown document with exactly these 4 sections, in this order. Put every file (SQL, TypeScript, load-test script) in a fenced code block tagged with its language, e.g. ```sql, ```typescript, ```javascript.
+
+---
+
+### PART 1: DENSE DATA & DATABASE SCHEMAS
+Provide the foundational database blueprints.
+Write the raw PostgreSQL DDL schemas for at least 15 core tables (including Users, Tenants, Inventory, Orders, Shipments, Ledger, etc.). Include all foreign keys, indexes, partitioning logic (by tenant and date), and trigger functions.
+
+---
+
+### PART 2: PRODUCTION-READY BACKEND CODE
+Write the complete, end-to-end backend service implementation for the Order Fulfillment and Inventory Consensus Engine.
+- Language: TypeScript
+- You must write out the complete, functional code. Implement all concrete logic for handling race conditions, distributed locking (using Redis/Redlock), database transaction isolation levels (Serializable), connection pooling, error handling, and structured JSON logging.
+- Include all necessary struct/class definitions, helper functions, and middleware. Do not truncate any part of the logic.
+
+---
+
+### PART 3: ANALYTICAL REASONING & EDGE CASE MATRIX
+Generate a massive Markdown evaluation matrix table mapping out 20 complex edge-case failure modes (e.g., network partitions during a two-phase commit, concurrent inventory depletion requests at millisecond intervals, tenant isolation breaches).
+Columns required:
+- [Case ID]
+- [Failure Scenario Description]
+- [Impact Vector]
+- [Detection Metric/Alerting Rule]
+- [Automated Self-Healing Mitigation Strategy]
+- [Rollback / Compensation Transaction Steps]
+*Requirement: Each row must contain a detailed, multi-sentence analytical breakdown inside the markdown cell.*
+
+---
+
+### PART 4: SYSTEM VERIFICATION & MATHEMATICAL PROOFS 
+Provide a formal verification of the system's scalability.
+1. Write a massive, copy-pasteable script for a load testing tool (like k6 or Locust) that simulates 10,000 concurrent virtual users hitting the API endpoints with complex, randomized JSON payloads.
+2. Formally prove the system’s transaction throughput and latency limits using mathematical formulas (including Amdahl's Law, Little's Law, and Queuing Theory formulas). Write out the equations and break down the variables step-by-step.

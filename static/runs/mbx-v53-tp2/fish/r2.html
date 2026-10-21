@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Drift — Continental Shelf Study No. 4</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#02121f}
+body{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#dbe9f7;-webkit-font-smoothing:antialiased}
+#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+
+.tail,.dorsal,.pect,.pelvic,.kelp,.ray,.shim,.caustic{transform-box:fill-box}
+.tail{transform-origin:100% 50%;animation:wag .9s ease-in-out infinite}
+#fishB .tail{animation-duration:.44s}
+.dorsal{transform-origin:50% 100%;animation:sway 3.1s ease-in-out infinite}
+#fishB .dorsal{animation-duration:1.9s}
+.pect{transform-origin:0% 50%;animation:flap 1.2s ease-in-out infinite}
+#fishA .pect{transform-origin:100% 0%;animation-duration:1.55s}
+.pelvic{transform-origin:50% 0%;animation:flap 1.7s ease-in-out infinite}
+.fish{filter:drop-shadow(0 14px 16px rgba(0,18,34,.35));transition:filter .4s}
+.fish.spot{filter:drop-shadow(0 0 16px rgba(190,240,255,.9))}
+.kelp{transform-origin:50% 100%;animation:sway 7s ease-in-out infinite}
+.ray{animation:drift 12s ease-in-out infinite alternate}
+.shim{animation:shim 9s linear infinite}
+.caustic{animation:pulse 7s ease-in-out infinite}
+@keyframes wag{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
+@keyframes flap{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg)}}
+@keyframes sway{0%,100%{transform:rotate(-2.8deg)}50%{transform:rotate(3deg)}}
+@keyframes drift{0%{opacity:.12;transform:translateX(-16px)}100%{opacity:.34;transform:translateX(16px)}}
+@keyframes shim{to{stroke-dashoffset:-330}}
+@keyframes pulse{0%,100%{opacity:.08}50%{opacity:.24}}
+
+.hud{position:fixed;pointer-events:none;z-index:5}
+.plate{left:clamp(18px,4.4vw,66px);top:clamp(16px,4.5vh,54px);max-width:min(42ch,46vw)}
+.tag{font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:#6fa6cf;display:flex;gap:12px;align-items:center}
+.tag:before{content:"";width:44px;height:1px;background:linear-gradient(90deg,#8fd6ff,transparent)}
+h1{font-family:Bahnschrift,"DIN Alternate",Haettenschweiler,"Arial Narrow",Impact,sans-serif;
+   font-size:clamp(46px,8.6vw,108px);line-height:.84;text-transform:uppercase;color:#f4fbff;
+   letter-spacing:.005em;margin:.14em 0 .1em;text-shadow:0 10px 34px rgba(2,22,44,.65)}
+h1 em{display:block;font-family:inherit;font-style:normal;font-size:.19em;letter-spacing:.44em;
+   color:#5fd8d0;font-weight:400;margin-top:.9em}
+.lede{font-size:12px;line-height:1.85;color:#93bad6;max-width:34ch;border-left:1px solid rgba(143,214,255,.32);padding-left:14px}
+.legend{left:clamp(18px,4.4vw,66px);bottom:clamp(18px,5vh,50px);display:grid;gap:13px}
+.sp{display:grid;grid-template-columns:13px 1fr;column-gap:13px;align-items:center;pointer-events:auto;cursor:crosshair;
+   transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.sp:hover{transform:translateX(6px)}
+.sp i{grid-row:span 2;width:13px;height:13px;border-radius:50%;background:var(--c);
+   box-shadow:0 0 0 3px rgba(255,255,255,.07),0 0 18px var(--c)}
+.sp b{font-family:Bahnschrift,"DIN Alternate","Arial Narrow",sans-serif;font-size:17px;letter-spacing:.08em;
+   text-transform:uppercase;color:#eaf6ff;font-weight:400}
+.sp s{grid-column:2;text-decoration:none;font-size:9.5px;letter-spacing:.15em;color:#7aa6c8;text-transform:uppercase}
+.readout{right:clamp(16px,3.4vw,48px);bottom:clamp(16px,4vh,44px);text-align:right;font-size:9.5px;
+   letter-spacing:.18em;color:#6894ba;text-transform:uppercase;line-height:2}
+.readout span{color:#c9e8ff}
+</style>
+</head>
+<body>
+
+<svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="none">
+<defs>
+ <linearGradient id="gWater" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#2a83ad"/><stop offset=".22" stop-color="#12608f"/>
+  <stop offset=".55" stop-color="#083a60"/><stop offset=".8" stop-color="#04223c"/>
+  <stop offset="1" stop-color="#021424"/></linearGradient>
+ <linearGradient id="gSurf" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#d6f6ff" stop-opacity=".34"/><stop offset="1" stop-color="#d6f6ff" stop-opacity="0"/></linearGradient>
+ <radialGradient id="gGlow" cx=".42" cy="0" r=".85">
+  <stop offset="0" stop-color="#a7ecff" stop-opacity=".38"/><stop offset="1" stop-color="#a7ecff" stop-opacity="0"/></radialGradient>
+ <linearGradient id="gRay" x1="0" y1="0" x2=".3" y2="1">
+  <stop offset="0" stop-color="#e2f8ff" stop-opacity=".5"/><stop offset=".55" stop-color="#bff0ff" stop-opacity=".12"/>
+  <stop offset="1" stop-color="#bff0ff" stop-opacity="0"/></linearGradient>
+ <linearGradient id="gSand" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#ecd3a1"/><stop offset=".28" stop-color="#cfae77"/>
+  <stop offset=".68" stop-color="#9c7b4f"/><stop offset="1" stop-color="#5c4329"/></linearGradient>
+ <linearGradient id="gRock" x1="0" y1="0" x2=".4" y2="1">
+  <stop offset="0" stop-color="#33586e"/><stop offset="1" stop-color="#122c3d"/></linearGradient>
+ <linearGradient id="gK1" x1="0" y1="1" x2="0" y2="0">
+  <stop offset="0" stop-color="#0f4028"/><stop offset=".5" stop-color="#2c814f"/><stop offset="1" stop-color="#61b869"/></linearGradient>
+ <linearGradient id="gK2" x1="0" y1="1" x2="0" y2="0">
+  <stop offset="0" stop-color="#103d3a"/><stop offset=".5" stop-color="#2f8b6e"/><stop offset="1" stop-color="#78c98a"/></linearGradient>
+ <radialGradient id="gBub" cx=".34" cy=".3" r=".78">
+  <stop offset="0" stop-color="#ffffff" stop-opacity=".82"/><stop offset=".45" stop-color="#d3f3ff" stop-opacity=".2"/>
+  <stop offset="1" stop-color="#eafaff" stop-opacity=".06"/></radialGradient>
+ <linearGradient id="gBodyA" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#7c3722"/><stop offset=".3" stop-color="#d9762f"/>
+  <stop offset=".62" stop-color="#f4ab52"/><stop offset="1" stop-color="#ffe3b7"/></linearGradient>
+ <linearGradient id="gTailA" x1="1" y1="0" x2="0" y2="0">
+  <stop offset="0" stop-color="#0e6a74"/><stop offset="1" stop-color="#2fc6bb"/></linearGradient>
+ <linearGradient id="gFinA" x1="0" y1="1" x2="0" y2="0">
+  <stop offset="0" stop-color="#0b4d59"/><stop offset="1" stop-color="#27a9a6"/></linearGradient>
+ <linearGradient id="gBodyB" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#8e1747"/><stop offset=".34" stop-color="#e8447a"/>
+  <stop offset=".7" stop-color="#ff86a9"/><stop offset="1" stop-color="#ffe0e9"/></linearGradient>
+ <linearGradient id="gTailB" x1="1" y1="0" x2="0" y2="0">
+  <stop offset="0" stop-color="#c8285e"/><stop offset="1" stop-color="#ffb27a"/></linearGradient>
+ <linearGradient id="gFinB" x1="0" y1="1" x2="0" y2="0">
+  <stop offset="0" stop-color="#b13559"/><stop offset="1" stop-color="#ffd9a3"/></linearGradient>
+ <radialGradient id="gVig" cx=".5" cy=".42" r=".78">
+  <stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000814" stop-opacity=".55"/></radialGradient>
+ <clipPath id="clipB"><path d="M38,2 C34,-18 18,-32 -2,-31 C-24,-30 -37,-16 -37,1 C-37,18 -22,31 -2,31 C18,31 34,20 38,2 Z"/></clipPath>
+</defs>
+
+<rect width="100%" height="100%" fill="url(#gWater)"/>
+<g id="rays"></g>
+<g id="surf"></g>
+<g id="motes"></g>
+<g id="ridge"></g>
+<g id="floor"></g>
+<g id="kelp"></g>
+<g id="bubbles"></g>
+
+<g id="fishLayer">
+ <g id="fishA" class="fish">
+  <g class="tail">
+   <polygon points="-84,0 -158,-44 -114,-5" fill="url(#gTailA)"/>
+   <polygon points="-84,0 -158,44 -114,5" fill="url(#gTailA)"/>
+   <polygon points="-84,0 -124,-15 -120,0 -124,15" fill="#0b4b57" opacity=".5"/>
+  </g>
+  <g class="dorsal">
+   <polygon points="-30,-23 24,-26 2,-64" fill="url(#gFinA)"/>
+   <path d="M-18,-23 L-2,-55 M-4,-25 L10,-50 M10,-25 L18,-39" stroke="#083f49" stroke-opacity=".45" stroke-width="1.6" fill="none"/>
+  </g>
+  <g class="pelvic"><polygon points="-8,22 22,24 2,52" fill="url(#gFinA)" opacity=".92"/></g>
+  <path d="M98,3 C74,-22 22,-31 -28,-25 C-60,-21 -78,-11 -86,0 C-78,11 -60,21 -28,25 C22,31 74,22 98,3 Z" fill="url(#gBodyA)"/>
+  <path d="M84,10 C60,25 10,30 -28,24 C-56,20 -74,12 -84,2 C-60,16 -10,24 40,18 Z" fill="#ffe9c6" opacity=".45"/>
+  <path d="M86,-1 C50,-10 -10,-13 -80,-3" stroke="#3fdcc4" stroke-width="4" stroke-opacity=".5" fill="none" stroke-linecap="round"/>
+  <path d="M54,-17 C46,-4 46,8 54,19" stroke="#7a3a24" stroke-opacity=".45" stroke-width="2.4" fill="none"/>
+  <g class="pect"><path d="M46,6 C34,21 18,31 2,28 C14,12 30,4 46,6 Z" fill="url(#gFinA)"/></g>
+  <path d="M96,4 C89,10 83,13 77,12" stroke="#6b2c17" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <circle cx="70" cy="-8" r="10" fill="#fff6e6"/>
+  <circle cx="72" cy="-8" r="5.2" fill="#0f2030"/>
+  <circle cx="69" cy="-11" r="1.9" fill="#fff"/>
+ </g>
+
+ <g id="fishB" class="fish">
+  <g class="tail">
+   <polygon points="-30,0 -80,-33 -80,33" fill="url(#gTailB)"/>
+   <polygon points="-30,0 -64,-12 -64,12" fill="#7d0f3c" opacity=".35"/>
+  </g>
+  <g class="dorsal"><polygon points="-17,-25 20,-23 3,-60" fill="url(#gFinB)"/></g>
+  <g class="pelvic"><polygon points="-14,26 10,26 -4,49" fill="url(#gFinB)" opacity=".9"/></g>
+  <path d="M38,2 C34,-18 18,-32 -2,-31 C-24,-30 -37,-16 -37,1 C-37,18 -22,31 -2,31 C18,31 34,20 38,2 Z" fill="url(#gBodyB)"/>
+  <g clip-path="url(#clipB)">
+   <path d="M-16,-34 q-9,34 2,68" stroke="#fff0f4" stroke-opacity=".32" stroke-width="7" fill="none"/>
+   <path d="M6,-34 q-10,34 0,68" stroke="#fff0f4" stroke-opacity=".2" stroke-width="5" fill="none"/>
+   <path d="M-36,18 C-22,30 -4,32 14,26 C-4,34 -24,32 -37,20 Z" fill="#ffe4ee" opacity=".42"/>
+  </g>
+  <g class="pect"><ellipse cx="14" cy="9" rx="13" ry="6.5" fill="url(#gFinB)"/></g>
+  <polygon points="34,-1 48,6 33,12" fill="#8d1442"/>
+  <path d="M34,5.5 L47,6" stroke="#ffd9a0" stroke-width="1.4"/>
+  <circle cx="17" cy="-10" r="10.5" fill="#fff5f8"/>
+  <circle cx="19" cy="-10" r="5.6" fill="#182635"/>
+  <circle cx="16" cy="-13" r="2" fill="#fff"/>
+ </g>
+</g>
+<rect width="100%" height="100%" fill="url(#gVig)" style="pointer-events:none"/>
+</svg>
+
+<div class="hud plate">
+ <div class="tag">Transect 07 · Station Kelp · <span id="clock">00:00</span></div>
+ <h1>Drift<em>study no. 4 · shelf</em></h1>
+ <p class="lede">Two residents of the twilight column, tracked all morning above a sand-wave field at forty fathoms.</p>
+</div>
+
+<div class="hud legend">
+ <div class="sp" data-f="fishA" style="--c:#f0913c"><i></i><b>Copper Lancer</b><s>42 cm · slender · 0.09 m/s</s></div>
+ <div class="sp" data-f="fishB" style="--c:#ff5d8f"><i></i><b>Rose Drumfish</b><s>14 cm · deep-bodied · 0.31 m/s</s></div>
+</div>
+
+<div class="hud readout">
+ Depth <span>72 m</span><br>Temp <span id="temp">6.4 °C</span><br>Vented <span id="bc">0</span><br>
+ <span style="color:#4f7a9c">click the water</span>
+</div>
+
+<script>
+(function(){
+var S=document.getElementById('scene'),NS='http://www.w3.org/2000/svg';
+var L=function(i){return document.getElementById(i)};
+var lay={rays:L('rays'),surf:L('surf'),motes:L('motes'),ridge:L('ridge'),floor:L('floor'),kelp:L('kelp'),bub:L('bubbles')};
+var W=1600,H=900,S0=1,fp=[],KP=[];
+function rnd(a,b){return a+Math.random()*(b-a)}
+function mk(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e}
+for(var i=0;i<4;i++)fp.push({a:rnd(5,15)*(i<2?1:.5),f:rnd(.0035,.014)*(i+1),o:rnd(0,6.28)});
+for(var j=0;j<6;j++)KP.push({x:rnd(.05,.95),h:rnd(.17,.4),g:j%2?'url(#gK1)':'url(#gK2)',d:rnd(5,9.5),ph:rnd(-8,0)});
+
+function floorY(x){var y=H*.865;for(var i=0;i<fp.length;i++)y+=fp[i].a*Math.sin(x*fp[i].f+fp[i].o);return y}
+
+function buildSurf(){lay.surf.textContent='';
+ mk('rect',{x:0,y:0,width:W,height:H*.22,fill:'url(#gSurf)'},lay.surf);
+ mk('rect',{x:0,y:0,width:W,height:H*.5,fill:'url(#gGlow)'},lay.surf);
+ for(var i=0;i<3;i++){var d='M0 '+(7+i*14);for(var x=0;x<=W;x+=44)d+=' q22 '+(i%2?-7:7)+' 44 0';
+  mk('path',{d:d,fill:'none',stroke:'#dcf7ff','stroke-opacity':(.24-i*.06),'stroke-width':1.6,'stroke-dasharray':'78 44','class':'shim',style:'animation-duration:'+(7+i*4)+'s'},lay.surf)}}
+
+function buildRays(){lay.rays.textContent='';
+ for(var i=0;i<5;i++){var x=(i+.25)/5*W+rnd(-40,40),w=W*rnd(.045,.11),sk=W*rnd(.09,.2);
+  mk('polygon',{points:x+',-30 '+(x+w)+',-30 '+(x+w+sk)+','+(H*.96)+' '+(x+sk-w*.3)+','+(H*.96),
+   fill:'url(#gRay)','class':'ray',style:'animation-duration:'+(9+i*2.6)+'s;animation-delay:'+(-i*2.4)+'s'},lay.rays)}}
+
+function buildRidge(){lay.ridge.textContent='';var d='M0 '+H,n=8;
+ for(var i=0;i<=n;i++){var x=i/n*W,y=H*(.83+.045*Math.sin(i*1.7+1)+(i%2?-.035:.01));d+=' L'+x.toFixed(0)+' '+y.toFixed(0)}
+ d+=' L'+W+' '+H+' Z';mk('path',{d:d,fill:'url(#gRock)',opacity:.8},lay.ridge)}
+
+function buildFloor(){lay.floor.textContent='';
+ var top='M0 '+floorY(0).toFixed(1);
+ for(var x=0;x<=W;x+=26)top+=' L'+x+' '+floorY(x).toFixed(1);
+ mk('path',{d:top+' L'+W+' '+H+' L0 '+H+' Z',fill:'url(#gSand)'},lay.floor);
+ mk('path',{d:top,fill:'none',stroke:'#f8e6bd','stroke-opacity':.45,'stroke-width':2},lay.floor);
+ for(var k=0;k<16;k++){var px=rnd(0,W),py=floorY(px)+rnd(4,26),rx=rnd(5,22);
+  mk('ellipse',{cx:px,cy:py,rx:rx,ry:rx*rnd(.28,.5),fill:['#8a6b45','#a98a5e','#6c5133'][k%3],opacity:.75},lay.floor)}
+ for(var r=0;r<3;r++){var bx=rnd(.1,.9)*W,by=floorY(bx)+6,p='';
+  for(var s=0;s<6;s++)p+=(bx-s*22+rnd(-6,6)).toFixed(0)+','+(by-Math.abs(Math.sin(s*1.1))*rnd(26,58)).toFixed(0)+' ';
+  mk('polygon',{points:p+(bx+18)+','+by,fill:'url(#gRock)',opacity:.95},lay.floor)}
+ for(var c=0;c<2;c++){var cx=rnd(.12,.88)*W,cy=floorY(cx)+4,g=mk('g',{},lay.floor);
+  for(var b=0;b<6;b++){var a=-1.6+b*.34+rnd(-.08,.08),ln=rnd(.06,.14)*H;
+   mk('path',{d:'M'+cx+' '+cy+' q'+(Math.cos(a)*ln*.5).toFixed(0)+' '+(-ln*.5).toFixed(0)+' '+Math.cos(a*.8).toFixed(2)+' '+(-ln).toFixed(0),
+    fill:'none',stroke:'#d76a86','stroke-opacity':.5,'stroke-width':rnd(2,4.5),'stroke-linecap':'round'},g)}}
+ for(var t=0;t<7;t++){var gx=rnd(0,W),gy=floorY(gx)+8;
+  mk('path',{d:'M'+gx+' '+gy+' q'+rnd(-14,14)+' '+(-H*.05)+' '+rnd(-26,26)+' '+(-H*.09),fill:'none',
+   stroke:'#3d8a5c','stroke-opacity':.6,'stroke-width':rnd(1.4,3),'stroke-linecap':'round'},lay.floor)}
+ for(var q=0;q<3;q++)mk('ellipse',{cx:rnd(.1,.9)*W,cy:floorY(W*.5)-rnd(2,20),rx:rnd(70,180),ry:rnd(6,14),
+   fill:'#bff0ff','class':'caustic',style:'animation-delay:'+(-q*2.3)+'s'},lay.floor)}
+
+function buildKelp(){lay.kelp.textContent='';
+ for(var i=0;i<KP.length;i++){var p=KP[i],bx=p.x*W,by=floorY(bx)+8,h=p.h*H,g=mk('g',{'class':'kelp',
+   style:'animation-duration:'+p.d+'s;animation-delay:'+p.ph+'s'},lay.kelp),d='M'+bx+' '+by,x=bx,y=by,n=14;
+  for(var s=1;s<=n;s++){var t=s/n;x=bx+Math.sin(t*Math.PI*1.9+i)*h*.12*t;y=by-h*t;d+=' L'+x.toFixed(1)+' '+y.toFixed(1)}
+  mk('path',{d:d,fill:'none',stroke:p.g,'stroke-width':(2+h*.032).toFixed(1),'stroke-linecap':'round'},g);
+  for(var l=1;l<=5;l++){var t=l/6,lx=bx+Math.sin(t*Math.PI*1.9+i)*h*.12*t,ly=by-h*t;
+   mk('ellipse',{cx:(lx+(l%2?1:-1)*h*.06).toFixed(1),cy:ly.toFixed(1),rx:(h*.085).toFixed(1),ry:(h*.026).toFixed(1),
+    fill:p.g,opacity:.85,transform:'rotate('+(l%2?32:-32)+' '+lx.toFixed(1)+' '+ly.toFixed(1)+')'},g)}
+  mk('circle',{cx:bx,cy:by,rx:0,r:0},g)}}
+
+var BUB=[],MOTE=[],vent=0;
+function newB(b,init){var vs=[.15,.3,.52,.7,.88],v=(Math.random()<.72?vs[(Math.random()*vs.length)|0]:Math.random())*W;
+ b.x=v+rnd(-18,18);b.r=Math.random()<.4?rnd(1.9,3.3):rnd(3.6,8.4);
+ b.v=rnd(26,42)+(9-b.r)*rnd(5,9);b.w=rnd(.5,1.5);b.ph=rnd(0,6.28);
+ b.y=init?rnd(-30,floorY(b.x)):floorY(b.x)+b.r*rnd(0,1.4)}
+function makeBubbles(){if(BUB.length)return;for(var i=0;i<16;i++){var g=mk('g',{},lay.bub);
+ mk('circle',{r:10,fill:'url(#gBub)',stroke:'#eafaff','stroke-opacity':.5,'stroke-width':1.1},g);
+ mk('circle',{cx:-3.2,cy:-3.6,r:2.6,fill:'#fff',opacity:.8},g);
+ var b={g:g};newB(b,true);BUB.push(b)}
+ for(var m=0;m<22;m++){var e=mk('circle',{r:rnd(.6,2),fill:'#d3efff',opacity:rnd(.1,.4)},lay.motes);
+  MOTE.push({e:e,x:rnd(0,W),y:rnd(0,H),v:rnd(3,11),w:rnd(.3,.9),ph:rnd(0,6.28)})}}
+function drawB(){for(var i=0;i<BUB.length;i++){var b=BUB[i];
+ b.g.setAttribute('transform','translate('+b.x.toFixed(1)+','+b.y.toFixed(1)+') scale('+(b.r/10).toFixed(3)+')')}
+ for(var j=0;j<MOTE.length;j++){var m=MOTE[j];m.e.setAttribute('cx',m.x.toFixed(1));m.e.setAttribute('cy',m.y.toFixed(1))}}
+
+var A={el:L('fishA'),x:0,y:0,py:0,sp:36,dir:1,base:.42,bob:26,wl:.00055,sc:1,hal:158,boost:0,ph:0};
+var B={el:L('fishB'),x:0,y:0,py:0,sp:126,dir:-1,base:.645,bob:15,wl:.0012,sc:.62,hal:80,boost:0,ph:3};
+var mx=0,my=0,tx=0,ty=0,el0=0,acc=0,vt=0;
+
+function resize(){W=Math.max(320,window.innerWidth);H=Math.max(320,window.innerHeight);S0=Math.min(1.5,Math.max(.5,H/900));
+ S.setAttribute('viewBox','0 0 '+W+' '+H);buildSurf();buildRays();buildRidge();buildFloor();buildKelp();
+ A.py=H*A.base;B.py=H*B.base;if(!A.x){A.x=W*.22;B.x=W*.72}}
+resize();makeBubbles();
+
+window.addEventListener('mousemove',function(e){tx=(e.clientX/W-.5)*2;ty=(e.clientY/H-.5)*2});
+S.addEventListener('pointerdown',function(e){var cx=e.clientX,cy=e.clientY;
+ for(var i=0;i<6;i++){var b=BUB[(vent+i)%BUB.length];newB(b,false);b.x=cx+rnd(-16,16);b.y=cy+rnd(-12,24);b.r=rnd(2,6)}vent+=6});
+var rows=document.querySelectorAll('.sp');
+for(var q=0;q<rows.length;q++)(function(r){var f=L(r.getAttribute('data-f'));
+ r.addEventListener('mouseenter',function(){f.classList.add('spot')});
+ r.addEventListener('mouseleave',function(){f.classList.remove('spot')});
+ r.addEventListener('click',function(){f===A?A.boost=2.6:B.boost=2.2})})(rows[q]);
+
+var last=0;
+function frame(ts){var dt=Math.min(.05,(ts-last)/1000||0);last=ts;el0+=dt;
+ mx+=(tx-mx)*.06;my+=(ty-my)*.06;
+ lay.rays.setAttribute('transform','translate('+(mx*22).toFixed(1)+','+(my*8).toFixed(1)+')');
+ lay.ridge.setAttribute('transform','translate('+(mx*-14).toFixed(1)+',0)');
+ var f,i;
+ for(i=0;i<2;i++){f=i?B:A;var s=f.sc*S0,sp=f.sp*S0*(1+f.boost);f.boost*=.95;
+  f.x+=sp*f.dir*dt;var half=f.hal*s;
+  if(f.dir>0&&f.x-half>W+50)f.x=-half-50;
+  if(f.dir<0&&f.x+half<-50)f.x=W+half+50;
+  f.ph+=dt*f.wl*1000;var y=f.py+Math.sin(f.ph)*f.bob*S0,p=Math.cos(f.ph)*2.8;
+  f.el.setAttribute('transform','translate('+f.x.toFixed(1)+','+y.toFixed(1)+') scale('+(f.dir*s).toFixed(3)+','+s.toFixed(3)+') rotate('+p.toFixed(2)+')')}
+ for(i=0;i<BUB.length;i++){var b=BUB[i];b.y-=b.v*dt*S0;b.x+=Math.sin(el0*b.w+b.ph)*12*dt;
+  if(b.y<-24){newB(b,false);vt++}}
+ for(i=0;i<MOTE.length;i++){var m=MOTE[i];m.y-=m.v*dt*S0;m.x+=Math.sin(el0*m.w+m.ph)*6*dt+3*dt;
+  if(m.y<-10||m.x>W+10){m.x=rnd(0,W);m.y=H+rnd(0,40)}}
+ acc+=dt;if(acc>.4){acc=0;var t=Math.floor(el0);
+  L('clock').textContent=('0'+Math.floor(t/60)).slice(-2)+':'+('0'+(t%60)).slice(-2);
+  L('bc').textContent=vt;L('temp').textContent=(6.1+Math.sin(el0*.22)*.45).toFixed(1)+' °C'}
+ drawB();requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){resize();
+ for(var i=0;i<BUB.length;i++)if(BUB[i].y>H)BUB[i].y=floorY(BUB[i].x)},120)});
+})();
+</script>
+</body>
+</html>

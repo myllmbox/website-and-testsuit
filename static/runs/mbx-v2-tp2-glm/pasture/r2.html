@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Morning Pasture</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#79c1ea}
+  svg{display:block;width:100vw;height:100vh}
+  .cloud{animation-name:drift;animation-duration:var(--cd,80s);animation-timing-function:linear;animation-iteration-count:infinite;animation-delay:var(--cdel,0s)}
+  @keyframes drift{from{transform:translateX(-170px)}to{transform:translateX(calc(100vw + 170px))}}
+  .hop{animation-name:hop;animation-duration:var(--hd,.9s);animation-iteration-count:infinite;animation-delay:var(--hdel,0s)}
+  @keyframes hop{
+    0%{transform:translateY(0);animation-timing-function:cubic-bezier(.2,.55,.45,1)}
+    42%{transform:translateY(var(--amp,-14px));animation-timing-function:cubic-bezier(.55,0,.8,.4)}
+    100%{transform:translateY(0)}
+  }
+  .shadow{animation-name:sfade;animation-duration:var(--hd,.9s);animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-delay:var(--hdel,0s)}
+  @keyframes sfade{0%,100%{opacity:.2}42%{opacity:.06}}
+</style>
+</head>
+<body>
+<svg id="scene"></svg>
+<script>
+'use strict';
+const svg=document.getElementById('scene');
+const F=n=>Math.round(n*10)/10;
+const C=(x,y,r,f,e='')=>`<circle cx="${F(x)}" cy="${F(y)}" r="${F(r)}" fill="${f}"${e?' '+e:''}/>`;
+const E=(x,y,rx,ry,f,e='')=>`<ellipse cx="${F(x)}" cy="${F(y)}" rx="${F(rx)}" ry="${F(ry)}" fill="${f}"${e?' '+e:''}/>`;
+const Rc=(x,y,w,h,f,r=0,e='')=>`<rect x="${F(x)}" y="${F(y)}" width="${F(w)}" height="${F(h)}" rx="${F(r)}" fill="${f}"${e?' '+e:''}/>`;
+const P=(d,f,e='')=>`<path d="${d}" fill="${f}"${e?' '+e:''}/>`;
+const LN=(x1,y1,x2,y2,f,w,e='')=>`<line x1="${F(x1)}" y1="${F(y1)}" x2="${F(x2)}" y2="${F(y2)}" stroke="${f}" stroke-width="${w}" stroke-linecap="round"${e?' '+e:''}/>`;
+
+function build(){
+  const W=innerWidth,H=innerHeight;
+  const hz=Math.round(H*.65),gh=H-hz;
+  const sc=Math.max(.4,Math.min(1,W/1050,H/620));
+  const R=Math.max(20,Math.min(W,H)*.048);
+  const sx=W*.84,sy=H*.16;
+
+  /* ---- sun with halo and rotating rays ---- */
+  let rays='';
+  for(let k=0;k<8;k++){
+    const a=(k*45+22.5)*Math.PI/180,c=Math.cos(a),s=Math.sin(a);
+    rays+=LN(sx+c*R*1.5,sy+s*R*1.5,sx+c*R*2.1,sy+s*R*2.1,'#ffd94d',Math.max(4,R*.13),'opacity=".85"');
+  }
+  const sun=`<g>${C(sx,sy,R*3.1,'url(#sg)')}<g>${rays}<animateTransform attributeName="transform" type="rotate" from="0 ${F(sx)} ${F(sy)}" to="360 ${F(sx)} ${F(sy)}" dur="90s" repeatCount="indefinite"/></g>${C(sx,sy,R,'#ffd94d')}${C(sx-R*.18,sy-R*.18,R*.62,'#ffe98c')}</g>`;
+
+  /* ---- drifting clouds (wrap around) ---- */
+  const cloud=k=>`<g>${E(26*k,13*k,30*k,9*k,'#d7ecf8')}${E(25*k,6*k,33*k,13*k,'#fff')}${C(5*k,2*k,14*k,'#fff')}${C(26*k,-9*k,21*k,'#fff')}${C(47*k,2*k,14*k,'#fff')}${C(24*k,7*k,15*k,'#fff')}</g>`;
+  const cdef=[[.13,1.2,'90s','-25s'],[.30,.85,'65s','-50s'],[.22,1,'75s','-12s'],[.38,.7,'58s','-33s']];
+  let cl='';
+  for(const [fy,k,d,dl] of cdef)
+    cl+=`<g transform="translate(0 ${F(H*fy)})"><g class="cloud" style="--cd:${d};--cdel:${dl}">${cloud(k)}</g></g>`;
+
+  /* ---- distant hills ---- */
+  const hills=E(W*.20,hz+8,W*.26,42,'#b7df8d')+E(W*.58,hz+8,W*.22,30,'#c3e69b')+E(W*.90,hz+8,W*.20,24,'#b7df8d');
+
+  /* ---- swaying trees ---- */
+  const tree=(x,y,st,dur,beg)=>`<g transform="translate(${F(x)} ${F(y)}) scale(${F(st)})">${E(0,3,30,6,'#1e4d18','opacity=".18"')}<g><animateTransform attributeName="transform" type="rotate" values="-1.4 0 0;1.4 0 0;-1.4 0 0" dur="${dur}" begin="${beg}" repeatCount="indefinite"/>${P('M-10,0 C-7,-26 -5,-48 -4,-64 L4,-64 C5,-48 7,-26 10,0 Z','#7a4a2a')}${P('M2,-64 C3,-46 5,-24 8,0 L10,0 C7,-26 5,-48 4,-64 Z','#683d22')}${C(-28,-84,25,'#4e8f3c')}${C(28,-84,25,'#4e8f3c')}${C(0,-116,26,'#4e8f3c')}${C(0,-90,34,'#4e8f3c')}${C(-20,-96,19,'#67b254')}${C(20,-96,19,'#67b254')}${C(0,-110,21,'#67b254')}${C(-6,-82,17,'#67b254')}${C(14,-80,15,'#67b254')}${C(-6,-106,10,'#82c46b')}${C(14,-96,8,'#82c46b')}</g></g>`;
+
+  /* ---- grass tufts and flowers ---- */
+  let details='';
+  const tuft=(x,y,s2)=>`<g transform="translate(${F(x)} ${F(y)}) scale(${F(s2)})" fill="none" stroke="#47893c" stroke-width="2" stroke-linecap="round"><path d="M0 0Q-2 -6 -4 -9"/><path d="M4 0Q4 -7 3 -11"/><path d="M8 0Q10 -5 12 -8"/></g>`;
+  [[.05,.55],[.11,.85],[.24,.62],[.34,.28],[.50,.78],[.58,.4],[.74,.62],[.83,.22],[.94,.82],[.985,.45]].forEach((p,i)=>{details+=tuft(W*p[0],hz+gh*p[1],sc*(.8+(i%3)*.2))});
+  const flower=(x,y,s2,p)=>`<g transform="translate(${F(x)} ${F(y)}) scale(${F(s2)})">${LN(0,2,0,8,'#47893c',1.6)}${C(0,-3.4,2.1,p)}${C(3.2,-.9,2.1,p)}${C(2,2.8,2.1,p)}${C(-2,2.8,2.1,p)}${C(-3.2,-.9,2.1,p)}${C(0,0,1.7,'#ffd94d')}</g>`;
+  [[.08,.4,'#fff'],[.2,.78,'#ffeaf1'],[.47,.55,'#fff'],[.64,.88,'#ffeaf1'],[.8,.5,'#fff'],[.93,.32,'#ffeaf1']].forEach(p=>{details+=flower(W*p[0],hz+gh*p[1],sc,p[2])});
+
+  /* ---- animals (local coords: feet at y=0, facing left) ---- */
+  const cow=`<g id="cow">`
+    +Rc(28,-46,9,46,'#e6dcc4',4)+Rc(77,-46,9,46,'#e6dcc4',4)
+    +Rc(41,-46,9,46,'#faf3e3',4)+Rc(90,-46,9,46,'#faf3e3',4)
+    +Rc(28,-9,9,9,'#3a3129',2)+Rc(41,-9,9,9,'#3a3129',2)+Rc(77,-9,9,9,'#3a3129',2)+Rc(90,-9,9,9,'#3a3129',2)
+    +P('M104,-70 C116,-66 120,-52 116,-40','none','stroke="#e6dcc4" stroke-width="5" stroke-linecap="round"')
+    +E(116,-38,4.5,7,'#332b24')
+    +Rc(8,-80,100,42,'#faf3e3',20)
+    +`<clipPath id="cw"><rect x="8" y="-80" width="100" height="42" rx="20"/></clipPath>`
+    +`<g clip-path="url(#cw)">`+E(38,-72,15,11,'#332b24')+E(80,-48,18,11,'#332b24')+E(107,-70,13,11,'#332b24')+E(58,-81,10,6.5,'#332b24')+`</g>`
+    +E(64,-40,11,8,'#f2a5b5')+Rc(60,-35,3,5,'#d4778f',1.5)+Rc(68,-35,3,5,'#d4778f',1.5)
+    +C(10,-74,11,'#faf3e3')
+    +E(-20,-87,8,5,'#e6dcc4','transform="rotate(-22 -20 -87)"')+E(-20,-87,4,2.4,'#f2a5b5','transform="rotate(-22 -20 -87)"')
+    +E(18,-87,8,5,'#e6dcc4','transform="rotate(22 18 -87)"')+E(18,-87,4,2.4,'#f2a5b5','transform="rotate(22 18 -87)"')
+    +P('M-9,-91 C-13,-99 -9,-105 -3,-105 C-6,-100 -6,-95 -5,-91 Z','#e7d9ba')
+    +P('M9,-91 C13,-99 9,-105 3,-105 C6,-100 6,-95 5,-91 Z','#e7d9ba')
+    +Rc(-15,-92,30,32,'#faf3e3',13)
+    +E(0,-88,6.5,4,'#332b24')
+    +C(-6,-79,2.6,'#2b241d')+C(7,-79,2.6,'#2b241d')
+    +Rc(-12,-68,24,12,'#f2a5b5',6)
+    +E(-5,-62,1.8,2.6,'#c26b82')+E(6,-62,1.8,2.6,'#c26b82')
+    +`</g>`;
+
+  const sheep=`<g id="sheep">`
+    +Rc(26,-40,7,40,'#5a4f43',3)+Rc(66,-40,7,40,'#5a4f43',3)
+    +Rc(37,-40,7,40,'#443a30',3)+Rc(78,-40,7,40,'#443a30',3)
+    +C(52,-56,29,'#e9e0cf')+C(30,-50,20,'#e9e0cf')+C(74,-50,20,'#e9e0cf')
+    +C(24,-48,14,'#fbf7ee')+C(36,-60,18,'#fbf7ee')+C(54,-63,20,'#fbf7ee')+C(72,-58,17,'#fbf7ee')+C(84,-48,12,'#fbf7ee')
+    +C(16,-40,11,'#fbf7ee')+C(38,-42,15,'#fbf7ee')+C(60,-44,16,'#fbf7ee')+C(80,-40,12,'#fbf7ee')
+    +E(-12,-78,8,4.5,'#3a322a','transform="rotate(-28 -12 -78)"')
+    +E(24,-78,8,4.5,'#3a322a','transform="rotate(28 24 -78)"')
+    +Rc(-8,-87,28,30,'#443a30',12)
+    +C(0,-88,7,'#fbf7ee')+C(10,-90,6,'#fbf7ee')+C(18,-87,5.5,'#fbf7ee')+C(-6,-85,5,'#fbf7ee')
+    +C(0,-73,3,'#fbf7ee')+C(13,-73,3,'#fbf7ee')
+    +C(-0.8,-73,1.5,'#191512')+C(12.2,-73,1.5,'#191512')
+    +E(-6,-61,2.4,1.7,'#2e2620')
+    +`</g>`;
+
+  const pig=`<g id="pig">`
+    +P('M88,-50 C98,-57 106,-52 104,-45 C102,-38 93,-40 93,-45 C93,-49 98,-51 101,-48','none','stroke="#e18ba0" stroke-width="3.5" stroke-linecap="round"')
+    +Rc(18,-30,8,30,'#e18ba0',3)+Rc(62,-30,8,30,'#e18ba0',3)
+    +Rc(29,-30,8,30,'#f3a2b3',3)+Rc(73,-30,8,30,'#f3a2b3',3)
+    +Rc(18,-7,8,7,'#c96f8a',2)+Rc(29,-7,8,7,'#c96f8a',2)+Rc(62,-7,8,7,'#c96f8a',2)+Rc(73,-7,8,7,'#c96f8a',2)
+    +E(52,-44,40,22,'#f3a2b3')
+    +C(15,-45,17,'#f3a2b3')
+    +P('M1,-58 L-3,-73 L15,-62 Z','#ef93a7')+P('M3,-60 L1,-68 L11,-62 Z','#d9748e')
+    +P('M19,-60 L28,-74 L29,-58 Z','#ef93a7')+P('M22,-61 L27,-69 L28,-60 Z','#d9748e')
+    +C(7,-50,2.4,'#4a2430')+C(24,-50,2.4,'#4a2430')
+    +E(15,-40,9,6.5,'#e27e96')
+    +E(11.5,-40,1.7,2.8,'#b0546e')+E(18.5,-40,1.7,2.8,'#b0546e')
+    +`</g>`;
+
+  const horse=`<g id="horse">`
+    +P('M116,-82 C132,-80 138,-62 131,-46 C127,-36 120,-30 115,-26','none','stroke="#472c18" stroke-width="9" stroke-linecap="round"')
+    +P('M119,-77 C129,-71 131,-58 126,-47','none','stroke="#5d3a20" stroke-width="3" stroke-linecap="round"')
+    +Rc(30,-70,9,70,'#7e502e',4)+Rc(88,-70,9,70,'#7e502e',4)
+    +Rc(43,-70,9,70,'#96613a',4)+Rc(101,-70,9,70,'#96613a',4)
+    +Rc(30,-9,9,9,'#33231a',2)+Rc(43,-9,9,9,'#33231a',2)+Rc(88,-9,9,9,'#33231a',2)+Rc(101,-9,9,9,'#33231a',2)
+    +P('M38,-84 C24,-96 14,-112 12,-130 L32,-136 C36,-118 44,-102 58,-92 Z','#96613a')
+    +E(70,-78,52,19,'#96613a')
+    +E(103,-77,17,15,'#8a5631')
+    +P('M22,-150 C30,-138 40,-116 55,-97','none','stroke="#472c18" stroke-width="9" stroke-linecap="round"')
+    +P('M27,-142 q7,1 9,7 M32,-130 q7,0 10,6 M38,-118 q7,-1 10,5 M45,-107 q7,-1 9,5','none','stroke="#472c18" stroke-width="3" stroke-linecap="round"')
+    +P('M14,-148 L8,-163 L22,-151 Z','#7e502e')+P('M15,-150 L12,-158 L19,-151 Z','#33231a')
+    +P('M23,-149 L27,-164 L34,-150 Z','#7e502e')+P('M25,-151 L27,-158 L31,-151 Z','#33231a')
+    +P('M26,-152 C12,-158 -2,-150 -7,-138 C-10,-131 -8,-125 -3,-124 C6,-122 16,-126 22,-132 C28,-138 30,-146 26,-152 Z','#96613a')
+    +E(-4,-129,6.5,5,'#bb8c66')+C(-6,-128,1.5,'#33231a')
+    +C(6,-141,2.4,'#241509')+C(17,-143,2.4,'#241509')
+    +C(20,-152,5,'#472c18')+C(14,-150,4.5,'#472c18')
+    +`</g>`;
+
+  /* ---- herd placement: spread across the field, out-of-phase hops ---- */
+  const herd=[
+    ['sheep',W*.155,hz+gh*.32,'-12px','.8s','-.4s',50],
+    ['cow',  W*.40, hz+gh*.48,'-14px','.9s','-.15s',60],
+    ['horse',W*.645,hz+gh*.68,'-18px','1s','-.62s',68],
+    ['pig',  W*.875,hz+gh*.85,'-10px','.7s','-.33s',44]
+  ];
+  let herdStr='';
+  for(const [id,x,y,amp,d,dl,sr] of herd){
+    herdStr+=`<g transform="translate(${F(x)} ${F(y)}) scale(${F(sc)})" style="--hd:${d};--hdel:${dl};--amp:${amp}">`
+      +E(0,1,sr,sr*.14,'#1e4d18','class="shadow"')
+      +`<g class="hop"><use href="#${id}"/></g></g>`;
+  }
+
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.innerHTML=`<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#79c1ea"/><stop offset=".55" stop-color="#a8dcf3"/><stop offset="1" stop-color="#e9f6ee"/></linearGradient>
+<linearGradient id="gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a3d87e"/><stop offset=".5" stop-color="#7cbb60"/><stop offset="1" stop-color="#4f9a45"/></linearGradient>
+<radialGradient id="sg"><stop offset="0" stop-color="#fff3b0" stop-opacity=".95"/><stop offset=".5" stop-color="#ffee9e" stop-opacity=".55"/><stop offset="1" stop-color="#ffee9e" stop-opacity="0"/></radialGradient>
+</defs>`
+  +Rc(0,0,W,hz,'url(#sky)')
+  +sun
+  +hills
+  +cl
+  +Rc(0,hz,W,gh,'url(#gr)')
+  +Rc(0,hz,W,3,'#dcf1ae')
+  +details
+  +tree(W*.30,hz+gh*.14,sc,'5.8s','-1.2s')
+  +tree(W*.56,hz+gh*.09,sc*.82,'7s','-3.1s')
+  +`<defs>${cow}${sheep}${pig}${horse}</defs>`
+  +herdStr;
+}
+
+let raf=0;
+addEventListener('resize',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(build)});
+build();
+</script>
+</body>
+</html>

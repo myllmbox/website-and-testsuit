@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Underwater SVG</title>
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#02121f}
+svg{position:fixed;left:0;top:0;width:100vw;height:100vh}
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#6fd5f2"/>
+<stop offset="50%" stop-color="#147fb9"/>
+<stop offset="100%" stop-color="#03162e"/>
+</linearGradient>
+<linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#f2dfb1"/>
+<stop offset="55%" stop-color="#c08a55"/>
+<stop offset="100%" stop-color="#5f3d23"/>
+</linearGradient>
+<radialGradient id="bubble" cx="35%" cy="30%" r="65%">
+<stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+<stop offset="45%" stop-color="#cdefff" stop-opacity="0.25"/>
+<stop offset="100%" stop-color="#8fddff" stop-opacity="0.12"/>
+</radialGradient>
+<linearGradient id="gradA" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#8de6ff"/>
+<stop offset="55%" stop-color="#329de3"/>
+<stop offset="100%" stop-color="#123f83"/>
+</linearGradient>
+<linearGradient id="gradB" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#ffd972"/>
+<stop offset="60%" stop-color="#ff8835"/>
+<stop offset="100%" stop-color="#c33918"/>
+</linearGradient>
+<linearGradient id="weed" x1="0" y1="1" x2="0" y2="0">
+<stop offset="0%" stop-color="#1f7a33"/>
+<stop offset="100%" stop-color="#7fe07b"/>
+</linearGradient>
+</defs>
+<rect width="100%" height="100%" fill="url(#water)"/>
+<path id="floor" fill="url(#sand)" stroke="#46311b" stroke-width="2" opacity="0.98"/>
+<g id="pebbles" fill="#6e5236" opacity="0.30">
+<ellipse cx="14%" cy="90%" rx="16" ry="5"/>
+<ellipse cx="35%" cy="93%" rx="22" ry="6"/>
+<ellipse cx="57%" cy="91%" rx="13" ry="4"/>
+<ellipse cx="73%" cy="94%" rx="25" ry="6"/>
+<ellipse cx="90%" cy="96%" rx="17" ry="5"/>
+</g>
+<g id="weeds"></g>
+<g id="fishA">
+<polygon points="-114,0 -192,-58 -192,58" fill="#124f99"/>
+<polygon points="-36,-29 -6,-78 36,-25" fill="#48b2f5"/>
+<ellipse cx="0" cy="0" rx="118" ry="38" fill="url(#gradA)"/>
+<path d="M 8 9 Q -34 36 -68 9 Q -28 24 8 9 Z" fill="#aeeeff" opacity="0.62"/>
+<path d="M 111 6 Q 98 19 85 12" fill="none" stroke="#0d3461" stroke-width="4.5" stroke-linecap="round"/>
+<circle cx="81" cy="-12" r="11" fill="#ffffff"/>
+<circle cx="84" cy="-11" r="5" fill="#071525"/>
+</g>
+<g id="fishB">
+<polygon points="-58,0 -118,-50 -118,50" fill="#c13617"/>
+<polygon points="-16,-32 12,-74 48,-26" fill="#ffd45e"/>
+<ellipse cx="0" cy="0" rx="64" ry="51" fill="url(#gradB)"/>
+<path d="M 9 13 Q -24 39 -51 15 Q -20 27 9 13 Z" fill="#ffc27a" opacity="0.75"/>
+<path d="M 55 6 Q 43 18 31 10" fill="none" stroke="#5b1d06" stroke-width="4" stroke-linecap="round"/>
+<circle cx="35" cy="-16" r="10" fill="#ffffff"/>
+<circle cx="38" cy="-15" r="4.5" fill="#250e02"/>
+</g>
+<g id="bubbles"></g>
+</svg>
+<script>
+(function(){
+var NS='http://www.w3.org/2000/svg';
+var svg=document.getElementById('scene');
+var floor=document.getElementById('floor');
+var weedLayer=document.getElementById('weeds');
+var bubbleLayer=document.getElementById('bubbles');
+var fishElA=document.getElementById('fishA');
+var fishElB=document.getElementById('fishB');
+var W=Math.max(1,svg.clientWidth||window.innerWidth);
+var H=Math.max(1,svg.clientHeight||window.innerHeight);
+var floorY=H*0.875;
+var floorVar=Math.max(4,Math.min(12,H*0.012));
+var floorRoot=Math.min(H,Math.max(1,floorY+floorVar+4));
+var globalS=1;
+var weedScale=1;
+var t=0;
+var bubbles=[], weeds=[];
+
+var weedDefs=[
+{fx:0.13,s:1.15,ph:0},
+{fx:0.5,s:0.82,ph:1.8},
+{fx:0.86,s:1.3,ph:3.3}
+];
+
+for(var k=0;k<weedDefs.length;k++){
+var def=weedDefs[k];
+var g=document.createElementNS(NS,'g');
+var p=document.createElementNS(NS,'path');
+p.setAttribute('d','M 0 0 C -11 -46 16 -80 -8 -132 C -26 -178 14 -215 -1 -265');
+p.setAttribute('fill','none');
+p.setAttribute('stroke','url(#weed)');
+p.setAttribute('stroke-width','9');
+p.setAttribute('stroke-linecap','round');
+p.setAttribute('opacity','0.85');
+g.appendChild(p);
+weedLayer.appendChild(g);
+weeds.push({g:g,p:p,fx:def.fx,s:def.s,ph:def.ph});
+}
+
+function resize(){
+W=Math.max(1,svg.clientWidth||window.innerWidth);
+H=Math.max(1,svg.clientHeight||window.innerHeight);
+svg.setAttribute('viewBox','0 0 '+W+' '+H);
+floorY=H*0.875;
+var v=Math.max(4,Math.min(12,H*0.012));
+floorVar=v;
+floorRoot=Math.min(H,Math.max(1,floorY+v+4));
+var d='M 0 '+(floorY+v*0.6);
+d+=' Q '+(W*0.06)+' '+(floorY-v)+' '+(W*0.14)+' '+(floorY+v*0.7);
+d+=' Q '+(W*0.26)+' '+(floorY+v)+' '+(W*0.37)+' '+(floorY-v*0.5);
+d+=' Q '+(W*0.5)+' '+(floorY-v)+' '+(W*0.62)+' '+(floorY+v*0.6);
+d+=' Q '+(W*0.74)+' '+(floorY+v)+' '+(W*0.85)+' '+(floorY-v*0.6);
+d+=' Q '+(W*0.94)+' '+(floorY-v)+' '+W+' '+(floorY+v*0.2);
+d+=' L '+W+' '+H+' L 0 '+H+' Z';
+floor.setAttribute('d',d);
+globalS=Math.max(0.45,Math.min(1.15,Math.min(W,H)/780));
+weedScale=Math.max(0.35,Math.min(1.25,floorY/380));
+}
+
+function spawnY(){
+var sy=floorY-floorVar-5-Math.random()*25;
+if(sy<5)sy=5+Math.random()*15;
+if(sy>H-1)sy=H-1;
+if(sy<1)sy=1;
+return sy;
+}
+
+resize();
+
+for(var i=0;i<10;i++){
+var c=document.createElementNS(NS,'circle');
+var r=3+Math.random()*11;
+c.setAttribute('r',r.toFixed(2));
+c.setAttribute('cx',(Math.random()*W).toFixed(2));
+c.setAttribute('cy',spawnY().toFixed(2));
+c.setAttribute('fill','url(#bubble)');
+c.setAttribute('stroke','#ffffff');
+c.setAttribute('stroke-opacity','0.35');
+c.setAttribute('stroke-width',Math.max(0.5,r*0.08).toFixed(2));
+bubbleLayer.appendChild(c);
+bubbles.push({el:c,x:Math.random()*W,y:spawnY(),r:r,vy:Math.max(18,Math.min(85,25+210/r))});
+}
+
+var fishA={el:fishElA,x:W*0.25,local:210,scaleBase:1.0,scale:1};
+var fishB={el:fishElB,x:W*0.72,local:135,scaleBase:0.55,scale:1};
+var last=Date.now();
+
+function loop(){
+var now=Date.now();
+var cw=Math.max(1,svg.clientWidth||window.innerWidth);
+var ch=Math.max(1,svg.clientHeight||window.innerHeight);
+if(cw!==W||ch!==H)resize();
+var dt=(now-last)/1000;
+if(dt<0)dt=0;
+if(dt>0.05)dt=0.05;
+last=now;
+t+=dt;
+
+for(i=0;i<bubbles.length;i++){
+var b=bubbles[i];
+b.y-=b.vy*dt;
+if(b.y<-b.r-15){
+b.y=spawnY();
+b.x=Math.random()*W;
+}
+if(b.x<0||b.x>W)b.x=Math.random()*W;
+b.el.setAttribute('cx',b.x.toFixed(1));
+b.el.setAttribute('cy',b.y.toFixed(1));
+}
+
+for(i=0;i<weeds.length;i++){
+var w=weeds[i];
+var sway=Math.sin(t*1.1+w.ph)*8;
+var ws=w.s*weedScale;
+w.g.setAttribute('transform','translate('+(W*w.fx).toFixed(1)+','+floorRoot.toFixed(1)+') scale('+ws.toFixed(3)+')');
+w.p.setAttribute('transform','rotate('+sway.toFixed(2)+')');
+}
+
+fishA.scale=fishA.scaleBase*globalS;
+fishB.scale=fishB.scaleBase*globalS;
+var vA=-(36+24*globalS);
+var vB=92+64*globalS;
+fishA.x+=vA*dt;
+fishB.x+=vB*dt;
+var mA=fishA.local*fishA.scale+90;
+var mB=fishB.local*fishB.scale+90;
+if(fishA.x<-mA)fishA.x=W+mA;
+else if(fishA.x>W+mA)fishA.x=-mA;
+if(fishB.x<-mB)fishB.x=W+mB;
+else if(fishB.x>W+mB)fishB.x=-mB;
+var ay=H*0.35;
+var by=H*0.58;
+fishA.el.setAttribute('transform','translate('+fishA.x.toFixed(1)+','+ay.toFixed(1)+') scale(-'+fishA.scale.toFixed(3)+','+fishA.scale.toFixed(3)+')');
+fishB.el.setAttribute('transform','translate('+fishB.x.toFixed(1)+','+by.toFixed(1)+') scale('+fishB.scale.toFixed(3)+','+fishB.scale.toFixed(3)+')');
+requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

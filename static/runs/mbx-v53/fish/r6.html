@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Two Fish, One Current — Living Reef Study</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;overflow:hidden}
+body{background:#03131e;color:#dff2f8;font-family:"Avenir Next","Segoe UI",system-ui,-apple-system,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+#scene{position:fixed;inset:0;display:block;width:100vw;height:100vh}
+
+/* ---- living SVG parts ---- */
+.tail{transform-box:fill-box;transform-origin:100% 50%;animation:wag .95s cubic-bezier(.45,.05,.55,.95) infinite alternate}
+.fish.b .tail{animation-duration:.5s}
+.pec{transform-box:fill-box;transform-origin:16% 6%;animation:flut 1.5s ease-in-out infinite alternate}
+.fish.b .pec{animation-duration:.75s}
+.fish{cursor:pointer;transition:filter .45s}
+.fish:hover{filter:saturate(1.25) brightness(1.08)}
+.fish:hover .tail{animation-duration:.3s}
+.aura{opacity:0;transition:opacity .5s}
+.fish:hover .aura,.fish.shot .aura{opacity:1}
+@keyframes wag{from{transform:rotate(-11deg)}to{transform:rotate(11deg)}}
+@keyframes flut{from{transform:rotate(-9deg)}to{transform:rotate(9deg)}}
+.weed{transform-box:fill-box;transform-origin:50% 100%;animation:sway 7s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-4.5deg) skewX(1.6deg)}to{transform:rotate(5deg) skewX(-2.2deg)}}
+.ray{transform-box:fill-box;transform-origin:50% 0;animation:rs 18s ease-in-out infinite alternate}
+@keyframes rs{from{transform:translateX(-30px) rotate(-1.8deg);opacity:.45}to{transform:translateX(34px) rotate(2.2deg);opacity:1}}
+.caustic{transform-box:fill-box;transform-origin:50% 50%;animation:cd 26s linear infinite}
+@keyframes cd{0%{transform:translateX(-220px) scaleX(1)}50%{transform:translateX(170px) scaleX(1.18)}100%{transform:translateX(-220px) scaleX(1)}}
+.surf{animation:sf 21s ease-in-out infinite alternate}
+@keyframes sf{from{transform:translateX(-46px)}to{transform:translateX(46px)}}
+.skin{transform-box:fill-box;transform-origin:50% 50%}
+.bub.pop .skin{animation:pop 3.4s ease-in infinite}
+@keyframes pop{0%,72%{transform:scale(1)}86%{transform:scale(1.45)}100%{transform:scale(.12);opacity:0}}
+.ring{transform-box:fill-box;transform-origin:50% 50%;animation:rg .95s ease-out forwards}
+@keyframes rg{from{transform:scale(.15);opacity:.85}to{transform:scale(2.4);opacity:0}}
+
+/* ---- overlay type ---- */
+.ui{position:fixed;inset:0;z-index:6;pointer-events:none;
+  background:radial-gradient(120% 85% at 8% 108%,rgba(2,14,24,.72),rgba(2,14,24,0) 58%)}
+.mark{position:absolute;top:clamp(16px,3vh,38px);left:clamp(16px,3vw,46px);
+  font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:#8fd2e8;display:flex;align-items:center;gap:11px}
+.pip{width:8px;height:8px;border-radius:50%;background:#5fe1b0;box-shadow:0 0 0 0 rgba(95,225,176,.55);animation:pulse 2.6s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,225,176,.5)}70%{box-shadow:0 0 0 13px rgba(95,225,176,0)}100%{box-shadow:0 0 0 0 rgba(95,225,176,0)}}
+.bl{position:absolute;left:clamp(16px,3vw,46px);bottom:clamp(18px,4vh,46px);max-width:min(46ch,62vw)}
+h1{font-family:Georgia,"Iowan Old Style","Palatino Linotype","Times New Roman",serif;font-weight:400;
+  font-size:clamp(38px,7vw,102px);line-height:.9;letter-spacing:-.022em;margin:0;color:#f4fdff;text-shadow:0 14px 44px rgba(1,16,28,.65)}
+h1 em{font-style:italic;color:#ffb877}
+h1 .sm{display:block;font-size:.42em;letter-spacing:.02em;color:#a9d7e8;font-style:italic}
+.lede{margin:18px 0 0;font-size:14px;line-height:1.65;color:#9cc4d7;max-width:38ch}
+.lede b{color:#e6f7ff;font-weight:600}
+.stats{display:flex;gap:clamp(16px,3vw,34px);margin-top:20px;flex-wrap:wrap}
+.st{font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:#6ba3bd}
+.st b{display:block;font-family:Georgia,serif;font-weight:400;font-size:26px;letter-spacing:.005em;text-transform:none;color:#eafaff;margin-top:5px;
+  text-shadow:0 4px 18px rgba(0,0,0,.5)}
+.st b i{font-style:normal;font-size:14px;color:#7fbfd6}
+.ctl{position:absolute;right:clamp(16px,3vw,46px);bottom:clamp(20px,4vh,48px);display:flex;gap:6px;pointer-events:auto}
+.ctl button{appearance:none;border:0;background:none;color:#93c8dc;font:inherit;font-size:10.5px;letter-spacing:.24em;
+  text-transform:uppercase;padding:9px 12px;margin:0;cursor:pointer;position:relative;transition:color .3s,transform .3s}
+.ctl button::after{content:"";position:absolute;left:12px;right:12px;bottom:4px;height:1px;background:#ffb877;width:0;transition:width .38s cubic-bezier(.2,.8,.2,1)}
+.ctl button:hover{color:#fff;transform:translateY(-2px)}
+.ctl button:hover::after,.ctl button.on::after{width:calc(100% - 24px)}
+.ctl button.on{color:#fff}
+.hint{position:absolute;right:clamp(16px,3vw,46px);bottom:calc(clamp(20px,4vh,48px) + 52px);font-size:10px;letter-spacing:.22em;
+  text-transform:uppercase;color:#5e93ad;text-align:right}
+.rv{opacity:0;transform:translateY(20px);transition:opacity .95s cubic-bezier(.2,.8,.2,1),transform .95s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+@media (max-width:620px){.lede{display:none}.hint{display:none}}
+@media (prefers-reduced-motion:reduce){.ray,.weed,.pec,.tail,.caustic,.surf,.pip,.bub.pop .skin{animation:none!important}}
+</style>
+</head>
+<body>
+
+<svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="none" role="img" aria-label="Animated underwater reef with two fish, bubbles and seaweed">
+<defs>
+  <linearGradient id="gWater" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#7fdaf3"/><stop offset=".15" stop-color="#41add7"/>
+    <stop offset=".42" stop-color="#16699a"/><stop offset=".72" stop-color="#083a5e"/>
+    <stop offset="1" stop-color="#031726"/>
+  </linearGradient>
+  <linearGradient id="gSun" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff6cf" stop-opacity=".8"/><stop offset="1" stop-color="#fff6cf" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="gRay" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#eafcffe" stop-opacity=".48"/><stop offset=".5" stop-color="#bfefff" stop-opacity=".11"/>
+    <stop offset="1" stop-color="#bfefff" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="gSand" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#f2ddab"/><stop offset=".3" stop-color="#d5b67e"/>
+    <stop offset=".72" stop-color="#9a7748"/><stop offset="1" stop-color="#5d432a"/>
+  </linearGradient>
+  <linearGradient id="gRidge" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2a5c72"/><stop offset="1" stop-color="#0d2a3c"/>
+  </linearGradient>
+  <radialGradient id="gRock" cx=".35" cy=".28" r=".85"><stop offset="0" stop-color="#8d979f"/><stop offset="1" stop-color="#33414c"/></radialGradient>
+  <linearGradient id="gW1" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#0e5540"/><stop offset=".55" stop-color="#1c8b5c"/><stop offset="1" stop-color="#4ec98a"/></linearGradient>
+  <linearGradient id="gW2" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#134a45"/><stop offset=".6" stop-color="#1f8a72"/><stop offset="1" stop-color="#67dcae"/></linearGradient>
+  <linearGradient id="gCo" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#6e2740"/><stop offset="1" stop-color="#d1657f"/></linearGradient>
+  <radialGradient id="gBub"><stop offset=".28" stop-color="#fff" stop-opacity=".03"/><stop offset=".72" stop-color="#d6f4ff" stop-opacity=".18"/>
+    <stop offset=".94" stop-color="#ffffff" stop-opacity=".62"/><stop offset="1" stop-color="#fff" stop-opacity=".1"/></radialGradient>
+  <radialGradient id="gGlow"><stop offset="0" stop-color="#ffeac4" stop-opacity=".5"/><stop offset=".55" stop-color="#9fe8ff" stop-opacity=".14"/><stop offset="1" stop-color="#9fe8ff" stop-opacity="0"/></radialGradient>
+  <linearGradient id="gBodyA" x1=".1" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#ffdb96"/><stop offset=".42" stop-color="#ff8f46"/><stop offset="1" stop-color="#cc3a22"/></linearGradient>
+  <linearGradient id="gFinA" x1="0" y1="0" x2=".55" y2="1"><stop offset="0" stop-color="#ffc781"/><stop offset="1" stop-color="#dd5227"/></linearGradient>
+  <linearGradient id="gBodyB" x1=".1" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#cdf4ff"/><stop offset=".42" stop-color="#37a3e0"/><stop offset="1" stop-color="#123f78"/></linearGradient>
+  <linearGradient id="gFinB" x1="0" y1="0" x2=".5" y2="1"><stop offset="0" stop-color="#a8e8ff"/><stop offset="1" stop-color="#1d6ba8"/></linearGradient>
+  <radialGradient id="gVig" cx=".5" cy=".4" r=".8"><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#00131f" stop-opacity=".62"/></radialGradient>
+  <filter id="soft" x="-45%" y="-45%" width="190%" height="190%"><feGaussianBlur stdDeviation="15"/></filter>
+  <filter id="soft2" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5"/></filter>
+  <clipPath id="clipA"><ellipse cx="0" cy="0" rx="84" ry="56"/></clipPath>
+  <clipPath id="clipB"><path d="M92,0 C64,-26 10,-32 -36,-25 C-62,-20 -76,-9 -82,0 C-76,9 -62,20 -36,25 C10,32 64,26 92,0Z"/></clipPath>
+</defs>
+
+<rect id="water" x="0" y="0" width="100%" height="100%" fill="url(#gWater)"/>
+<g id="haze" filter="url(#soft)"></g>
+<g id="rays" filter="url(#soft)" style="mix-blend-mode:screen"></g>
+<g id="surf" class="surf" opacity=".5"></g>
+<g id="far" filter="url(#soft2)" opacity=".55"></g>
+<g id="floor"></g>
+<g id="motes"></g>
+<g id="weeds"></g>
+<g id="bub"></g>
+<g id="fish"></g>
+<rect x="0" y="0" width="100%" height="100%" fill="url(#gVig)" pointer-events="none"/>
+</svg>
+
+<div class="ui">
+  <div class="mark rv"><span class="pip"></span>Abyssal Terrace &nbsp;/&nbsp; reef study no. 04 &nbsp;/&nbsp; live</div>
+  <div class="bl">
+    <h1><span class="sm">two fish share</span>one <em>current</em>.</h1>
+    <p class="lede">Every fin, bubble and blade of kelp is an SVG primitive — ellipses, triangles, wave paths. Nothing loaded, nothing imported. <b>Click the water</b> to release air; <b>click a fish</b> to startle it.</p>
+    <div class="stats">
+      <div class="st rv">Bubbles aloft<b id="sBub">0</b></div>
+      <div class="st rv">Depth<b id="sDep">0<i> m</i></b></div>
+      <div class="st rv">Current<b id="sCur">1.0<i>×</i></b></div>
+      <div class="st rv">Frames<b id="sFps">60</b></div>
+    </div>
+  </div>
+  <div class="hint rv">current &rarr;</div>
+  <div class="ctl rv" id="ctl">
+    <button data-v="0.6">Drift</button><button data-v="1" class="on">Flow</button><button data-v="1.7">Rush</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg";
+var svg=document.getElementById("scene"), q=function(i){return document.getElementById(i);};
+var G={haze:q("haze"),rays:q("rays"),surf:q("surf"),far:q("far"),floor:q("floor"),motes:q("motes"),weeds:q("weeds"),bub:q("bub"),fish:q("fish")};
+function R(a,b){return a+Math.random()*(b-a);}
+function el(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;}
+var VW=1600,VH=900,floorY=780,cur=1,T=0,lastY=420,vents=[220,610,1010,1380],fps=60;
+
+/* ---------- fish construction (primitives only) ---------- */
+var HTML_A=[
+'<ellipse class="aura" cx="-12" cy="4" rx="132" ry="88" fill="url(#gGlow)"/>',
+'<polygon class="tail" points="-88,0 -168,-62 -146,0 -168,62" fill="url(#gFinA)" stroke="#b23a1f" stroke-opacity=".35" stroke-width="2"/>',
+'<polygon class="ped" points="-68,-14 -104,-6 -104,6 -68,14" fill="url(#gBodyA)"/>',
+'<path class="fin dorsal" d="M-34,-44 C-12,-98 36,-108 66,-56 C30,-72 -6,-66 -34,-44Z" fill="url(#gFinA)" stroke="#b23a1f" stroke-opacity=".3" stroke-width="2"/>',
+'<path class="fin anal" d="M-28,42 C-12,80 22,84 42,52 C12,64 -8,58 -28,42Z" fill="url(#gFinA)" opacity=".95"/>',
+'<ellipse class="body" cx="0" cy="0" rx="84" ry="56" fill="url(#gBodyA)"/>',
+'<g clip-path="url(#clipA)" fill="#ffe6b0" opacity=".34">',
+  '<path d="M18,-60 C6,-20 6,20 18,60 L36,60 C24,20 24,-20 36,-60Z"/>',
+  '<path d="M-18,-60 C-30,-20 -30,20 -18,60 L0,60 C-12,20 -12,-20 0,-60Z"/>',
+  '<path d="M-52,-60 C-64,-20 -64,20 -52,60 L-38,60 C-50,20 -50,-20 -38,-60Z"/>',
+'</g>',
+'<path d="M32,-46 C16,-16 16,16 32,46" fill="none" stroke="#9e3216" stroke-opacity=".45" stroke-width="3.6" stroke-linecap="round"/>',
+'<path class="fin pec" d="M20,8 C54,10 68,34 50,58 C28,46 10,28 20,8Z" fill="url(#gFinA)" stroke="#b23a1f" stroke-opacity=".3" stroke-width="2"/>',
+'<circle cx="54" cy="-18" r="13.5" fill="#fffdf4"/>',
+'<circle cx="57" cy="-18" r="6.8" fill="#101f2a"/>',
+'<circle cx="59.8" cy="-21.2" r="2.1" fill="#fff" opacity=".95"/>',
+'<path d="M74,12 C80,17 76,23.5 67,21.5" fill="none" stroke="#8b2d14" stroke-opacity=".85" stroke-width="3.2" stroke-linecap="round"/>'].join("");
+
+var BODY_B="M92,0 C64,-26 10,-32 -36,-25 C-62,-20 -76,-9 -82,0 C-76,9 -62,20 -36,25 C10,32 64,26 92,0Z";
+var HTML_B=[
+'<ellipse class="aura" cx="-8" cy="0" rx="122" ry="58" fill="url(#gGlow)"/>',
+'<polygon class="tail" points="-84,0 -148,-48 -128,0 -148,48" fill="url(#gFinB)" stroke="#0f4a7a" stroke-opacity=".4" stroke-width="2"/>',
+'<polygon class="ped" points="-64,-10 -96,-5 -96,5 -64,10" fill="url(#gBodyB)"/>',
+'<path class="fin dorsal" d="M-48,-19 C-16,-48 26,-46 56,-14 C20,-27 -16,-29 -48,-19Z" fill="url(#gFinB)" stroke="#0f4a7a" stroke-opacity=".3" stroke-width="1.8"/>',
+'<path class="fin anal" d="M-40,19 C-18,42 8,42 28,17 C2,29 -18,27 -40,19Z" fill="url(#gFinB)" opacity=".95"/>',
+'<path class="body" d="'+BODY_B+'" fill="url(#gBodyB)"/>',
+'<g clip-path="url(#clipB)" fill="#0c3f6d" opacity=".38">',
+  '<path d="M34,-32 C28,-10 28,10 34,32 L46,32 C40,10 40,-10 46,-32Z"/>',
+  '<path d="M-2,-34 C-8,-11 -8,11 -2,34 L10,34 C4,11 4,-11 10,-34Z"/>',
+  '<path d="M-40,-30 C-46,-10 -46,10 -40,30 L-30,30 C-36,10 -36,-10 -30,-30Z"/>',
+'</g>',
+'<path d="M46,-19 C36,-6 36,7 46,19" fill="none" stroke="#0d3a63" stroke-opacity=".5" stroke-width="2.6" stroke-linecap="round"/>',
+'<path class="fin pec" d="M18,5 C44,7 56,23 42,41 C24,32 10,19 18,5Z" fill="url(#gFinB)" stroke="#0f4a7a" stroke-opacity=".3" stroke-width="1.8"/>',
+'<circle cx="58" cy="-7" r="9.6" fill="#f7fdff"/>',
+'<circle cx="60.5" cy="-7" r="4.8" fill="#0c1a26"/>',
+'<circle cx="62.4" cy="-9.3" r="1.6" fill="#fff" opacity=".95"/>',
+'<path d="M78,2 C83,6 80,11 72,10" fill="none" stroke="#0d3557" stroke-opacity=".85" stroke-width="2.6" stroke-linecap="round"/>'].join("");
+
+var FISH=[
+ {id:"a",html:HTML_A,s:1.2,dir:1,spd:48,pad:210,bobA:15,bobF:.55,fy:.40},
+ {id:"b",html:HTML_B,s:.78,dir:-1,spd:136,pad:160,bobA:23,bobF:1.05,fy:.68}
+];
+FISH.forEach(function(f){
+ f.g=el("g",{"class":"fish "+f.id},G.fish); f.g.innerHTML=f.html;
+ f.x=R(0,VW); f.ph=R(0,6.283); f.boost=0; f.y=VH*f.fy;
+ f.g.addEventListener("pointerdown",function(e){e.stopPropagation();f.boost=1.8;
+   f.g.classList.add("shot");setTimeout(function(){f.g.classList.remove("shot");},900);});
+});
+
+/* ---------- scenery ---------- */
+function weedD(x,base,h,w,amp,ph){
+ var N=20,top=[],bot=[],i,t,y,ww,off,d;
+ for(i=0;i<=N;i++){t=i/N;y=base-h*t;ww=w*(1-t*.84);off=Math.sin(ph+t*3.7)*amp*t;
+   top.push([x+off-ww,y]);bot.push([x+off+ww,y]);}
+ d="M "+top[0][0].toFixed(1)+" "+top[0][1].toFixed(1);
+ for(i=1;i<=N;i++)d+=" L "+top[i][0].toFixed(1)+" "+top[i][1].toFixed(1);
+ for(i=N;i>=0;i--)d+=" L "+bot[i][0].toFixed(1)+" "+bot[i][1].toFixed(1);
+ return d+" Z";
+}
+function buildScenery(){
+ var i,x,y,d,g;
+ G.rays.innerHTML="";G.haze.innerHTML="";G.surf.innerHTML="";G.far.innerHTML="";
+ G.floor.innerHTML="";G.motes.innerHTML="";G.weeds.innerHTML="";
+ /* light shafts */
+ for(i=0;i<6;i++){x=R(-60,VW);var w=R(38,130);
+   g=el("g",{"class":"ray"},G.rays);g.style.animationDuration=R(13,26)+"s";g.style.animationDelay=(-R(0,14))+"s";
+   el("polygon",{points:x+",-60 "+(x+w)+",-60 "+(x+w*2.5+190)+","+(VH*.94)+" "+(x+w*1.2+130)+","+(VH*.94),fill:"url(#gRay)"},g);}
+ /* surface shimmer + haze bands */
+ d="M -60 6";for(x=-60;x<=VW+60;x+=40)d+=" Q "+(x+10)+" "+(R(-14,14))+" "+(x+20)+" 5";
+ el("path",{d:d,fill:"none",stroke:"#eafaff","stroke-width":"5","stroke-opacity":".45","stroke-linecap":"round"},G.surf);
+ el("rect",{x:-60,y:-30,width:VW+120,height:60,fill:"url(#gSun)",opacity:".5"},G.surf);
+ for(i=0;i<4;i++)el("ellipse",{"class":"caustic",cx:R(0,VW),cy:R(20,VH*.2),rx:R(120,280),ry:R(6,16),fill:"#dffbff",opacity:R(.07,.16),style:"animation-duration:"+R(18,34)+"s;animation-delay:-"+R(0,20)+"s"},G.haze);
+ el("ellipse",{cx:VW*.5,cy:VH*.42,rx:VW*.7,ry:VH*.13,fill:"#8fe0f5",opacity:".07"},G.haze);
+ /* distant kelp silhouettes */
+ for(i=0;i<9;i++){x=R(0,VW);
+   el("path",{d:weedD(x,floorY+18,R(120,320),R(9,20),R(14,30),R(0,6.3)),fill:"#0b3f45"},G.far);}
+ /* rocky ridge behind sand */
+ d="M -30 "+(VH+40)+" L -30 "+(floorY+30);
+ for(x=-30;x<=VW+30;x+=50)d+=" L "+x+" "+(floorY+18-Math.abs(Math.sin(x*.0027+1))*72-Math.sin(x*.009)*10).toFixed(1);
+ d+=" L "+(VW+30)+" "+(VH+40)+" Z";
+ el("path",{d:d,fill:"url(#gRidge)",opacity:".9"},G.floor);
+ /* sand */
+ d="M -30 "+(VH+40)+" L -30 "+(floorY+16);
+ for(x=-30;x<=VW+30;x+=36)y=floorY+Math.sin(x*.0042)*11+Math.sin(x*.0111+1.3)*6+Math.cos(x*.0021)*5;
+ for(x=-30;x<=VW+30;x+=36){y=floorY+Math.sin(x*.0042)*11+Math.sin(x*.0111+1.3)*6+Math.cos(x*.0021)*5;d+=" L "+x+" "+y.toFixed(1);}
+ d+=" L "+(VW+30)+" "+(VH+40)+" Z";
+ el("path",{d:d,fill:"url(#gSand)"},G.floor);
+ el("path",{d:d,fill:"none",stroke:"#f6e6bd","stroke-opacity":".5","stroke-width":"3"},G.floor);
+ /* rocks + pebbles */
+ for(i=0;i<7;i++){x=R(0,VW);var r=R(16,54);
+   el("ellipse",{cx:x,cy:floorY+r*.35,rx:r,ry:r*.62,fill:"url(#gRock)",transform:"rotate("+R(-8,8).toFixed(1)+" "+x+" "+floorY+")"},G.floor);
+   el("ellipse",{cx:x-r*.3,cy:floorY+r*.05,rx:r*.5,ry:r*.2,fill:"#cfd8dd",opacity:".18"},G.floor);}
+ for(i=0;i<26;i++){var pr=R(3,10);el("ellipse",{cx:R(0,VW),cy:floorY+R(12,VH-floorY),rx:pr,ry:pr*.6,fill:"#b99a68",opacity:R(.25,.6)},G.floor);}
+ /* seaweed plants (rooted on the seafloor) */
+ vents=[];
+ var spots=[R(60,200),R(300,470),R(560,720),R(820,980),R(1080,1240),R(1330,1520)];
+ spots.forEach(function(sx,si){
+   var grp=el("g",{},G.weeds),blades=3+Math.floor(R(0,2)),j;
+   for(j=0;j<blades;j++){
+     var p=el("path",{d:weedD(sx+R(-16,16),floorY+12,R(90,250),R(8,16),R(16,34),R(0,6.3)),
+       fill:(si%2?"url(#gW2)":"url(#gW1)"),opacity:R(.78,1)},grp);
+     p.setAttribute("class","weed");
+     p.style.animationDuration=R(5.2,9.5)+"s";p.style.animationDelay=(-R(0,5))+"s";
+   }
+   if(si%2===0){el("path",{d:weedD(sx+R(-6,6),floorY+10,R(50,90),R(4,7),R(6,12),R(0,6.3)),fill:"url(#gW1)",opacity:".6"},G.weeds);
+     vents.push(sx+R(-14,14));}
+ });
+ /* coral fans */
+ for(i=0;i<2;i++){var cx=R(120,VW-120),cf=el("g",{},G.weeds),k;
+   for(k=-2;k<=2;k++){el("path",{d:"M "+cx+" "+(floorY+12)+" C "+(cx+k*22)+" "+(floorY-42)+" "+(cx+k*34)+" "+(floorY-62)+" "+(cx+k*40)+" "+(floorY-84-k*k*3),
+     fill:"none",stroke:"url(#gCo)","stroke-width":(7-Math.abs(k)),"stroke-linecap":"round",opacity:".85"},cf);
+     el("circle",{cx:cx+k*40,cy:floorY-84-k*k*3,r:3.4,fill:"#f0a9bb",opacity:".8"},cf);}}
+ /* plankton motes */
+ for(i=0;i<38;i++)el("circle",{cx:R(0,VW),cy:R(0,VH),r:R(.7,2.6),fill:"#d7f2fb",opacity:R(.08,.34)},G.motes);
+ if(!vents.length)vents=[200,600,1000,1400];
+}
+
+/* ---------- bubbles ---------- */
+var bubbles=[];
+function mkB(temp){
+ var g=el("g",{"class":"bub"+(temp?" pop":"")},G.bub);
+ var b={g:g,s:el("circle",{"class":"skin",r:6,fill:"url(#gBub)",stroke:"rgba(236,252,255,.55)"},g),
+        h:el("circle",{r:2,cx:-2,cy:-2,fill:"#fff",opacity:".85"},g),temp:!!temp};
+ bubbles.push(b);return b;
+}
+function place(b,fresh){
+ var v=vents[Math.floor(Math.random()*vents.length)];
+ b.r=R(2.4,9.6);b.x=v+R(-15,15);b.y=fresh?R(0,VH):floorY+R(0,14);
+ b.v=10+44/Math.sqrt(b.r);b.ph=R(0,6.283);b.am=R(5,19);b.f=R(.45,1.1);
+ b.s.setAttribute("r",b.r.toFixed(1));b.s.setAttribute("stroke-width",Math.max(.6,b.r*.11).toFixed(2));
+ b.h.setAttribute("r",(b.r*.3).toFixed(1));b.h.setAttribute("cx",(-b.r*.34).toFixed(1));b.h.setAttribute("cy",(-b.r*.38).toFixed(1));
+}
+for(var i=0;i<18;i++){var nb=mkB(false);place(nb,true);}
+
+/* ---------- interaction ---------- */
+function burst(x,y){
+ if(bubbles.length>62)return;
+ var b=mkB(true);place(b,false);b.x=x+R(-13,13);b.y=y+R(-9,9);
+ b.r=R(2,6.2);b.v=16+40/Math.sqrt(b.r);b.am=R(6,20);
+ b.s.setAttribute("r",b.r.toFixed(1));b.s.setAttribute("stroke-width",Math.max(.6,b.r*.11).toFixed(2));
+ b.h.setAttribute("r",(b.r*.3).toFixed(1));b.h.setAttribute("cx",(-b.r*.34).toFixed(1));b.h.setAttribute("cy",(-b.r*.38).toFixed(1));
+}
+function ring(x,y){var c=el("circle",{cx:x,cy:y,r:26,fill:"none",stroke:"#dffbff","stroke-width":"2.4","class":"ring"},G.bub);
+ setTimeout(function(){if(c.parentNode)c.parentNode.removeChild(c);},1000);}
+svg.addEventListener("pointerdown",function(e){
+ var x=e.clientX/innerWidth*VW,y=e.clientY/innerHeight*VH;
+ ring(x,y);for(var k=0;k<7;k++)burst(x,y);
+});
+var px=0,py=0;
+addEventListener("pointermove",function(e){lastY=e.clientY/innerHeight*VH;px=e.clientX/innerWidth-.5;py=e.clientY/innerHeight-.5;},{passive:true});
+q("ctl").addEventListener("click",function(e){
+ var t=e.target;if(t.tagName!=="BUTTON")return;
+ cur=parseFloat(t.getAttribute("data-v"));
+ Array.prototype.forEach.call(this.children,function(c){c.classList.toggle("on",c===t);});
+ q("sCur").innerHTML=cur.toFixed(1)+'<i>&times;</i>';
+});
+
+/* ---------- layout + loop ---------- */
+function layout(){
+ VW=1600;VH=Math.max(300,Math.round(1600*innerHeight/innerWidth));
+ svg.setAttribute("viewBox","0 0 "+VW+" "+VH);
+ floorY=VH*.875;
+ buildScenery();
+ bubbles.forEach(function(b){if(b.y>floorY+40||b.y<-VH)place(b,true);b.x=Math.max(6,Math.min(VW-6,b.x));});
+ FISH.forEach(function(f){f.y=VH*f.fy;f.x=Math.max(-f.pad,Math.min(VW+f.pad,f.x));});
+}
+var rt;addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(layout,140);});
+layout();
+
+var last=performance.now(),tick=0;
+function frame(now){
+ var dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;fps=fps*.92+(1/Math.max(dt,.001))*.08;
+ FISH.forEach(function(f){
+   if(f.boost>0)f.boost=Math.max(0,f.boost-dt);
+   var sp=f.spd*cur*(1+f.boost*2.6);
+   f.x+=f.dir*sp*dt;
+   if(f.dir>0&&f.x>VW+f.pad)f.x=-f.pad;
+   if(f.dir<0&&f.x<-f.pad)f.x=VW+f.pad;
+   f.y=VH*f.fy+Math.sin(T*f.bobF+f.ph)*f.bobA+Math.sin(T*f.bobF*.37+f.ph)*6;
+   var tilt=Math.cos(T*f.bobF+f.ph)*3.2, s=f.s*(1+Math.sin(T*2.1+f.ph)*.013);
+   f.g.setAttribute("transform","translate("+f.x.toFixed(1)+","+f.y.toFixed(1)+") scale("+(f.dir*s).toFixed(3)+","+s.toFixed(3)+") rotate("+tilt.toFixed(2)+")");
+ });
+ for(var i=bubbles.length-1;i>=0;i--){
+   var b=bubbles[i];b.y-=b.v*cur*dt;b.x+=Math.sin(T*b.f+b.ph)*b.am*dt;
+   if(b.y<-b.r-12){
+     if(b.temp){b.g.parentNode.removeChild(b.g);bubbles.splice(i,1);}
+     else place(b,false);
+   } else b.g.setAttribute("transform","translate("+b.x.toFixed(1)+","+b.y.toFixed(1)+")");
+ }
+ Array.prototype.forEach.call(G.motes.children,function(m,k){
+   var y=parseFloat(m.getAttribute("cy"))-(3+k%5)*.14*cur,x=parseFloat(m.getAttribute("cx"))+Math.sin(T*.4+k)*.12;
+   if(y<-6){y=VH+6;x=R(0,VW);} if(x>VW+6)x=-6; if(x<-6)x=VW+6;
+   m.setAttribute("cx",x.toFixed(1));m.setAttribute("cy",y.toFixed(1));
+ });
+ G.rays.setAttribute("transform","translate("+(px*-34).toFixed(1)+","+(py*-10).toFixed(1)+")");
+ G.haze.setAttribute("transform","translate("+(px*-20).toFixed(1)+","+(py*-8).toFixed(1)+")");
+ G.far.setAttribute("transform","translate("+(px*-9).toFixed(1)+",0)");
+ if((tick++&7)===0){q("sBub").textContent=bubbles.length;q("sDep").innerHTML=Math.round(Math.max(0,Math.min(VH,lastY))/VH*240)+'<i> m</i>';
+   q("sFps").textContent=Math.round(Math.min(fps,144));}
+ requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+var dly=0;Array.prototype.forEach.call(document.querySelectorAll(".rv"),function(n){
+ setTimeout(function(){n.classList.add("in");},180+dly);dly+=130;});
+})();
+</script>
+</body>
+</html>

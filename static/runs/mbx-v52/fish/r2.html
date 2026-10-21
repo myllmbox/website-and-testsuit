@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Underwater Scene</title>
+<style>
+html,body{height:100%;margin:0;overflow:hidden;background:#021531}
+svg{position:fixed;left:0;top:0;display:block;width:100%;height:100%}
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"></svg>
+<script>
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("scene");
+let W = window.innerWidth || 1;
+let H = window.innerHeight || 1;
+
+function mk(name, attrs, parent) {
+  attrs = attrs || {};
+  parent = parent || svg;
+  const e = document.createElementNS(NS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  parent.appendChild(e);
+  return e;
+}
+
+const defs = mk("defs");
+
+function grad(id, x2, y2, stops) {
+  const g = mk("linearGradient", {id:id, x1:"0%", y1:"0%", x2:x2, y2:y2}, defs);
+  stops.forEach(s => mk("stop", {offset:s[0], "stop-color":s[1], "stop-opacity":s[2] === undefined ? 1 : s[2]}, g));
+  return g;
+}
+
+grad("water", "0%", "100%", [["0%", "#72dcff"], ["35%", "#1a8ad6"], ["100%", "#031433"]]);
+grad("sand", "0%", "100%", [["0%", "#eed9a6"], ["55%", "#caa36b"], ["100%", "#6c4521"]]);
+grad("fishA", "0%", "100%", [["0%", "#ffd28d"], ["55%", "#ff9835"], ["100%", "#e45a00"]]);
+grad("fishB", "100%", "100%", [["0%", "#d9c6ff"], ["45%", "#8c7bff"], ["100%", "#3727df"]]);
+
+const bubGrad = mk("radialGradient", {id:"bubble", cx:"35%", cy:"30%", r:"70%"}, defs);
+mk("stop", {offset:"0%", "stop-color":"#ffffff", "stop-opacity":"0.85"}, bubGrad);
+mk("stop", {offset:"45%", "stop-color":"#cdefff", "stop-opacity":"0.25"}, bubGrad);
+mk("stop", {offset:"100%", "stop-color":"#ffffff", "stop-opacity":"0.05"}, bubGrad);
+
+mk("rect", {width:"100%", height:"100%", fill:"url(#water)"});
+
+const floorG = mk("g");
+const floorPath = mk("path", {fill:"url(#sand)"}, floorG);
+const floorEdge = mk("path", {fill:"none", stroke:"#fff3c4", "stroke-opacity":"0.35", "stroke-width":"3"}, floorG);
+
+const rocks = [];
+for (let i = 0; i < 7; i++) {
+  rocks.push(mk("ellipse", {
+    fill:["#8a6238", "#725030", "#5b3c1f"][i % 3],
+    stroke:"#33220f",
+    "stroke-opacity":"0.5",
+    "stroke-width":"2"
+  }, floorG));
+}
+
+const plantG = mk("g");
+const weeds = [];
+for (let i = 0; i < 5; i++) {
+  const g = mk("g", {}, plantG);
+  const p = mk("path", {
+    fill:"none",
+    stroke:["#2f8b48", "#3fa760", "#55c972", "#2b7c3f", "#48bd66"][i],
+    "stroke-width":String(12 - i * 1.5),
+    "stroke-linecap":"round"
+  }, g);
+  weeds.push({g:g, p:p, x:0, y:0, freq:0.65 + i * 0.18, phase:i * 1.3});
+}
+
+const bubbleG = mk("g");
+const bubbles = [];
+for (let i = 0; i < 20; i++) {
+  const r = 1.6 + Math.random() * 5.4;
+  const e = mk("circle", {
+    r:r.toFixed(2),
+    fill:"url(#bubble)",
+    stroke:"rgba(225,250,255,0.35)",
+    "stroke-width":"1"
+  }, bubbleG);
+  bubbles.push({
+    e:e,
+    r:r,
+    x:Math.random() * W,
+    y:Math.random() * H,
+    vy:26 + 85 / r,
+    wf:0.9 + Math.random() * 1.4,
+    wa:4 + Math.random() * 8,
+    ph:Math.random() * 7
+  });
+}
+
+function buildA(g) {
+  const tail = mk("g", {transform:"translate(-60, 0)"}, g);
+  mk("polygon", {points:"0,-24 -50,0 0,24", fill:"#ff7b1b"}, tail);
+  mk("ellipse", {cx:0, cy:0, rx:60, ry:21, fill:"url(#fishA)"}, g);
+  mk("polygon", {points:"-15,-19 8,-47 35,-17", fill:"#ffa952"}, g);
+  mk("polygon", {points:"3,17 -18,45 25,26", fill:"#ff9330"}, g);
+  mk("circle", {cx:41, cy:-5, r:6, fill:"#ffffff"}, g);
+  mk("circle", {cx:42.5, cy:-5, r:2.9, fill:"#111318"}, g);
+  mk("path", {d:"M58 -1 q -8 8 -17 1", stroke:"#a34209", "stroke-width":"2.6", fill:"none"}, g);
+  return {tail:tail, tailX:60};
+}
+
+function buildB(g) {
+  const tail = mk("g", {transform:"translate(-31, 0)"}, g);
+  mk("polygon", {points:"0,-19 -42,0 0,19", fill:"#6572ff"}, tail);
+  mk("ellipse", {cx:0, cy:0, rx:31, ry:35, fill:"url(#fishB)"}, g);
+  mk("polygon", {points:"-7,-31 5,-52 21,-27", fill:"#8b97ff"}, g);
+  mk("polygon", {points:"6,18 -8,44 20,26", fill:"#7886ff"}, g);
+  mk("circle", {cx:17, cy:-8, r:5, fill:"#ffffff"}, g);
+  mk("circle", {cx:18.5, cy:-8, r:2.5, fill:"#0e1324"}, g);
+  mk("path", {d:"M29 -2 q -6 7 -12 2", stroke:"#2f37a2", "stroke-width":"2.2", fill:"none"}, g);
+  return {tail:tail, tailX:31};
+}
+
+const fishG = mk("g");
+const gA = mk("g", {}, fishG);
+const infA = buildA(gA);
+const gB = mk("g", {}, fishG);
+const infB = buildB(gB);
+
+const fish = [
+  {
+    g:gA,
+    tail:infA.tail,
+    tailX:infA.tailX,
+    dir:1,
+    x:W * 0.66,
+    size:1,
+    speedFrac:0.135,
+    yF:0.41,
+    amp:13,
+    bob:0.75,
+    phase:0
+  },
+  {
+    g:gB,
+    tail:infB.tail,
+    tailX:infB.tailX,
+    dir:-1,
+    x:W * 0.24,
+    size:0.78,
+    speedFrac:0.042,
+    yF:0.63,
+    amp:19,
+    bob:1.25,
+    phase:1.1
+  }
+];
+
+function floorY(x) {
+  let y = H * 0.90 + Math.sin(x * 0.012) * 10 + Math.sin(x * 0.0038) * 16 + Math.sin(x * 0.075) * 2;
+  if (y > H * 0.985) y = H * 0.985;
+  if (y < H * 0.75) y = H * 0.75;
+  return y;
+}
+
+function layout() {
+  W = window.innerWidth || 1;
+  H = window.innerHeight || 1;
+
+  const pts = [];
+  for (let x = 0; x < W; x += 55) pts.push([x, floorY(x)]);
+  if (!pts.length || pts[pts.length - 1][0] !== W) pts.push([W, floorY(W)]);
+
+  let d = "M0 " + H;
+  let e = "M" + pts[0][0] + " " + pts[0][1];
+
+  for (let i = 0; i < pts.length; i++) {
+    d += " L" + pts[i][0] + " " + pts[i][1];
+    if (i > 0) e += " L" + pts[i][0] + " " + pts[i][1];
+  }
+
+  d += " L" + W + " " + H + " Z";
+  floorPath.setAttribute("d", d);
+  floorEdge.setAttribute("d", e);
+
+  rocks.forEach((r, i) => {
+    const x = (i + 0.5) * W / rocks.length;
+    r.setAttribute("cx", x);
+    r.setAttribute("cy", floorY(x) + 6 + ((i * 7) % 10));
+    r.setAttribute("rx", 18 + ((i * 13) % 24));
+    r.setAttribute("ry", 10 + ((i * 11) % 11));
+  });
+
+  weeds.forEach((w, i) => {
+    w.x = (i + 1) * W / (weeds.length + 1) + ((i % 2) ? 18 : -18);
+    w.y = floorY(w.x) - 2;
+    const h = H * (0.17 + ((i * 13) % 16) / 100);
+    const amp = h * (0.12 + ((i * 7) % 9) / 100);
+    w.p.setAttribute("d",
+      "M0 0 C " + amp + " " + (-h * 0.16) + ", " + (-amp) + " " + (-h * 0.40) + ", 0 " + (-h * 0.54) +
+      " C " + amp + " " + (-h * 0.70) + ", " + (-amp) + " " + (-h * 0.86) + ", 0 " + (-h)
+    );
+  });
+
+  for (const b of bubbles) {
+    if (b.x > W) b.x = Math.random() * W;
+    if (b.y > H) b.y = floorY(b.x) - Math.random() * 15;
+  }
+}
+
+window.addEventListener("resize", layout);
+layout();
+
+for (const b of bubbles) {
+  b.x = Math.random() * W;
+  b.y = floorY(b.x) - Math.random() * 15;
+}
+
+let last = 0;
+let t = 0;
+
+function frame(now) {
+  const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
+  last = now;
+  t += dt;
+
+  for (const w of weeds) {
+    const sw = Math.sin(t * w.freq + w.phase) * 6;
+    w.g.setAttribute("transform", "translate(" + w.x + "," + w.y + ") skewX(" + sw + ")");
+  }
+
+  for (const b of bubbles) {
+    b.y -= b.vy * dt;
+    const x = b.x + Math.sin(t * b.wf + b.ph) * b.wa;
+
+    if (b.y + b.r < 0) {
+      b.x = Math.random() * W;
+      b.y = floorY(b.x) - Math.random() * 12;
+      b.ph = Math.random() * 7;
+    }
+
+    b.e.setAttribute("cx", x);
+    b.e.setAttribute("cy", b.y);
+  }
+
+  const scaleBase = Math.max(0.55, Math.min(1.15, Math.min(W, H) / 700));
+
+  for (const f of fish) {
+    const s = f.size * scaleBase;
+    const sp = Math.max(10, f.speedFrac * W);
+    f.x += sp * f.dir * dt;
+
+    const margin = 145 * s;
+    if (f.dir > 0) {
+      if (f.x > W + margin) f.x = -margin;
+      else if (f.x < -margin) f.x = W + margin;
+    } else {
+      if (f.x < -margin) f.x = W + margin;
+      else if (f.x > W + margin) f.x = -margin;
+    }
+
+    const y = f.yF * H + Math.sin(t * f.bob + f.phase) * f.amp;
+    f.g.setAttribute("transform", "translate(" + f.x + "," + y + ") scale(" + (s * f.dir) + "," + s + ")");
+
+    const wag = Math.sin(t * (6 + f.bob * 2) + f.phase) * 9;
+    f.tail.setAttribute("transform", "translate(" + (-f.tailX) + ", 0) rotate(" + wag + ", 0, 0)");
+  }
+
+  requestAnimationFrame(frame);
+}
+
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Underwater Scene</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#06233d}
+svg{position:fixed;left:0;top:0;width:100vw;height:100vh;display:block}
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#9fd8f3"/>
+<stop offset="0.45" stop-color="#1d7ec2"/>
+<stop offset="1" stop-color="#062039"/>
+</linearGradient>
+<linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#dcc289"/>
+<stop offset="1" stop-color="#71512d"/>
+</linearGradient>
+<radialGradient id="bubble" cx="35%" cy="30%" r="75%">
+<stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
+<stop offset="0.42" stop-color="#dcf4ff" stop-opacity="0.45"/>
+<stop offset="1" stop-color="#8bd8ff" stop-opacity="0.16"/>
+</radialGradient>
+<linearGradient id="orange" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ffbb4e"/>
+<stop offset="1" stop-color="#e8631c"/>
+</linearGradient>
+<linearGradient id="teal" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#72e9f2"/>
+<stop offset="1" stop-color="#087086"/>
+</linearGradient>
+</defs>
+
+<rect width="100%" height="100%" fill="url(#water)"/>
+
+<g>
+<rect x="0" y="86%" width="100%" height="14%" fill="url(#sand)"/>
+<ellipse cx="12%" cy="85.6%" rx="3.1%" ry="1.9%" fill="#9c7a4d" opacity="0.72"/>
+<ellipse cx="27%" cy="86.5%" rx="2.1%" ry="1.3%" fill="#785c38" opacity="0.76"/>
+<ellipse cx="72%" cy="85.8%" rx="2.9%" ry="1.8%" fill="#8f6c43" opacity="0.75"/>
+<ellipse cx="91%" cy="86.7%" rx="2.2%" ry="1.4%" fill="#6d5031" opacity="0.7"/>
+</g>
+
+<g id="weeds">
+<g id="weed1" class="weed">
+<path d="M-5 0 C-22 -55 16 -95 -10 -150 C-24 -186 10 -225 14 -265 L31 -263 C25 -225 -5 -186 7 -150 C30 -100 12 -55 11 0 Z" fill="#1f8f4b"/>
+<path d="M7 0 C27 -45 55 -72 42 -126 C33 -162 63 -195 67 -235 L50 -231 C47 -195 23 -162 33 -126 C52 -80 24 -45 24 0 Z" fill="#2bb15f"/>
+<path d="M-2 0 C-20 -36 -52 -65 -43 -110 C-37 -140 -60 -170 -66 -200 L-51 -197 C-46 -170 -28 -140 -30 -110 C-35 -74 -9 -36 -14 0 Z" fill="#167c42"/>
+</g>
+<g id="weed2" class="weed">
+<path d="M0 0 C18 -50 50 -85 35 -145 C25 -183 55 -218 60 -258 L44 -255 C38 -218 14 -183 23 -145 C38 -100 14 -50 15 0 Z" fill="#24994f"/>
+<path d="M-4 0 C-26 -45 -58 -78 -49 -128 C-44 -160 -68 -190 -74 -225 L-58 -222 C-54 -190 -32 -160 -34 -128 C-38 -90 -15 -45 -17 0 Z" fill="#13733d"/>
+<path d="M4 0 C25 -34 50 -55 42 -95 C35 -125 60 -150 66 -180 L51 -177 C46 -150 31 -125 35 -95 C42 -59 20 -34 21 0 Z" fill="#22a154"/>
+</g>
+</g>
+
+<g id="bubbles"></g>
+
+<g id="fish1" class="fish">
+<polygon points="-55,0 -115,-50 -115,50" fill="#f97316"/>
+<ellipse cx="0" cy="0" rx="55" ry="50" fill="url(#orange)"/>
+<path d="M-16,-46 L-6,-86 L36,-46 Z" fill="#ffd166"/>
+<path d="M10 18 C6 44 34 54 45 31 C36 41 16 33 10 18 Z" fill="#ff9c1f"/>
+<circle cx="31" cy="-15" r="12" fill="#ffffff"/>
+<circle cx="34" cy="-15" r="5" fill="#10213b"/>
+<path d="M51 7 L70 13 L52 24 Z" fill="#7f1d1d"/>
+</g>
+
+<g id="fish2" class="fish">
+<polygon points="-88,0 -150,-42 -150,42" fill="#0ea9c0"/>
+<ellipse cx="6" cy="0" rx="88" ry="20" fill="url(#teal)"/>
+<path d="M-18,-15 L-8,-48 L34,-15 Z" fill="#8be8f2"/>
+<path d="M13 5 C10 23 31 30 40 13 C33 19 18 14 13 5 Z" fill="#16c4d6"/>
+<circle cx="73" cy="-4" r="8" fill="#ffffff"/>
+<circle cx="74.8" cy="-4" r="3.6" fill="#10213b"/>
+<path d="M94 -2 Q110 3 94 9 Z" fill="#063a45"/>
+</g>
+
+<script>
+(function(){
+var svgNS="http://www.w3.org/2000/svg";
+var fish1=document.getElementById("fish1");
+var fish2=document.getElementById("fish2");
+var weed1=document.getElementById("weed1");
+var weed2=document.getElementById("weed2");
+var bubbleLayer=document.getElementById("bubbles");
+
+var w=window.innerWidth||1;
+var h=window.innerHeight||1;
+var floorY=h*0.86;
+
+fish1.setAttribute("transform","translate("+(w*0.24)+","+(h*0.42)+") scale(1.3,1.3)");
+fish2.setAttribute("transform","translate("+(w*0.72)+","+(h*0.65)+") scale(-0.6,0.6)");
+weed1.setAttribute("transform","translate("+(w*0.18)+","+floorY+") scale(0.85,0.85)");
+weed2.setAttribute("transform","translate("+(w*0.82)+","+floorY+") scale(1,1)");
+
+var fish=[
+{el:fish1, dir:1, speed:90, base:0.42, amp:9, scale:1.3, pos:170, ph:0.7, bob:1.1},
+{el:fish2, dir:-1, speed:38, base:0.65, amp:14, scale:0.6, pos:720, ph:2.8, bob:0.75}
+];
+
+var bubbles=[];
+for(var i=0;i<8;i++){
+var r=3+Math.random()*7;
+var c=document.createElementNS(svgNS,"circle");
+c.setAttribute("class","bubble");
+c.setAttribute("r",r);
+c.setAttribute("fill","url(#bubble)");
+c.setAttribute("stroke","#e9fbff");
+c.setAttribute("stroke-width","1");
+c.setAttribute("stroke-opacity","0.5");
+var x=15+Math.random()*Math.max(1,w-30);
+var y=Math.max(4,floorY-6-i*9);
+c.setAttribute("cx",x);
+c.setAttribute("cy",y);
+bubbleLayer.appendChild(c);
+bubbles.push({el:c,r:r,x:x,y:y,v:15+40/r,ph:Math.random()*6.283,wob:0.35+Math.random()*1.2});
+}
+
+function frame(now){
+var dt=Math.min(0.1,(now-(frame.last||now))/1000);
+frame.last=now;
+w=window.innerWidth||1;
+h=window.innerHeight||1;
+floorY=h*0.86;
+
+var sizeAll=Math.max(0.5,Math.min(1.15,Math.min(w/1300,h/800)));
+
+for(i=0;i<fish.length;i++){
+var f=fish[i];
+var s=f.scale*sizeAll;
+f.pos += f.speed*sizeAll*dt;
+var margin=Math.max(70,200*s);
+var span=w+margin*2;
+var phase=((f.pos%span)+span)%span;
+var x=(f.dir===1) ? (-margin+phase) : (w+margin-phase);
+var y=h*f.base + Math.sin(now/1000*f.bob+f.ph)*f.amp*sizeAll;
+f.el.setAttribute("transform","translate("+x+","+y+") scale("+((f.dir===1)?s:-s)+","+s+")");
+}
+
+var sw1=Math.sin(now/1000*1.15)*5;
+var sw2=Math.sin(now/1000*0.8+1.9)*4.2;
+weed1.setAttribute("transform","translate("+(w*0.18)+","+floorY+") scale("+(sizeAll*0.9)+","+sizeAll+") rotate("+sw1+",0,0)");
+weed2.setAttribute("transform","translate("+(w*0.82)+","+floorY+") scale("+(sizeAll*1.05)+","+sizeAll+") rotate("+sw2+",0,0)");
+
+for(i=0;i<bubbles.length;i++){
+var b=bubbles[i];
+b.y -= b.v*sizeAll*dt;
+b.x += Math.sin(now/1000*b.wob+b.ph)*13*dt;
+if(w > b.r*4) b.x=Math.max(b.r,Math.min(w-b.r,b.x));
+if(b.y < -b.r*3){
+b.y=floorY-4-Math.random()*18;
+if(w > b.r*4) b.x=b.r+Math.random()*(w-b.r*2);
+else b.x=w/2;
+}
+b.el.setAttribute("cx",b.x);
+b.el.setAttribute("cy",b.y);
+}
+
+requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

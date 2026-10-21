@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blue Corridor — an animated SVG seascape</title>
+<style>
+:root{
+ --serif:"Hoefler Text","Iowan Old Style",Georgia,"Times New Roman",serif;
+ --sans:"Avenir Next","Segoe UI",system-ui,-apple-system,"Helvetica Neue",sans-serif;
+ --ink:#eaf8ff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#02121e}
+body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+#sea{position:fixed;inset:0;width:100vw;height:100vh;display:block;cursor:crosshair;touch-action:manipulation}
+.plate,.index,.gauges,.hint{position:fixed;z-index:2;pointer-events:none}
+.plate{top:clamp(16px,3.2vh,40px);left:clamp(16px,3vw,46px);max-width:min(44ch,38vw);animation:rise .9s .1s both}
+.eyebrow{font:600 10px/1.6 var(--sans);letter-spacing:.34em;text-transform:uppercase;color:#7fe0f5;text-shadow:0 0 14px rgba(18,122,157,.75)}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(38px,6.4vw,86px);line-height:.9;letter-spacing:-.02em;margin:.24em 0 .34em;text-shadow:0 10px 34px rgba(0,26,46,.65)}
+h1 em{display:block;font-style:italic;color:#ffd9a4}
+.lede{font-size:13.5px;line-height:1.62;color:#b9dced;max-width:33ch;border-left:2px solid rgba(255,201,120,.5);padding-left:12px}
+.lede b{color:#fff;font-weight:600}
+.index{top:50%;right:clamp(16px,3vw,46px);transform:translateY(-50%);pointer-events:auto;display:grid;gap:8px;animation:riseX 1s .2s both}
+.index h2{font:600 9px/1 var(--sans);letter-spacing:.3em;text-transform:uppercase;color:#6f9fb8;margin-bottom:6px}
+.sp{pointer-events:auto;display:grid;grid-template-columns:auto 1fr;column-gap:11px;align-items:center;padding:9px 13px 9px 11px;border:0;border-left:2px solid rgba(126,220,247,.35);background:linear-gradient(90deg,rgba(3,27,45,.74),rgba(3,27,45,.3));color:inherit;text-align:left;cursor:pointer;font-family:inherit;transition:transform .28s cubic-bezier(.2,.7,.3,1),border-color .28s,background .28s}
+.sp i{grid-row:1/3;width:28px;height:28px;border-radius:50% 42% 46% 50%/50% 46% 42% 50%;box-shadow:0 3px 12px rgba(0,20,38,.55)}
+.sp b{font-family:var(--serif);font-style:italic;font-size:15px;font-weight:400}
+.sp span{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#8fb6cc;margin-top:4px}
+.sp:hover,.sp:focus-visible{transform:translateX(-9px);border-left-color:#ffc879;background:linear-gradient(90deg,rgba(8,45,70,.92),rgba(8,45,70,.35));outline:none}
+.gauges{bottom:clamp(16px,3vh,36px);left:clamp(16px,3vw,46px);display:flex;gap:22px;flex-wrap:wrap;animation:rise .9s .35s both}
+.g{border-top:1px solid rgba(140,200,228,.28);padding-top:7px;min-width:76px}
+.g span{font-family:var(--serif);font-size:clamp(19px,2vw,27px);line-height:1;display:block}
+.g label{font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:#7ea8c0;margin-top:7px;display:block}
+.meter{width:76px;height:4px;background:rgba(150,205,232,.18);margin-top:11px;overflow:hidden}
+.meter i{display:block;height:100%;width:34%;background:linear-gradient(90deg,#37b6dc,#ffd08a)}
+.hint{bottom:clamp(16px,3vh,36px);right:clamp(16px,3vw,46px);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#84afc7;animation:fadeout 9s 1s both}
+.fish{transition:opacity .45s ease}
+.fish.dim{opacity:.14}
+.fish.hot{filter:drop-shadow(0 0 16px rgba(255,208,140,.9))}
+.tail,.pec{transform-box:fill-box}
+.tail{transform-origin:100% 50%;animation:wag .6s ease-in-out infinite alternate}
+.pec{transform-origin:100% 0;animation:flap .95s ease-in-out infinite alternate}
+#fishB .tail{animation-duration:.26s}
+#fishB .pec{animation-duration:.4s}
+.sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway ease-in-out infinite alternate}
+.ray{mix-blend-mode:screen;animation:shimmer 12s ease-in-out infinite alternate}
+.plank{animation-name:drift;animation-timing-function:linear;animation-iteration-count:infinite}
+@keyframes wag{from{transform:rotate(-11deg)}to{transform:rotate(11deg)}}
+@keyframes flap{from{transform:rotate(-8deg)}to{transform:rotate(10deg)}}
+@keyframes sway{from{transform:rotate(-3.4deg)}to{transform:rotate(3.4deg)}}
+@keyframes shimmer{from{opacity:.07}to{opacity:.33}}
+@keyframes drift{from{transform:translate(0,0)}to{transform:translate(26px,-190px)}}
+@keyframes pop{from{transform:scale(.2);opacity:.85}to{transform:scale(2.7);opacity:0}}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes riseX{from{opacity:0;transform:translate(18px,-50%)}to{opacity:1;transform:translateY(-50%)}}
+@keyframes fadeout{0%,70%{opacity:1}100%{opacity:.15}}
+@media (max-width:760px){.lede{display:none}.index b{font-size:13px}.gauges{gap:14px}}
+@media (prefers-reduced-motion:reduce){.ray,.sway,.pec,.plank{animation:none}.tail{animation-duration:1.8s}}
+</style>
+</head>
+<body>
+<svg id="sea" viewBox="0 0 1400 900" preserveAspectRatio="none" role="img"
+     aria-label="Two fish swim through a kelp forest above a sandy seafloor while bubbles rise from vents.">
+<defs id="defs">
+ <filter id="soft" x="-15%" y="-25%" width="130%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
+ <path id="bodyAPath" d="M116,2C96,-24 46,-38 -12,-32C-62,-27 -92,-15 -108,-6L-108,6C-92,15 -62,27 -12,32C46,38 96,24 116,2Z"/>
+ <path id="bodyBPath" d="M60,0C52,-28 22,-47 -10,-45C-42,-43 -62,-21 -62,0C-62,21 -42,43 -10,45C22,47 52,28 60,0Z"/>
+ <clipPath id="clipA"><path d="M116,2C96,-24 46,-38 -12,-32C-62,-27 -92,-15 -108,-6L-108,6C-92,15 -62,27 -12,32C46,38 96,24 116,2Z"/></clipPath>
+ <clipPath id="clipB"><path d="M60,0C52,-28 22,-47 -10,-45C-42,-43 -62,-21 -62,0C-62,21 -42,43 -10,45C22,47 52,28 60,0Z"/></clipPath>
+</defs>
+<rect id="water" x="0" y="0" width="1400" height="900" fill="url(#waterG)"/>
+<g id="gRay"></g>
+<g id="gSurf"></g>
+<g id="gPlank"></g>
+<g id="gRidge"></g>
+<g id="gKelpB"></g>
+<g id="gFloor"></g>
+<g id="gFish">
+ <g id="fishA" class="fish" transform="translate(420,380) scale(1.15)">
+  <path class="tail" d="M-98,0L-176,-52Q-150,0 -176,52Z" fill="url(#finA)"/>
+  <path d="M-46,26L-16,60L14,26Z" fill="url(#finA)" opacity=".95"/>
+  <path d="M-30,-30L6,-76L54,-26Z" fill="url(#finA)" opacity=".95"/>
+  <use href="#bodyAPath" fill="url(#bodyA)"/>
+  <g clip-path="url(#clipA)">
+   <path d="M34,-40C22,-14 22,14 34,40" stroke="#0a4a72" stroke-width="11" fill="none" opacity=".3"/>
+   <path d="M-6,-42C-18,-14 -18,14 -6,42" stroke="#0a4a72" stroke-width="13" fill="none" opacity=".26"/>
+   <path d="M-52,-40C-62,-14 -62,14 -52,40" stroke="#0a4a72" stroke-width="9" fill="none" opacity=".22"/>
+  </g>
+  <path d="M60,-24C50,-8 50,10 58,25" stroke="#093a5a" stroke-width="3" fill="none" opacity=".45" stroke-linecap="round"/>
+  <path class="pec" d="M34,4C20,24 -8,36 -20,30C-8,14 16,2 34,4Z" fill="url(#finA)" opacity=".92"/>
+  <circle cx="88" cy="-9" r="11" fill="#f4fdff"/>
+  <circle cx="91" cy="-8" r="5.4" fill="#04202f"/>
+  <circle cx="85.4" cy="-12.6" r="2.2" fill="#fff" opacity=".92"/>
+  <path d="M115,4C107,12 99,15 92,13" stroke="#083350" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+ </g>
+ <g id="fishB" class="fish" transform="translate(1000,620) scale(-0.5,0.5)">
+  <path class="tail" d="M-52,0L-114,-42Q-90,0 -114,42Z" fill="url(#finB)"/>
+  <path d="M-24,-38L4,-94L42,-22Z" fill="url(#finB)" opacity=".95"/>
+  <path d="M-22,38L4,90L38,22Z" fill="url(#finB)" opacity=".95"/>
+  <use href="#bodyBPath" fill="url(#bodyB)"/>
+  <g clip-path="url(#clipB)">
+   <path d="M8,-48C-2,-16 -2,16 8,48" stroke="#fff4e2" stroke-width="12" fill="none" opacity=".55"/>
+   <path d="M-26,-48C-36,-16 -36,16 -26,48" stroke="#fff4e2" stroke-width="9" fill="none" opacity=".4"/>
+   <path d="M-62,-30L-40,-14L-62,2Z" fill="#7e2c0e" opacity=".35"/>
+  </g>
+  <path d="M44,-30C36,-10 36,12 42,28" stroke="#a53c12" stroke-width="2.6" fill="none" opacity=".38" stroke-linecap="round"/>
+  <path class="pec" d="M22,4C12,22 -10,30 -18,25C-8,12 8,2 22,4Z" fill="#fff2d6" opacity=".92"/>
+  <circle cx="34" cy="-11" r="12" fill="#fdfdff"/>
+  <circle cx="37" cy="-10" r="6" fill="#2b1207"/>
+  <circle cx="31" cy="-15.5" r="2.6" fill="#fff"/>
+  <path d="M56,5C61,10 66,11 69,7" stroke="#8d3410" stroke-width="3" fill="none" stroke-linecap="round"/>
+ </g>
+</g>
+<g id="gKelpF"></g>
+<g id="gBub"></g>
+<rect id="vig" x="0" y="0" width="1400" height="900" fill="url(#vigG)" pointer-events="none"/>
+</svg>
+
+<header class="plate">
+ <p class="eyebrow">Plate XVII · Pelagic Study</p>
+ <h1>Blue<em>Corridor</em></h1>
+ <p class="lede">Two fish, five vents and a swaying kelp forest — <b>every form an SVG primitive</b>, rebuilt live at any viewport. No bitmaps, no fonts, no network.</p>
+</header>
+
+<aside class="index">
+ <h2>Field index</h2>
+ <button class="sp" data-fish="a"><i style="background:linear-gradient(150deg,#b9efff,#1a6699)"></i><b>Scomberovagus</b><span>slender · slow cruise</span></button>
+ <button class="sp" data-fish="b"><i style="background:linear-gradient(150deg,#ffe0a1,#c3451a)"></i><b>Cyclichthys orbis</b><span>discoid · quicksilver</span></button>
+</aside>
+
+<div class="gauges">
+ <div class="g"><span id="gD">212</span><label>metres · depth</label></div>
+ <div class="g"><span id="gT">24.6</span><label>°C · surface</label></div>
+ <div class="g"><span id="gB">20</span><label>ascending · bubbles</label></div>
+ <div class="g"><span style="font-size:0">·</span><label>surge</label><div class="meter"><i id="gF"></i></div></div>
+</div>
+
+<p class="hint" id="hint">click the water to stir it</p>
+
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg",TAU=6.2831853,
+ svg=document.getElementById("sea"),defs=document.getElementById("defs"),
+ water=document.getElementById("water"),vig=document.getElementById("vig"),
+ gRay=document.getElementById("gRay"),gSurf=document.getElementById("gSurf"),
+ gPlank=document.getElementById("gPlank"),gRidge=document.getElementById("gRidge"),
+ gFloor=document.getElementById("gFloor"),gKb=document.getElementById("gKelpB"),
+ gKf=document.getElementById("gKelpF"),gBub=document.getElementById("gBub"),
+ elD=document.getElementById("gD"),elT=document.getElementById("gT"),
+ elB=document.getElementById("gB"),elF=document.getElementById("gF"),hint=document.getElementById("hint"),
+ W=1400,H=900,FL=790,tm=0,last=performance.now(),
+ reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function mk(t,a,p){var n=document.createElementNS(NS,t);for(var k in a)n.setAttribute(k,a[k]);if(p)p.appendChild(n);return n;}
+function R(a,b){return a+Math.random()*(b-a);}
+function sandY(x){return FL+Math.sin(x/W*TAU*1.9+.6)*11+Math.sin(x/W*TAU*4.7+1.4)*5+Math.sin(x/W*TAU*.8)*9;}
+function dFor(fn,x0,x1,st){var s=st||14,d="",x;for(x=x0;x<=x1;x+=s)d+=(d?"L":"M")+x.toFixed(1)+","+fn(x).toFixed(1);if(x-x1>.6)d+="L"+x1.toFixed(1)+","+fn(x1).toFixed(1);return d;}
+
+/* ---- gradients ---- */
+function grad(id,horiz,stops,parent){var g=mk("linearGradient",{id:id,x1:0,y1:0,x2:horiz?1:0,y2:horiz?0:1},parent);
+ stops.forEach(function(s){mk("stop",{offset:s[0],"stop-color":s[1],"stop-opacity":s[2]===undefined?1:s[2]},g);});return g;}
+grad("waterG",0,[[0,"#82e0f5"],[.16,"#3aab d6".replace(" ","")],[.44,"#116195"],[.74,"#062f52"],[1,"#01101b"]],defs);
+grad("sandG",0,[[0,"#f1d9ac"],[.34,"#cea36b"],[.74,"#94714a"],[1,"#57412c"]],defs);
+grad("ridgeG",0,[[0,"#124a6e"],[1,"#06213a"]],defs);
+grad("bodyA",0,[[0,"#c4f3fe"],[.36,"#3fa9d8"],[.72,"#1a6699"],[1,"#0d3f66"]],defs);
+grad("finA",0,[[0,"#ffdb90"],[1,"#dd791d"]],defs);
+grad("bodyB",0,[[0,"#ffe7b3"],[.4,"#fb913a"],[1,"#c3451a"]],defs);
+grad("finB",0,[[0,"#fff5df"],[1,"#ffbe73"]],defs);
+grad("rayG",0,[[0,"#d8f7ff",.32],[1,"#d8f7ff",0]],defs);
+var rg=mk("radialGradient",{id:"bubG",cx:.36,cy:.3,r:.72},defs);
+[[0,"#ffffff",.8],[.45,"#bfe9ff",.07],[.86,"#dff4ff",.16],[1,"#ffffff",.6]].forEach(function(s){mk("stop",{offset:s[0],"stop-color":s[1],"stop-opacity":s[2]},rg);});
+var vg=mk("radialGradient",{id:"vigG",cx:.45,cy:.35,r:.78},defs);
+mk("stop",{offset:.55,"stop-color":"#01121e","stop-opacity":0},vg);
+mk("stop",{offset:1,"stop-color":"#01121e","stop-opacity":.62},vg);
+
+/* ---- scene pieces ---- */
+function rock(x,w,h){var y=sandY(x)+h*.5;
+ mk("path",{d:"M"+(x-w).toFixed(1)+","+y.toFixed(1)+"Q"+(x-w*.55).toFixed(1)+","+(y-h*1.45).toFixed(1)+" "+(x+w*.08).toFixed(1)+","+(y-h).toFixed(1)+"Q"+(x+w*.72).toFixed(1)+","+(y-h*1.25).toFixed(1)+" "+(x+w).toFixed(1)+","+y.toFixed(1)+"Z",fill:"#4c544e",opacity:.92},gFloor);
+ mk("path",{d:"M"+(x-w*.5).toFixed(1)+","+(y-h*.72).toFixed(1)+"Q"+(x-w*.1).toFixed(1)+","+(y-h*1.18).toFixed(1)+" "+(x+w*.24).toFixed(1)+","+(y-h*.94).toFixed(1),stroke:"#8d8f80","stroke-width":2.4,fill:"none",opacity:.4,"stroke-linecap":"round"},gFloor);}
+
+function blade(x0,base,h,amp,ph,wid){
+ var segs=10,L=[],Rt=[],i,t,y,cx,dx,dl,nx,w;
+ for(i=0;i<=segs;i++){t=i/segs;y=base-h*t;
+  cx=x0+Math.sin(ph+t*3.6)*amp*t;
+  dx=Math.cos(ph+t*3.6)*3.6*amp*t+Math.sin(ph+t*3.6)*amp;
+  dl=Math.sqrt(h*h+dx*dx);nx=h/dl;
+  w=wid*(1-t*.94)*(t<.14?.4+t/.14*.6:1);
+  L.push([cx+nx*w,y+(dx/dl)*w]);Rt.push([cx-nx*w,y-(dx/dl)*w]);}
+ function f(a){return a.map(function(p){return p[0].toFixed(1)+","+p[1].toFixed(1);}).join("L");}
+ return "M"+f(L)+"L"+f(Rt.reverse())+"Z";}
+
+function kelp(par,x,base,h,color,op,n){
+ var sw=mk("g",{"class":"sway"},mk("g",{transform:"translate("+x.toFixed(1)+","+base.toFixed(1)+")"},par));
+ sw.style.animationDuration=R(6.5,11).toFixed(1)+"s";
+ sw.style.animationDelay=(-R(0,7)).toFixed(1)+"s";
+ for(var i=0;i<n;i++)mk("path",{d:blade(R(-13,13),0,R(h*.55,h*1.05),R(9,22),R(0,TAU),R(4.5,9)),fill:color,opacity:op},sw);}
+
+function rays(){
+ for(var i=0;i<6;i++){var x=(i+.35)*W/6+R(-40,40),w0=R(26,58),w1=w0*R(2.6,3.8),
+  p=mk("polygon",{points:(x-w0).toFixed(1)+",-20 "+(x+w0).toFixed(1)+",-20 "+(x+w1).toFixed(1)+","+(H*.94).toFixed(0)+" "+(x-w1).toFixed(1)+","+(H*.94).toFixed(0),fill:"url(#rayG)","class":"ray"},gRay);
+  p.style.animationDuration=R(9,17).toFixed(1)+"s";p.style.animationDelay=(-R(0,9)).toFixed(1)+"s";}}
+
+function surface(){
+ mk("rect",{x:0,y:0,width:W,height:H*.075,fill:"url(#rayG)",opacity:.5},gSurf);
+ [[10,5,150,-26],[26,8,230,18],[44,4,110,-9],[64,6,300,26]].forEach(function(o){
+  var wl=o[2],g=mk("g",{},gSurf);
+  mk("path",{d:dFor(function(x){return o[0]+Math.sin(x/wl*TAU)*o[1];},-2*wl,W+2*wl,9),fill:"none",stroke:"#e8fbff","stroke-width":2.2,opacity:.2,"stroke-linecap":"round"},g);
+  g.style.animation="drift "+R(24,46).toFixed(0)+"s linear infinite";
+  g.style.animationDelay=(-R(0,20)).toFixed(1)+"s";});}
+
+function plankton(){
+ for(var i=0;i<46;i++){var c=mk("circle",{cx:(Math.random()*W).toFixed(1),cy:(Math.random()*H*.97).toFixed(1),r:R(.7,2.2).toFixed(2),fill:"#d8f3ff",opacity:R(.12,.5).toFixed(2),"class":"plank"},gPlank);
+  c.style.animationDuration=R(16,34).toFixed(1)+"s";c.style.animationDelay=(-R(0,30)).toFixed(1)+"s";}}
+
+/* ---- bubbles ---- */
+var bub=[],ventX=[],NB=30;
+function size(b){b.c.setAttribute("r",b.r.toFixed(2));b.h.setAttribute("cx",(b.r*.32).toFixed(2));b.h.setAttribute("cy",(-b.r*.38).toFixed(2));b.h.setAttribute("r",Math.max(.7,b.r*.22).toFixed(2));}
+function ventFill(b){var vi=(Math.random()*ventX.length)|0;b.vx=ventX[vi]+R(-15,15);b.r=R(2.2,8.4);b.y=sandY(b.vx)+R(1,13);b.v=84-b.r*5.4+R(-6,9);b.a=R(4,15);b.f=R(.35,1.05);b.p=R(0,TAU);b.x=b.vx;}
+function initBubbles(){
+ for(var i=0;i<NB;i++){var g=mk("g",{},gBub),
+  b={el:g,c:mk("circle",{fill:"url(#bubG)",stroke:"rgba(226,248,255,.5)","stroke-width":.8},g),
+     h:mk("circle",{fill:"rgba(255,255,255,.9)"},g)};
+  ventFill(b);b.burst=false;size(b);g.setAttribute("transform","translate("+b.x.toFixed(1)+","+b.y.toFixed(1)+")");bub.push(b);}}
+function ring(x,y,r0){var c=mk("circle",{cx:x.toFixed(1),cy:y.toFixed(1),r:r0||9,fill:"none",stroke:"rgba(226,248,255,.75)","stroke-width":1.6},gBub);
+ c.style.transformBox="fill-box";c.style.transformOrigin="50% 50%";c.style.animation="pop .9s ease-out forwards";
+ c.addEventListener("animationend",function(){if(c.parentNode)c.parentNode.removeChild(c);});}
+function stepBubbles(dt){
+ var live=0;
+ for(var i=0;i<bub.length;i++){var b=bub[i];
+  b.y-=b.v*dt*(b.burst?1.25:1);
+  b.x=b.vx+Math.sin(tm*b.f+b.p)*b.a;
+  if(b.y<-12){if(!b.burst)ring(b.x,8,b.r*1.6);ventFill(b);b.burst=false;}
+  var o=1;if(b.y<H&&b.y>H-52)o=Math.max(0,(H-b.y)/52);if(b.y>FL-4)o=Math.min(o,Math.max(0,(H-b.y)/26));
+  b.el.setAttribute("opacity",o.toFixed(2));
+  b.el.setAttribute("transform","translate("+b.x.toFixed(1)+","+b.y.toFixed(1)+")");
+  if(o>.02&&b.y<H&&b.y>-10)live++;}
+ elB.textContent=live;}
+
+/* ---- fish ---- */
+var fish=[
+ {g:document.getElementById("fishA"),s:1.15,dir:1,spd:44,y0:.42,m:215,bf:.5,ba:26,rt:2.6},
+ {g:document.getElementById("fishB"),s:.5,dir:-1,spd:134,y0:.68,m:85,bf:1.15,ba:34,rt:4}];
+fish.forEach(function(f){f.x=Math.random()*W;f.y=f.y0*H;f.boost=1;});
+function stepFish(dt){
+ fish.forEach(function(f){
+  f.boost+=(1-f.boost)*dt*1.7;
+  f.x+=f.dir*f.spd*f.boost*dt;
+  var span=W+2*f.m;f.x=((f.x+f.m)%span+span)%span-f.m;
+  var y=f.y0*H+Math.sin(tm*f.bf+f.x*.004)*f.ba,
+      r=Math.cos(tm*f.bf+f.x*.004)*f.rt;
+  f.g.setAttribute("transform","translate("+f.x.toFixed(1)+","+y.toFixed(1)+") scale("+(f.dir*f.s)+","+f.s+") rotate("+r.toFixed(2)+")");});}
+
+/* ---- layout ---- */
+function measure(){H=900;W=Math.max(560,Math.round(H*innerWidth/innerHeight));FL=Math.round(H*.878);
+ svg.setAttribute("viewBox","0 0 "+W+" "+H);water.setAttribute("width",W);water.setAttribute("height",H);vig.setAttribute("width",W);vig.setAttribute("height",H);}
+function clear(g){while(g.firstChild)g.removeChild(g.firstChild);}
+function build(){
+ measure();
+ [gRay,gSurf,gPlank,gRidge,gFloor,gKb,gKf,gBub].forEach(clear);
+ mk("path",{d:dFor(function(x){return FL-46+Math.sin(x/W*TAU*1.3+2.2)*26+Math.sin(x/W*TAU*3.1)*10;},0,W)+"L"+W+","+H+"L0,"+H+"Z",fill:"url(#ridgeG)",opacity:.8,filter:"url(#soft)"},gRidge);
+ rays();surface();plankton();
+ var i,n=Math.max(3,Math.round(W/240));
+ for(i=0;i<n*2;i++)kelp(gKb,R(0,W),FL-R(0,10),R(70,160),i%2?"#1d6b55":"#256f4a",.5,(i%3)+2);
+ mk("path",{d:dFor(sandY,0,W)+"L"+W+","+H+"L0,"+H+"Z",fill:"url(#sandG)"},gFloor);
+ for(i=0;i<Math.round(W/64);i++){var rx=R(0,W),ry=sandY(rx)+R(16,58);
+  mk("path",{d:"M"+(rx-22).toFixed(1)+","+ry.toFixed(1)+"Q"+rx.toFixed(1)+","+(ry-7).toFixed(1)+" "+(rx+22).toFixed(1)+","+ry.toFixed(1),stroke:"#6a5133","stroke-width":2.4,fill:"none",opacity:.32},gFloor);}
+ for(i=0;i<n;i++)rock(R(0,W),R(30,88),R(16,46));
+ for(i=0;i<n;i++)kelp(gKf,R(0,W),sandY(R(0,W))+9,R(150,300),i%2?"#2f9159":"#3fb46a",.85,(i%3)+3);
+ ventX=[];for(i=0;i<5;i++)ventX.push(Math.round(W*(i+.5)/5)+R(-30,30));
+ clear(gBub);bub=[];initBubbles();}
+
+/* ---- interaction ---- */
+function toLocal(e){var m=svg.getScreenCTM();if(!m)return{x:W/2,y:H/2};var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;var q=p.matrixTransform(m.inverse());return{x:q.x,y:q.y};}
+svg.addEventListener("pointerdown",function(e){
+ var p=toLocal(e),k;
+ for(k=0;k<8;k++){var b=bub[(Math.random()*bub.length)|0];
+  b.vx=p.x+R(-26,26);b.r=R(1.6,5.4);b.y=p.y+R(-14,14);b.v=70-b.r*5+R(0,14);
+  b.a=R(5,18);b.f=R(.6,1.3);b.p=R(0,TAU);b.x=b.vx;b.burst=true;size(b);}
+ ring(p.x,p.y,7);
+ fish[1].boost=3.4;fish[0].boost=1.7;
+ hint.style.opacity=0;});
+[].forEach.call(document.querySelectorAll(".sp"),function(btn){
+ var id=btn.getAttribute("data-fish"),me=id==="a"?fish[0]:fish[1],o=me===fish[0]?fish[1]:fish[0];
+ function on(){me.g.classList.add("hot");o.g.classList.add("dim");}
+ function off(){me.g.classList.remove("hot");o.g.classList.remove("dim");}
+ btn.addEventListener("mouseenter",on);btn.addEventListener("focus",on);
+ btn.addEventListener("mouseleave",off);btn.addEventListener("blur",off);
+ btn.addEventListener("click",function(){fish[id==="a"?0:1].boost=3.2;});});
+var rt;addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(build,160);});
+
+/* ---- gauges + loop ---- */
+var acc=0;
+function frame(now){
+ var dt=Math.min(.05,(now-last)/1000);last=now;tm+=dt;
+ stepFish(dt);stepBubbles(dt);
+ acc+=dt;if(acc>.14){acc=0;
+  elD.textContent=(212+Math.sin(tm*.23)*7+Math.sin(tm*.61)*2).toFixed(0);
+  elT.textContent=(24.6+Math.sin(tm*.17)*.5).toFixed(1);
+  elF.style.width=(34+26*Math.sin(tm*.31)+10*Math.sin(tm*.9)).toFixed(0)+"%";}
+ requestAnimationFrame(frame);}
+if(!reduced)setInterval(function(){if(Math.random()<.5)fish[1].boost=2.9;},7000);
+
+build();requestAnimationFrame(function(n){last=n;frame(n);});
+})();
+</script>
+</body>
+</html>

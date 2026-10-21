@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reef Drift — Pelagic Survey, Station 07</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#04121f}
+body{font-family:"Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+#sea{display:block;position:fixed;inset:0;width:100vw;height:100vh}
+.hud{position:fixed;inset:0;pointer-events:none;z-index:3;color:#d7ecf9}
+.tl{position:absolute;top:min(6vh,46px);left:min(5.2vw,46px);max-width:min(44ch,54vw)}
+.kick{font-size:9.5px;letter-spacing:.34em;text-transform:uppercase;color:#6fd0e6}
+.kick span{color:#ffbe63;padding:0 4px}
+h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;font-weight:400;
+   font-size:clamp(40px,6.4vw,78px);line-height:.9;letter-spacing:-.02em;margin:.2em 0 .3em;color:#f4fbff;
+   text-shadow:0 8px 40px rgba(3,26,46,.85)}
+h1 i{font-style:italic;color:#ffbe63}
+.rule{width:82px;height:1px;background:linear-gradient(90deg,#78d8ec,rgba(120,216,236,0))}
+.blurb{margin-top:15px;font-size:12.5px;line-height:1.75;color:#94bdd8;font-weight:300;max-width:34ch}
+.blurb b{color:#e2f3ff;font-weight:600}
+.ro{position:absolute;left:min(5.2vw,46px);bottom:min(6vh,40px);display:flex;gap:min(5vw,40px)}
+.ro div{font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:#5f9fbd}
+.ro b{display:block;margin-top:7px;font-family:"Iowan Old Style",Georgia,serif;font-size:27px;font-weight:400;
+      letter-spacing:-.015em;color:#eaf7ff;font-variant-numeric:tabular-nums}
+.hint{position:absolute;right:min(5.2vw,46px);bottom:min(6vh,40px);font-size:9px;letter-spacing:.24em;
+      text-transform:uppercase;color:#5f9fbd;text-align:right;line-height:2}
+.hint em{font-style:normal;color:#ffbe63}
+.nm{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:20px;fill:#f4fbff;letter-spacing:-.01em}
+.mt{font-size:8.5px;letter-spacing:.22em;fill:#8fd2ea}
+.hit{fill:none;pointer-events:all;cursor:pointer}
+.plate{transition:opacity .35s ease}
+.rayglow{animation:glow 17s ease-in-out infinite alternate}
+@keyframes glow{0%{opacity:.42}100%{opacity:.95}}
+.tw{animation:tw 6s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.10}50%{opacity:.62}}
+.caust{animation:cz 9s ease-in-out infinite alternate}
+@keyframes cz{0%{opacity:.08}100%{opacity:.34}}
+@media (max-width:680px){.blurb{display:none}.ro{gap:26px}}
+@media (prefers-reduced-motion:reduce){.rayglow,.tw,.caust{animation:none}}
+</style>
+</head>
+<body>
+<svg id="sea" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+<defs>
+<linearGradient id="gWater" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#63cdea"/><stop offset=".16" stop-color="#2f97c7"/>
+<stop offset=".44" stop-color="#12628f"/><stop offset=".73" stop-color="#093a5f"/>
+<stop offset="1" stop-color="#031728"/></linearGradient>
+<linearGradient id="gRay" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#e8fbff" stop-opacity=".5"/><stop offset="1" stop-color="#e8fbff" stop-opacity="0"/></linearGradient>
+<linearGradient id="gSand" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#eacc94"/><stop offset=".3" stop-color="#c6a069"/>
+<stop offset=".7" stop-color="#8f6c44"/><stop offset="1" stop-color="#59401f"/></linearGradient>
+<linearGradient id="gK1" x1="0" y1="1" x2="0" y2="0">
+<stop offset="0" stop-color="#0f4a37"/><stop offset=".55" stop-color="#2f8f5c"/><stop offset="1" stop-color="#63c07a"/></linearGradient>
+<linearGradient id="gK2" x1="0" y1="1" x2="0" y2="0">
+<stop offset="0" stop-color="#164528"/><stop offset=".55" stop-color="#5c9a3f"/><stop offset="1" stop-color="#9ecb56"/></linearGradient>
+<radialGradient id="gBub" cx=".34" cy=".28" r=".78">
+<stop offset="0" stop-color="#ffffff" stop-opacity=".9"/><stop offset=".5" stop-color="#cdefff" stop-opacity=".14"/>
+<stop offset="1" stop-color="#8fd6f5" stop-opacity=".3"/></radialGradient>
+<linearGradient id="gBodyA" x1=".1" y1="0" x2=".55" y2="1">
+<stop offset="0" stop-color="#ffd98f"/><stop offset=".42" stop-color="#f89a33"/>
+<stop offset="1" stop-color="#c44a1b"/></linearGradient>
+<linearGradient id="gFinA" x1="0" y1="0" x2=".3" y2="1">
+<stop offset="0" stop-color="#ffd3a1"/><stop offset="1" stop-color="#e3702a"/></linearGradient>
+<linearGradient id="gBodyB" x1=".1" y1="0" x2=".4" y2="1">
+<stop offset="0" stop-color="#eefaff"/><stop offset=".45" stop-color="#8ec9de"/>
+<stop offset="1" stop-color="#2f7191"/></linearGradient>
+<linearGradient id="gFinB" x1="0" y1="0" x2=".3" y2="1">
+<stop offset="0" stop-color="#7fc6dd"/><stop offset=".7" stop-color="#1d5573"/><stop offset="1" stop-color="#f0b45c"/></linearGradient>
+<radialGradient id="gVig" cx=".5" cy=".42" r=".8">
+<stop offset=".5" stop-color="#001424" stop-opacity="0"/><stop offset="1" stop-color="#01101d" stop-opacity=".62"/></radialGradient>
+<filter id="soft" x="-30%" y="-15%" width="160%" height="140%"><feGaussianBlur stdDeviation="11"/></filter>
+<clipPath id="clipA"><ellipse cx="0" cy="0" rx="74" ry="48"/></clipPath>
+<clipPath id="clipB"><path d="M78 0C58 -15 16 -20 -26 -14C-50 -10 -64 -5 -70 0C-64 5 -50 10 -26 14C16 20 58 15 78 0Z"/></clipPath>
+</defs>
+<rect x="0" y="0" width="100%" height="100%" fill="url(#gWater)"/>
+</svg>
+
+<div class="hud">
+ <div class="tl">
+  <div class="kick">Pelagic survey<span>/</span>station 07<span>/</span>12.06 N 109.4 E</div>
+  <h1>Reef <i>Drift</i></h1>
+  <div class="rule"></div>
+  <p class="blurb">Two residents hold the sand shelf beneath the thermocline. <b>Air climbs from the vents</b>, kelp answers the current, and the light never stops moving.</p>
+ </div>
+ <div class="ro">
+  <div>Air<b id="rAir">0</b></div>
+  <div>Drift<b id="rDrift">0.0</b></div>
+  <div>Depth<b id="rDepth">0.0</b></div>
+ </div>
+ <div class="hint">Tap the water to release air<br><em>hover a specimen</em></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg",S=document.getElementById("sea");
+function el(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+function rnd(a,b){return a+Math.random()*(b-a)}
+function poly(p){var s="",i;for(i=0;i<p.length;i++)s+=(i?"L":"")+p[i][0].toFixed(1)+" "+p[i][1].toFixed(1);return s}
+var L={};["rays","haze","far","floor","kelpB","parts","kelpF","bub","fishL","ui","fx","vig"].forEach(function(id){L[id]=el("g",{id:id},S)});
+L.ui.style.pointerEvents="none";L.fx.style.pointerEvents="none";L.vig.style.pointerEvents="none";
+var W=0,H=0,F=0,T=0,last=0,drift=0,driftT=0,surf=0,uiT=0,rt=-1;
+var kel=[],bub=[],parts=[],fish=[],fx=[],vents=[];
+var rA=document.getElementById("rAir"),rD=document.getElementById("rDrift"),rP=document.getElementById("rDepth");
+
+var A_MARK='<g class="tail"><path d="M-62 0L-140 -54Q-114 0 -140 54Z" fill="url(#gFinA)" stroke="#a4481e" stroke-width="1.6" stroke-linejoin="round"/>'
++'<path d="M-70 -9L-131 -46M-72 0L-124 0M-70 9L-131 46" fill="none" stroke="#8f3a17" stroke-opacity=".35" stroke-width="1.4"/></g>'
++'<path d="M-34 38C-16 74 8 74 26 44C2 54 -16 52 -34 38Z" fill="url(#gFinA)" stroke="#a4481e" stroke-width="1.5"/>'
++'<path class="dorsal" d="M-28 -40C-6 -92 32 -95 58 -44C22 -56 -6 -54 -28 -40Z" fill="url(#gFinA)" stroke="#a4481e" stroke-width="1.5"/>'
++'<path d="M-14 -60L-4 -80M8 -60L18 -82M28 -54L38 -72" fill="none" stroke="#8f3a17" stroke-opacity=".33" stroke-width="1.3"/>'
++'<ellipse cx="0" cy="0" rx="74" ry="48" fill="url(#gBodyA)" stroke="#a4481e" stroke-width="2"/>'
++'<g clip-path="url(#clipA)" fill="none" stroke-linecap="round">'
++'<path d="M-6 -48C-24 -16 -24 16 -6 48" stroke="#a83d16" stroke-opacity=".26" stroke-width="10"/>'
++'<path d="M24 -46C10 -16 10 16 24 46" stroke="#a83d16" stroke-opacity=".24" stroke-width="8"/>'
++'<path d="M-40 -40C-54 -14 -54 14 -40 40" stroke="#a83d16" stroke-opacity=".26" stroke-width="9"/>'
++'<path d="M-72 27C-30 47 26 47 66 22" stroke="#ffe9c2" stroke-opacity=".4" stroke-width="11"/></g>'
++'<path d="M28 -42C16 -14 16 14 28 42" fill="none" stroke="#a4481e" stroke-opacity=".5" stroke-width="2"/>'
++'<g class="pec"><path d="M12 2C-10 30 -30 41 -45 32C-24 20 -6 6 12 2Z" fill="#ffca8c" fill-opacity=".92" stroke="#a4481e" stroke-width="1.4"/>'
++'<path d="M6 8C-10 22 -24 28 -35 29" fill="none" stroke="#a4481e" stroke-opacity=".35" stroke-width="1.2"/></g>'
++'<circle cx="48" cy="-15" r="12.5" fill="#fff7e8" stroke="#a4481e" stroke-opacity=".5" stroke-width="1.4"/>'
++'<circle cx="51" cy="-14" r="6" fill="#152430"/><circle cx="47.4" cy="-18" r="2.2" fill="#fff"/>'
++'<path d="M74 6C68 17 57 21 47 17" fill="none" stroke="#8f3a17" stroke-width="2.6" stroke-linecap="round"/>'
++'<ellipse class="hit" rx="80" ry="54"/>';
+
+var B_MARK='<g class="tail"><path d="M-58 0L-126 -42Q-104 0 -126 42Z" fill="url(#gFinB)" stroke="#123c55" stroke-width="1.4" stroke-linejoin="round"/>'
++'<path d="M-64 -6L-118 -33M-66 0L-112 0M-64 6L-118 33" fill="none" stroke="#0f3346" stroke-opacity=".33" stroke-width="1.1"/></g>'
++'<path d="M-30 11C-22 46 -6 50 4 18C-10 23 -20 19 -30 11Z" fill="url(#gFinB)" stroke="#123c55" stroke-width="1.3"/>'
++'<path class="dorsal" d="M-24 -11C-8 -37 14 -35 26 -13C8 -18 -10 -17 -24 -11Z" fill="url(#gFinB)" stroke="#123c55" stroke-width="1.3"/>'
++'<path d="M78 0C58 -15 16 -20 -26 -14C-50 -10 -64 -5 -70 0C-64 5 -50 10 -26 14C16 20 58 15 78 0Z" fill="url(#gBodyB)" stroke="#1b4f6b" stroke-width="1.8"/>'
++'<g clip-path="url(#clipB)" fill="none" stroke-linecap="round">'
++'<path d="M14 -19L7 19" stroke="#1d5a78" stroke-opacity=".3" stroke-width="5"/>'
++'<path d="M-14 -20L-21 19" stroke="#1d5a78" stroke-opacity=".28" stroke-width="5"/>'
++'<path d="M-40 -16L-45 16" stroke="#1d5a78" stroke-opacity=".26" stroke-width="4"/>'
++'<path d="M74 3C40 14 -20 13 -64 3" stroke="#f0fbff" stroke-opacity=".34" stroke-width="6"/></g>'
++'<path d="M62 0C22 -4 -20 -3 -60 1" fill="none" stroke="#eaf7ff" stroke-opacity=".3" stroke-width="1.2"/>'
++'<g class="pec"><path d="M26 3C12 23 -2 27 -13 21C2 13 14 5 26 3Z" fill="#a7dff0" fill-opacity=".92" stroke="#1b4f6b" stroke-width="1.2"/></g>'
++'<circle cx="60" cy="-4" r="9.5" fill="#f2fbff" stroke="#1b4f6b" stroke-opacity=".5" stroke-width="1.2"/>'
++'<circle cx="62" cy="-3.5" r="4.6" fill="#10222c"/><circle cx="59" cy="-6.6" r="1.7" fill="#fff"/>'
++'<path d="M78 1C71 7 65 8 59 6" fill="none" stroke="#123c55" stroke-width="2" stroke-linecap="round"/>'
++'<ellipse class="hit" rx="84" ry="30"/>';
+
+function blade(h,w,wob){var N=12,lp=[],rp=[],i,t,y,cx,hw;
+ for(i=0;i<=N;i++){t=i/N;y=-h*t;cx=Math.sin(t*2.9+wob)*w*1.2*t+t*w*.6;hw=Math.max(.7,w*.5*(1-t*.85)*(.55+.45*Math.sin(t*4+wob)));
+  lp.push([cx-hw,y]);rp.push([cx+hw,y]);}
+ return "M"+poly(lp)+"L"+poly(rp.reverse())+"Z";}
+
+function kelpAt(x,h,w,fill,op,layer,amp){
+ var p=el("g",{transform:"translate("+x.toFixed(1)+","+(F+H*.028).toFixed(1)+")","fill-opacity":op},layer);
+ var g=el("g",{},p);
+ el("path",{d:blade(h,w,rnd(0,6)),fill:fill},g);
+ el("path",{d:blade(h*rnd(.5,.82),w*.8,rnd(0,6)),fill:fill,opacity:.8},g);
+ el("path",{d:blade(h*rnd(.35,.6),w*.6,rnd(0,6)),fill:fill,opacity:.6},g);
+ kel.push({g:g,ph:rnd(0,6.28),sp:rnd(.45,1.05),amp:amp||3});}
+
+function rock(x,y,s,fill){var n=8,p=[],i,a,r;
+ for(i=0;i<=n;i++){a=Math.PI+i/n*Math.PI;r=s*rnd(.62,1.15);
+  p.push((x+Math.cos(a)*r).toFixed(1)+","+(y+Math.sin(a)*r*.72).toFixed(1));}
+ el("polygon",{points:p.join(" "),fill:fill||"#2c3a46",stroke:"rgba(255,255,255,.10)","stroke-width":1.2,"stroke-linejoin":"round"},L.floor);}
+
+function buildRays(){var g=el("g",{filter:"url(#soft)",class:"rayglow"},L.rays),i,x,w,ln;
+ for(i=0;i<5;i++){x=rnd(-.05,.9)*W;w=rnd(26,80);ln=rnd(130,260);
+  el("path",{d:"M"+x+" -30L"+(x+w)+" -30L"+(x+w+ln)+" "+F+"L"+(x+ln)+" "+F+"Z",fill:"url(#gRay)"},g);}}
+
+function buildHaze(){var i;for(i=0;i<3;i++)el("ellipse",{cx:rnd(0,W),cy:rnd(.34,.68)*H,rx:rnd(.24,.5)*W,
+ ry:rnd(.05,.12)*H,fill:"#8adcf2","fill-opacity":rnd(.035,.075)},L.haze);}
+
+function buildFar(){var amp=H*.03,pts=[],x;
+ for(x=-30;x<=W+30;x+=Math.max(20,W/44))pts.push([x,F-H*.055+Math.sin(x*.0026+2.1)*amp+Math.sin(x*.009)*amp*.4]);
+ el("path",{d:"M"+poly(pts)+"L"+(W+30)+" "+H+"L-30 "+H+"Z",fill:"#082438","fill-opacity":.8},L.far);
+ for(x=0;x<8;x++)kelpAt(rnd(0,W),rnd(.09,.2)*H,rnd(6,13),"#0c3650",.6,L.far,2);}
+
+function buildFloor(){var y0=F,amp=H*.024,pts=[],x,i;
+ for(x=-30;x<=W+30;x+=Math.max(16,W/54))pts.push([x,y0+Math.sin(x*.0043+1.3)*amp+Math.sin(x*.0129+.4)*amp*.45]);
+ el("path",{d:"M"+poly(pts)+"L"+(W+30)+" "+(H+20)+"L-30 "+(H+20)+"Z",fill:"url(#gSand)"},L.floor);
+ el("path",{d:"M"+poly(pts),fill:"none",stroke:"#f8e8c0","stroke-opacity":.3,"stroke-width":2.4},L.floor);
+ for(i=0;i<6;i++)rock(rnd(0,W),y0+rnd(H*.008,H*.06),rnd(H*.028,H*.075));
+ for(i=0;i<22;i++)el("ellipse",{cx:rnd(0,W),cy:y0+rnd(H*.012,H*.09),rx:rnd(3,9),ry:rnd(2,4.5),fill:"#8a6a45","fill-opacity":.65},L.floor);
+ for(i=0;i<14;i++)el("path",{d:"M"+rnd(0,W)+" "+rnd(y0+H*.02,H*.985)+"q"+rnd(14,30)+" "+(-rnd(3,7))+" "+rnd(30,66)+" 0",
+  fill:"none",stroke:"#fff3d4","stroke-opacity":.1,"stroke-width":1.3},L.floor);
+ for(i=0;i<5;i++)el("path",{d:"M"+rnd(0,W)+" "+(y0+rnd(-H*.01,H*.04))+"c30 -10 60 6 96 -4",fill:"none",stroke:"#e7faff",
+  "stroke-width":rnd(2,5),class:"caust",style:"animation-delay:-"+rnd(0,9)+"s"},L.floor);
+ for(i=0;i<3;i++){x=rnd(W*.08,W*.92);var yy=y0+Math.sin(x*.0043+1.3)*amp+Math.sin(x*.0129+.4)*amp*.45;
+  rock(x,yy+5,rnd(H*.034,H*.055),"#4a3a26");
+  el("ellipse",{cx:x,cy:yy+2,rx:rnd(5,9),ry:rnd(2.5,4),fill:"#170f08","fill-opacity":.8},L.floor);
+  vents.push({x:x,y:yy-3});}}
+
+function buildKelp(){var i;
+ for(i=0;i<3;i++)kelpAt(rnd(0,W),rnd(.16,.26)*H,rnd(11,18),"url(#gK1)",.75,L.kelpB,2.6);
+ for(i=0;i<4;i++)kelpAt(rnd(.04,.96)*W,rnd(.2,.36)*H,rnd(14,24),i%2?"url(#gK2)":"url(#gK1)",1,L.kelpF,4);}
+
+function buildParts(){var i;for(i=0;i<42;i++){var o={x:rnd(0,W),y:rnd(0,H),v:rnd(3,11)};
+ o.g=el("circle",{cx:o.x.toFixed(1),cy:o.y.toFixed(1),r:rnd(.6,2.1).toFixed(2),fill:"#dff3ff",class:"tw",
+ style:"animation-delay:-"+rnd(0,6)+"s"},L.parts);parts.push(o);}}
+
+function resetB(b){var v=vents[(Math.random()*vents.length)|0]||{x:rnd(0,W),y:F};
+ b.x=v.x+rnd(-11,11);b.y=v.y-rnd(0,8);b.r=rnd(2,8.5);
+ b.v=(28+130/b.r)*(H/760);b.sw=rnd(.5,1.7)*(8/b.r);b.ph=rnd(0,6.28);}
+function buildBubbles(){var i;for(i=0;i<22;i++){var g=el("g",{},L.bub);
+ g.innerHTML='<circle r="1" fill="url(#gBub)"/><circle r="1" fill="none" stroke="#eafaff" stroke-opacity=".5" stroke-width=".15"/>'
+ +'<circle cx="-.34" cy="-.38" r=".26" fill="#fff" fill-opacity=".75"/>';
+ var b={g:g,r:4,v:40,sw:1,ph:0,x:0,y:0,free:i>16};resetB(b);bub.push(b);}}
+
+function makeFish(mark,cfg){
+ var g=el("g",{"class":"fish"},L.fishL);g.innerHTML=mark;
+ var f={g:g,x:rnd(-.2,1)*W,y:cfg.y,dir:cfg.dir,spd:cfg.spd,s:cfg.s,tail:g.querySelector(".tail"),pec:g.querySelector(".pec"),
+        tp:cfg.tp,tj:cfg.tj,pp:cfg.pp,mb:rnd(1,4),name:cfg.name,meta:cfg.meta,boost:1,on:false};
+ g.addEventListener("pointerenter",function(){f.on=true;f.boost=2.7});
+ g.addEventListener("pointerleave",function(){f.on=false});
+ f.plate=el("g",{"class":"plate",opacity:0},L.ui);
+ f.plate.innerHTML='<line x1="0" y1="0" x2="30" y2="-24" stroke="#8fd2ea" stroke-opacity=".65" stroke-width="1"/>'
+ +'<circle cx="0" cy="0" r="2.5" fill="#8fd2ea"/><text class="nm" x="36" y="-32">'+cfg.name+'</text>'
+ +'<text class="mt" x="36" y="-18">'+cfg.meta+'</text>';
+ fish.push(f);}
+
+function buildFish(){var s=Math.min(1.15,Math.max(.7,W/1450));
+ makeFish(A_MARK,{y:H*.52,dir:1,spd:W/31,s:s,tp:3.3,tj:[-62,0],pp:[12,2],
+  name:"Sunburst Grouper",meta:"EPINEPHELUS HELIOPHIS · 2.4 KG"});
+ makeFish(B_MARK,{y:H*.27,dir:-1,spd:W/11.5,s:s*.5,tp:7.4,tj:[-58,0],pp:[26,3],
+  name:"Cobalt Dart",meta:"CAESIO VELARIS · 0.4 KG"});}
+
+function build(){W=window.innerWidth;H=window.innerHeight;F=Math.round(H*.875);
+ S.setAttribute("viewBox","0 0 "+W+" "+H);
+ for(var k in L)L[k].innerHTML="";
+ kel=[];bub=[];parts=[];fish=[];fx=[];vents=[];
+ buildRays();buildHaze();buildFar();buildFloor();buildKelp();buildParts();buildBubbles();buildFish();
+ el("rect",{x:0,y:F-H*.06,width:W,height:H*.06+2,fill:"#052438","fill-opacity":.35},L.floor);
+ el("rect",{x:0,y:0,width:W,height:H,fill:"url(#gVig)"},L.vig);}
+
+function ripple(x,y){var c=el("circle",{cx:x,cy:y,r:4,fill:"none",stroke:"#d7f3ff","stroke-width":1.6},L.fx);
+ fx.push({c:c,x:x,y:y,r:4,m:rnd(60,110)});}
+
+window.addEventListener("pointerdown",function(e){
+ var x=e.clientX,y=e.clientY,i;ripple(x,y);
+ for(i=0;i<7;i++){var b=bub[(Math.random()*bub.length)|0];b.x=x+rnd(-16,16);b.y=F-rnd(0,10);b.r=rnd(2,7);
+  b.v=(28+130/b.r)*(H/760);b.sw=rnd(.5,1.7)*(8/b.r);b.ph=rnd(0,6.28);}
+ driftT+=(Math.random()-.5)*1.4;});
+
+window.addEventListener("pointermove",function(e){
+ var n=(e.clientX/W-.5)*2;if(isFinite(n))driftT=driftT*.6+n*.9;});
+
+function frame(ts){
+ if(!last)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;T+=dt;
+ drift+=(driftT-drift)*Math.min(1,dt*1.8);driftT+=(0-driftT)*Math.min(1,dt*.7);
+ surf=(surf+dt*14)%W;
+ if(L.haze.lastChild&&L.haze.firstChild)L.haze.firstChild;
+ /* kelp */
+ var i,o;for(i=0;i<kel.length;i++){o=kel[i];
+  o.g.setAttribute("transform","rotate("+(Math.sin(T*o.sp+o.ph)*o.amp+drift*3).toFixed(2)+")");}
+ /* plankton */
+ for(i=0;i<parts.length;i++){o=parts[i];o.y-=o.v*dt*.5;o.x+=drift*8*dt;
+  if(o.y<-6){o.y=H+6;o.x=rnd(0,W);}
+  o.g.setAttribute("cy",o.y.toFixed(1));o.g.setAttribute("cx",o.x.toFixed(1));}
+ /* bubbles */
+ for(i=0;i<bub.length;i++){var b=bub[i];
+  b.y-=b.v*dt;b.x+=(Math.sin(b.y*.02*b.sw+b.ph)*13*b.sw+drift*22)*dt;
+  if(b.y<-14)resetB(b);
+  b.g.setAttribute("transform","translate("+b.x.toFixed(1)+","+b.y.toFixed(1)+") scale("+b.r.toFixed(2)+")");}
+ /* fish */
+ for(i=0;i<fish.length;i++){var f=fish[i];
+  f.boost+=(1-f.boost)*Math.min(1,dt*1.5);
+  f.x+=f.dir*f.spd*f.boost*dt;
+  var m=170*f.s;
+  if(f.dir>0&&f.x>W+m)f.x=-m;if(f.dir<0&&f.x<-m)f.x=W+m;
+  var y=f.y+Math.sin(T*.75+i*2)*(10+i*4);
+  f.g.setAttribute("transform","translate("+f.x.toFixed(1)+","+y.toFixed(1)+") rotate("+(Math.sin(T*1.1+i)*1.6).toFixed(2)
+   +") scale("+(f.dir*f.s).toFixed(3)+","+f.s.toFixed(3)+")");
+  f.tail.setAttribute("transform","rotate("+(Math.sin(T*f.tp*(1+f.boost*.25))*13).toFixed(2)+","+f.tj[0]+","+f.tj[1]+")");
+  f.pec.setAttribute("transform","rotate("+(Math.sin(T*6.2+i)*11).toFixed(2)+","+f.pp[0]+","+f.pp[1]+")");
+  var flip=(f.x>W-280)?-1:1;
+  f.plate.setAttribute("transform","translate("+(f.x+flip*46*f.s).toFixed(1)+","+(y-52*f.s).toFixed(1)+") scale("+flip+",1)");
+  f.plate.setAttribute("opacity",f.on?1:0);
+  f.mb-=dt;if(f.mb<=0){f.mb=rnd(2.2,5);if(f.x>-40&&f.x<W+40){var mb=bub[(18+(Math.random()*4|0))%bub.length];
+   mb.x=f.x+f.dir*80*f.s;mb.y=y-14*f.s;mb.r=rnd(1.8,3.6);mb.v=(28+130/mb.r)*(H/760);mb.ph=rnd(0,6.28);}}}
+ /* ripples */
+ for(i=fx.length-1;i>=0;i--){var r=fx[i];r.r+=230*dt;
+  r.c.setAttribute("r",r.r.toFixed(1));r.c.setAttribute("stroke-opacity",Math.max(0,1-r.r/r.m).toFixed(2));
+  if(r.r>r.m){r.c.parentNode.removeChild(r.c);fx.splice(i,1);}}
+ /* readout */
+ if(T-uiT>.25){uiT=T;var n=0;for(i=0;i<bub.length;i++)if(bub[i].y<H&&bub[i].y>-2)n++;
+  rA.textContent=n;rD.textContent=(drift*22).toFixed(1);rP.textContent=(fish[0]?fish[0].y/F*34:0).toFixed(1);}
+ requestAnimationFrame(frame);}
+
+build();
+var to;window.addEventListener("resize",function(){clearTimeout(to);to=setTimeout(build,160)});
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
