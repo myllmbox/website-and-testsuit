@@ -1,0 +1,58 @@
+· model detected: DeepSeek-V4.1-Flash-1017
+# test  http://100.89.129.80:8007  model=DeepSeek-V4.1-Flash-1017  c=1  window=until the first stream finishes (warmup 30s excluded)  thinking=on  max_tokens=100000  prompt=pasture
+  t=  10s  run= 1 wait= 0  gen   60.9 tok/s  per-stream  60.9  steps   0.0/s  acc 0.00  kv  0.2%  (not steady)
+  t=  20s  run= 1 wait= 0  gen   66.4 tok/s  per-stream  66.4  steps   0.0/s  acc 0.00  kv  0.2%  (not steady)
+  t=  30s  run= 1 wait= 0  gen   66.0 tok/s  per-stream  66.0  steps   0.0/s  acc 0.00  kv  0.3%
+  t=  40s  run= 1 wait= 0  gen   73.3 tok/s  per-stream  73.3  steps   0.0/s  acc 0.00  kv  0.4%
+  t=  50s  run= 1 wait= 0  gen   63.4 tok/s  per-stream  63.4  steps   0.0/s  acc 0.00  kv  0.4%
+  t=  60s  run= 1 wait= 0  gen   69.7 tok/s  per-stream  69.7  steps   0.0/s  acc 0.00  kv  0.5%
+  t=  70s  run= 1 wait= 0  gen   70.7 tok/s  per-stream  70.7  steps   0.0/s  acc 0.00  kv  0.6%
+  t=  80s  run= 1 wait= 0  gen   70.4 tok/s  per-stream  70.4  steps   0.0/s  acc 0.00  kv  0.6%
+  t=  90s  run= 1 wait= 0  gen   69.4 tok/s  per-stream  69.4  steps   0.0/s  acc 0.00  kv  0.7%
+  t= 100s  run= 1 wait= 0  gen   64.3 tok/s  per-stream  64.3  steps   0.0/s  acc 0.00  kv  0.8%
+  t= 110s  run= 1 wait= 0  gen   85.6 tok/s  per-stream  85.6  steps   0.0/s  acc 0.00  kv  0.8%
+  t= 120s  run= 1 wait= 0  gen   71.5 tok/s  per-stream  71.5  steps   0.0/s  acc 0.00  kv  0.9%
+  t= 130s  run= 1 wait= 0  gen   78.7 tok/s  per-stream  78.7  steps   0.0/s  acc 0.00  kv  1.0%
+  t= 140s  run= 1 wait= 0  gen   78.7 tok/s  per-stream  78.7  steps   0.0/s  acc 0.00  kv  1.1%
+  t= 150s  run= 1 wait= 0  gen   79.7 tok/s  per-stream  79.7  steps   0.0/s  acc 0.00  kv  1.1%
+  t= 160s  run= 1 wait= 0  gen   74.4 tok/s  per-stream  74.4  steps   0.0/s  acc 0.00  kv  1.2%
+  t= 170s  run= 1 wait= 0  gen   78.3 tok/s  per-stream  78.3  steps   0.0/s  acc 0.00  kv  1.3%
+  t= 180s  run= 1 wait= 0  gen   73.7 tok/s  per-stream  73.7  steps   0.0/s  acc 0.00  kv  1.3%
+  t= 190s  run= 1 wait= 0  gen   77.1 tok/s  per-stream  77.1  steps   0.0/s  acc 0.00  kv  1.4%
+  t= 200s  run= 1 wait= 0  gen   71.3 tok/s  per-stream  71.3  steps   0.0/s  acc 0.00  kv  1.5%
+  t= 210s  run= 1 wait= 0  gen   77.9 tok/s  per-stream  77.9  steps   0.0/s  acc 0.00  kv  1.6%
+  t= 220s  run= 1 wait= 0  gen   80.0 tok/s  per-stream  80.0  steps   0.0/s  acc 0.00  kv  1.6%
+  t= 230s  run= 1 wait= 0  gen   69.6 tok/s  per-stream  69.6  steps   0.0/s  acc 0.00  kv  1.7%
+  t= 240s  run= 1 wait= 0  gen   96.1 tok/s  per-stream  96.1  steps   0.0/s  acc 0.00  kv  1.8%
+  t= 250s  run= 1 wait= 0  gen   92.4 tok/s  per-stream  92.4  steps   0.0/s  acc 0.00  kv  1.9%
+  t= 260s  run= 1 wait= 0  gen   99.0 tok/s  per-stream  99.0  steps   0.0/s  acc 0.00  kv  2.0%
+  t= 270s  run= 1 wait= 0  gen   90.3 tok/s  per-stream  90.3  steps   0.0/s  acc 0.00  kv  2.1%
+  t= 280s  run= 1 wait= 0  gen   92.5 tok/s  per-stream  92.5  steps   0.0/s  acc 0.00  kv  2.2%
+  t= 290s  run= 1 wait= 0  gen   89.3 tok/s  per-stream  89.3  steps   0.0/s  acc 0.00  kv  2.2%
+  t= 300s  run= 1 wait= 0  gen   75.1 tok/s  per-stream  75.1  steps   0.0/s  acc 0.00  kv  2.3%
+  t= 310s  run= 1 wait= 0  gen   74.5 tok/s  per-stream  74.5  steps   0.0/s  acc 0.00  kv  2.4%
+  t= 320s  run= 1 wait= 0  gen   73.5 tok/s  per-stream  73.5  steps   0.0/s  acc 0.00  kv  2.4%
+  t= 330s  run= 1 wait= 0  gen   79.4 tok/s  per-stream  79.4  steps   0.0/s  acc 0.00  kv  2.5%
+  t= 340s  run= 1 wait= 0  gen   75.1 tok/s  per-stream  75.1  steps   0.0/s  acc 0.00  kv  2.6%
+  t= 350s  run= 1 wait= 0  gen   75.3 tok/s  per-stream  75.3  steps   0.0/s  acc 0.00  kv  2.7%
+  t= 360s  run= 1 wait= 0  gen   95.3 tok/s  per-stream  95.3  steps   0.0/s  acc 0.00  kv  2.8%
+  t= 370s  run= 1 wait= 0  gen  117.9 tok/s  per-stream 117.9  steps   0.0/s  acc 0.00  kv  2.9%
+  t= 380s  run= 1 wait= 0  gen  110.1 tok/s  per-stream 110.1  steps   0.0/s  acc 0.00  kv  3.0%
+  t= 390s  run= 1 wait= 0  gen  109.6 tok/s  per-stream 109.6  steps   0.0/s  acc 0.00  kv  3.1%
+  t= 400s  run= 0 wait= 0  gen  107.3 tok/s  per-stream   0.0  steps 957.6/s  acc 3.37  kv  0.0%  prefill 1123 tok  (not steady)
+· a stream finished (running 0 < c=1) — window ends here at 400s
+· window over — aborting the remaining streams
+
+# watched 23:52:14 → 23:58:54 (400 s); steady part 23:52:44 → 23:58:44 (370 s, 37 samples)
+# summary (steady = after warmup, all 1 running, zero prefill in the sample):
+  samples 37/40 steady · requests 1 ok, 0 failed, 0 hit max_tokens, 0 aborted by cap · avg 32263 tok / 400 s per request
+  gen tok/s   avg (min–max): 80.8 (63.4–117.9)
+  per-stream  avg (min–max): 80.8 (63.4–117.9)
+  steps/s     —
+  acc len     avg (min–max): —
+  running     avg (min–max): 1.0 (0.0–1.0)   kv% 1.6 (0.0–3.1)
+  ttft s      avg (min–max): 0.94 (0.94–0.94)   (first token after send, 1 prompts of 1123 tok fired together = queue + prefill)
+
+# reports.md row:
+| 2026-10-21 23:58 | | 1 | pasture thinking on (steady 370s of 400s watched) | 81 (63–118) | — | — | | per-stream 81 (63–118); ttft 0.94 (0.94–0.94) s; test.py |
+· saved /private/tmp/myllmbox/bench/results/DeepSeek-V4.1-Flash-1017--dsv41-1017-tf/20261021-232331-gauntlet/pasture-6.json

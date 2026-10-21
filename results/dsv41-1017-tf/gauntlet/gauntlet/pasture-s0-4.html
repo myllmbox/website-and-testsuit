@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pasture Scene</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #87CEEB;
+  }
+  svg {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    overflow: visible;
+  }
+  .bounce {
+    animation: hop 0.8s ease-in-out infinite;
+  }
+  .d1 { animation-delay: 0s; }
+  .d2 { animation-delay: -0.2s; }
+  .d3 { animation-delay: -0.4s; }
+  .d4 { animation-delay: -0.6s; }
+  @keyframes hop {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+  <defs>
+    <linearGradient id="skyGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="455">
+      <stop offset="0%" stop-color="#87CEEB"/>
+      <stop offset="100%" stop-color="#E0F6FF"/>
+    </linearGradient>
+    <linearGradient id="grassGrad" gradientUnits="userSpaceOnUse" x1="0" y1="455" x2="0" y2="700">
+      <stop offset="0%" stop-color="#6ab04c"/>
+      <stop offset="100%" stop-color="#3d8b37"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFE066" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#FFE066" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Extended background to fill viewport -->
+  <rect x="-5000" y="-5000" width="10000" height="5455" fill="url(#skyGrad)"/>
+  <rect x="-5000" y="455" width="10000" height="5000" fill="url(#grassGrad)"/>
+  <rect x="-5000" y="453" width="10000" height="4" fill="#4a7c2f"/>
+
+  <!-- Sun -->
+  <circle cx="150" cy="100" r="75" fill="url(#sunGlow)"/>
+  <circle cx="150" cy="100" r="45" fill="#FFD700"/>
+  <g stroke="#FFD700" stroke-width="4" stroke-linecap="round">
+    <line x1="150" y1="45" x2="150" y2="20"/>
+    <line x1="180" y1="60" x2="200" y2="45"/>
+    <line x1="195" y1="100" x2="220" y2="100"/>
+    <line x1="180" y1="140" x2="200" y2="155"/>
+    <line x1="150" y1="155" x2="150" y2="180"/>
+    <line x1="120" y1="140" x2="100" y2="155"/>
+    <line x1="105" y1="100" x2="80" y2="100"/>
+    <line x1="120" y1="60" x2="100" y2="45"/>
+  </g>
+
+  <!-- Clouds -->
+  <g transform="translate(0,80)">
+    <g>
+      <animateTransform attributeName="transform" type="translate" from="-300 0" to="1500 0" dur="80s" begin="-10s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="50" ry="25" fill="#fff" opacity="0.9"/>
+      <ellipse cx="40" cy="-10" rx="40" ry="22" fill="#fff" opacity="0.9"/>
+      <ellipse cx="80" cy="5" rx="45" ry="20" fill="#fff" opacity="0.9"/>
+      <ellipse cx="20" cy="10" rx="35" ry="18" fill="#fff" opacity="0.9"/>
+    </g>
+  </g>
+  <g transform="translate(0,160)">
+    <g>
+      <animateTransform attributeName="transform" type="translate" from="-300 0" to="1500 0" dur="60s" begin="-30s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="45" ry="22" fill="#fff" opacity="0.85"/>
+      <ellipse cx="35" cy="-12" rx="38" ry="20" fill="#fff" opacity="0.85"/>
+      <ellipse cx="70" cy="0" rx="40" ry="18" fill="#fff" opacity="0.85"/>
+      <ellipse cx="25" cy="8" rx="30" ry="15" fill="#fff" opacity="0.85"/>
+    </g>
+  </g>
+  <g transform="translate(0,50)">
+    <g>
+      <animateTransform attributeName="transform" type="translate" from="-300 0" to="1500 0" dur="70s" begin="-50s" repeatCount="indefinite"/>
+      <ellipse cx="0" cy="0" rx="40" ry="20" fill="#fff" opacity="0.8"/>
+      <ellipse cx="30" cy="-10" rx="35" ry="18" fill="#fff" opacity="0.8"/>
+      <ellipse cx="65" cy="5" rx="35" ry="16" fill="#fff" opacity="0.8"/>
+      <ellipse cx="20" cy="10" rx="28" ry="14" fill="#fff" opacity="0.8"/>
+    </g>
+  </g>
+
+  <!-- Trees -->
+  <!-- Tree 1 -->
+  <rect x="60" y="520" width="20" height="120" fill="#8B5A2B" rx="4"/>
+  <circle cx="70" cy="480" r="40" fill="#2e8b57"/>
+  <circle cx="45" cy="500" r="30" fill="#2e8b57"/>
+  <circle cx="95" cy="500" r="30" fill="#2e8b57"/>
+  <circle cx="70" cy="515" r="30" fill="#2e8b57"/>
+  <circle cx="70" cy="465" r="30" fill="#2e8b57"/>
+  <!-- Tree 2 -->
+  <rect x="1120" y="530" width="20" height="110" fill="#8B5A2B" rx="4"/>
+  <circle cx="1130" cy="490" r="45" fill="#2e8b57"/>
+  <circle cx="1100" cy="510" r="32" fill="#2e8b57"/>
+  <circle cx="1160" cy="510" r="32" fill="#2e8b57"/>
+  <circle cx="1130" cy="525" r="32" fill="#2e8b57"/>
+  <circle cx="1130" cy="470" r="32" fill="#2e8b57"/>
+
+  <!-- Cow -->
+  <g transform="translate(180,640)">
+    <g class="bounce d1">
+      <!-- legs (4) -->
+      <rect x="-45" y="-30" width="10" height="30" rx="3" fill="#f5f0e6"/>
+      <rect x="-20" y="-30" width="10" height="30" rx="3" fill="#f5f0e6"/>
+      <rect x="15" y="-30" width="10" height="30" rx="3" fill="#f5f0e6"/>
+      <rect x="40" y="-30" width="10" height="30" rx="3" fill="#f5f0e6"/>
+      <!-- hooves -->
+      <rect x="-45" y="-8" width="10" height="8" rx="2" fill="#333"/>
+      <rect x="-20" y="-8" width="10" height="8" rx="2" fill="#333"/>
+      <rect x="15" y="-8" width="10" height="8" rx="2" fill="#333"/>
+      <rect x="40" y="-8" width="10" height="8" rx="2" fill="#333"/>
+      <!-- body -->
+      <ellipse cx="0" cy="-60" rx="55" ry="32" fill="#f5f0e6"/>
+      <!-- black patches -->
+      <ellipse cx="-25" cy="-65" rx="12" ry="9" fill="#222"/>
+      <ellipse cx="15" cy="-72" rx="9" ry="7" fill="#222"/>
+      <ellipse cx="25" cy="-52" rx="10" ry="6" fill="#222"/>
+      <ellipse cx="-5" cy="-50" rx="8" ry="5" fill="#222"/>
+      <!-- head -->
+      <ellipse cx="55" cy="-95" rx="24" ry="22" fill="#f5f0e6"/>
+      <!-- ears (2) -->
+      <ellipse cx="40" cy="-115" rx="8" ry="5" fill="#f5f0e6" transform="rotate(-30 40 -115)"/>
+      <ellipse cx="70" cy="-115" rx="8" ry="5" fill="#f5f0e6" transform="rotate(30 70 -115)"/>
+      <!-- eyes (2) -->
+      <circle cx="45" cy="-100" r="3" fill="#111"/>
+      <circle cx="65" cy="-100" r="3" fill="#111"/>
+      <!-- pink snout -->
+      <ellipse cx="55" cy="-82" rx="14" ry="9" fill="#f7a1b5"/>
+      <ellipse cx="50" cy="-82" rx="2" ry="3" fill="#c2185b"/>
+      <ellipse cx="60" cy="-82" rx="2" ry="3" fill="#c2185b"/>
+      <!-- udder -->
+      <ellipse cx="-30" cy="-35" rx="12" ry="8" fill="#f7a1b5"/>
+    </g>
+  </g>
+
+  <!-- Sheep -->
+  <g transform="translate(420,640)">
+    <g class="bounce d2">
+      <!-- legs (4) -->
+      <rect x="-30" y="-25" width="8" height="25" rx="2" fill="#444"/>
+      <rect x="-8" y="-25" width="8" height="25" rx="2" fill="#444"/>
+      <rect x="18" y="-25" width="8" height="25" rx="2" fill="#444"/>
+      <rect x="38" y="-25" width="8" height="25" rx="2" fill="#444"/>
+      <!-- fluffy body -->
+      <circle cx="-35" cy="-55" r="18" fill="#fff"/>
+      <circle cx="-15" cy="-65" r="20" fill="#fff"/>
+      <circle cx="10" cy="-65" r="20" fill="#fff"/>
+      <circle cx="30" cy="-55" r="18" fill="#fff"/>
+      <circle cx="-40" cy="-40" r="16" fill="#fff"/>
+      <circle cx="-10" cy="-40" r="18" fill="#fff"/>
+      <circle cx="15" cy="-40" r="18" fill="#fff"/>
+      <circle cx="35" cy="-40" r="16" fill="#fff"/>
+      <!-- dark face -->
+      <ellipse cx="48" cy="-75" rx="15" ry="17" fill="#444"/>
+      <!-- ears (2) -->
+      <ellipse cx="35" cy="-88" rx="6" ry="4" fill="#444" transform="rotate(-20 35 -88)"/>
+      <ellipse cx="61" cy="-88" rx="6" ry="4" fill="#444" transform="rotate(20 61 -88)"/>
+      <!-- eyes (2) -->
+      <circle cx="43" cy="-78" r="3.5" fill="#fff"/>
+      <circle cx="55" cy="-78" r="3.5" fill="#fff"/>
+      <circle cx="43" cy="-78" r="1.8" fill="#111"/>
+      <circle cx="55" cy="-78" r="1.8" fill="#111"/>
+    </g>
+  </g>
+
+  <!-- Pig -->
+  <g transform="translate(650,640)">
+    <g class="bounce d3">
+      <!-- legs (4) -->
+      <rect x="-30" y="-20" width="10" height="20" rx="3" fill="#e88aa0"/>
+      <rect x="-10" y="-20" width="10" height="20" rx="3" fill="#e88aa0"/>
+      <rect x="15" y="-20" width="10" height="20" rx="3" fill="#e88aa0"/>
+      <rect x="35" y="-20" width="10" height="20" rx="3" fill="#e88aa0"/>
+      <!-- body -->
+      <ellipse cx="0" cy="-45" rx="45" ry="30" fill="#f7a1b5"/>
+      <!-- head -->
+      <ellipse cx="50" cy="-55" rx="18" ry="16" fill="#f7a1b5"/>
+      <!-- ears (2 triangles) -->
+      <polygon points="42,-70 48,-82 54,-70" fill="#e88aa0"/>
+      <polygon points="56,-70 62,-82 68,-70" fill="#e88aa0"/>
+      <!-- eyes (2) -->
+      <circle cx="44" cy="-60" r="2.5" fill="#111"/>
+      <circle cx="58" cy="-60" r="2.5" fill="#111"/>
+      <!-- snout -->
+      <ellipse cx="52" cy="-48" rx="10" ry="8" fill="#e88aa0"/>
+      <ellipse cx="48" cy="-48" rx="1.5" ry="2.5" fill="#a33"/>
+      <ellipse cx="56" cy="-48" rx="1.5" ry="2.5" fill="#a33"/>
+      <!-- curly tail -->
+      <path d="M-45,-45 q-12,-10 -8,-18 q4,-8 10,-2" fill="none" stroke="#e88aa0" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- Horse -->
+  <g transform="translate(930,640)">
+    <g class="bounce d4">
+      <!-- legs (4) -->
+      <rect x="-45" y="-45" width="9" height="45" rx="3" fill="#8B5A2B"/>
+      <rect x="-20" y="-45" width="9" height="45" rx="3" fill="#8B5A2B"/>
+      <rect x="15" y="-45" width="9" height="45" rx="3" fill="#8B5A2B"/>
+      <rect x="40" y="-45" width="9" height="45" rx="3" fill="#8B5A2B"/>
+      <!-- hooves -->
+      <rect x="-45" y="-8" width="9" height="8" rx="2" fill="#3a2a1a"/>
+      <rect x="-20" y="-8" width="9" height="8" rx="2" fill="#3a2a1a"/>
+      <rect x="15" y="-8" width="9" height="8" rx="2" fill="#3a2a1a"/>
+      <rect x="40" y="-8" width="9" height="8" rx="2" fill="#3a2a1a"/>
+      <!-- body -->
+      <ellipse cx="0" cy="-70" rx="60" ry="28" fill="#8B5A2B"/>
+      <!-- neck -->
+      <path d="M35,-75 L55,-135 L75,-125 L50,-70 Z" fill="#8B5A2B"/>
+      <!-- mane -->
+      <path d="M45,-125 Q55,-145 70,-135 L75,-125 Q60,-115 50,-110 Z" fill="#4a2c0f"/>
+      <!-- head -->
+      <ellipse cx="65" cy="-135" rx="18" ry="12" fill="#8B5A2B"/>
+      <!-- ears (2) -->
+      <polygon points="55,-145 60,-155 65,-145" fill="#8B5A2B"/>
+      <polygon points="68,-145 73,-155 78,-145" fill="#8B5A2B"/>
+      <!-- eyes (2) -->
+      <circle cx="58" cy="-137" r="2.5" fill="#111"/>
+      <circle cx="72" cy="-137" r="2.5" fill="#111"/>
+      <!-- tail -->
+      <path d="M-58,-75 Q-85,-70 -80,-45" fill="none" stroke="#4a2c0f" stroke-width="6" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>
+</body>
+</html>

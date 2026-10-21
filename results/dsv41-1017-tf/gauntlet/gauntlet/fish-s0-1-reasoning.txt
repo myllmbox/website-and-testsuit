@@ -1,0 +1,394 @@
+We need to produce a single HTML file with SVG underwater scene. Requirements. Need keep under 18KB. Must use inline CSS/JS. Need exactly 2 fish, distinct, each with body, triangular tail, fin, exactly 1 eye (circle with pupil), mouth. Bubbles >=5 rising, respawn. Seaweed >=2 rooted on seafloor. Fish swim horizontally wrap, different speeds. Use SVG primitives.
+
+Need self-contained. We can create SVG with viewBox maybe use percentages? Full viewport. Use SVG width 100vw height 100vh. Could use viewBox="0 0 1000 600" preserveAspectRatio="none"? But shapes scale non-uniformly, fish distorted if viewport aspect differs. Better use width="100%" height="100%" with viewBox 0 0 1000 600 and preserveAspectRatio="xMidYMid slice" maybe. But full-viewport, no scrollbars. Use body margin 0 overflow hidden. SVG width 100vw height 100vh. With viewBox 0 0 1000 600 preserveAspectRatio="xMidYMid slice" to fill. That might crop sides but okay. Fish swim across screen based on 1000 width coordinate; wrap at -150..1150 maybe. But if cropped, still visible mostly. Alternatively use viewBox 0 0 100 100 and preserveAspectRatio="none" but shapes distort. Better xMidYMid slice.
+
+Need animation. Could use JS requestAnimationFrame moving fish groups via transform. Bubbles similarly. Seaweed sway via CSS or SMIL? Use JS to animate everything? Keep simple. Use CSS animations for seaweed? Could use SMIL <animateTransform> for seaweed, but JS simpler? File size constraints. Use JS.
+
+Design:
+
+HTML:
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Underwater</title>
+<style>
+html,body{margin:0;padding:0;overflow:hidden;height:100%;background:#012;}
+svg{display:block;width:100vw;height:100vh;}
+</style>
+</head><body>
+<svg id="scene" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#4fc3f7"/>
+<stop offset="100%" stop-color="#003366"/>
+</linearGradient>
+<radialGradient id="bubble" cx="30%" cy="30%" r="60%">
+<stop offset="0%" stop-color="#fff" stop-opacity="0.9"/>
+<stop offset="70%" stop-color="#b3e5fc" stop-opacity="0.4"/>
+<stop offset="100%" stop-color="#81d4fa" stop-opacity="0.2"/>
+</radialGradient>
+</defs>
+<rect width="1000" height="600" fill="url(#water)"/>
+
+Seafloor: path along bottom ~ y=520..600 (13%). Use path fill tan. Maybe some rocks ellipses.
+<path d="M0 540 Q 100 520 200 545 T 400 540 T 600 555 T 800 535 T 1000 550 L 1000 600 L 0 600 Z" fill="#d2b48c" />
+Some rocks: <ellipse cx="150" cy="570" rx="60" ry="20" fill="#a67c52"/> etc.
+
+Seaweed: at least 2. Use paths green with wavy vertical. Could be static or sway. We'll sway via JS transform rotate around root. Need rooted on seafloor. Use groups with transform-origin bottom. For each seaweed group, base at (x, y=540). Path from bottom up wavy. Use <path d="M0 0 C -10 -40, 15 -80, -5 -120 ..." stroke="#2e7d32" stroke-width="10" fill="none" stroke-linecap="round"/> within group translated to x,y. But if swaying, use JS to set transform="translate(x,y) rotate(angle)" where angle oscillates. Need transform-origin at bottom (0,0). Use group transform translate(x, y) rotate(a). Path from 0,0 upwards. For seaweed with leaves? Could use path plus ellipses. But simple wavy path enough. At least 2. Let's do 3 for nice. Use different colors/green.
+
+Fish: need exactly 2 fish groups. Each fish group constructed from primitives. We'll define them with coordinates relative to fish origin. Fish 1 larger, round/short, orange. Fish 2 smaller, long/slender, blue/purple. Need tail triangular at rear, fin, eye, mouth. Need direction maybe swim horizontally. We can design fish pointing right initially. Then if moving left, flip horizontally. But requirement just swim horizontally across screen. Could have both move in same direction or opposite. Different speeds. We'll move fish1 rightwards at speed maybe 40 px/sec, fish2 leftwards at 70 px/sec? Need wrap. Or both right with different speeds. Simpler: fish1 moving right, fish2 moving left. But if fish2 points left, need draw fish pointing left or use scale(-1,1). We can create fish with default pointing right and then set transform scale(-1,1) for left-moving fish. But if we wrap x, transform includes translate and scale. Need eye etc mirrored, still fine. Exactly one eye visible (we draw one eye). If mirrored, eye appears on other side. Still one visible eye. Mouth.
+
+Fish 1 (large round, orange):
+Group id="fish1". We'll create shapes around origin (0,0). Body ellipse cx=0 cy=0 rx=60 ry=38 fill="#ff7f50" stroke="#e65100" stroke-width="2". Tail triangle at rear (left side if pointing right? Wait fish pointing right: head on right, tail on left. Body centered at 0. Tail at rear = left side. Triangle points: (-60,-25) (-100,0) (-60,25) fill orange. Dorsal fin top: path from (-20,-38) Q -10,-65 20,-38? Or triangle. Use path d="M -15 -35 Q 0 -70 25 -35 Z" fill="#ffb74d". Side fin: ellipse or path near center lower? maybe <path d="M 10 10 Q 25 30 35 10 Z" fill="#ffb74d"/>. Eye at (30,-10): circle r=7 fill white, pupil circle r=3 fill black. Mouth: small curve or line near front (right side). Body front at x=60. Mouth at (58, 8): path d="M 52 8 Q 58 12 64 8" stroke="#b71c1c" fill="none" stroke-width="2". Ensure exactly one visible eye. Need only one eye circle. Fine. Body shape round/short.
+
+Fish 2 (small slender, blue/purple):
+Group id="fish2". Body ellipse cx=0 cy=0 rx=70? Wait smaller than fish1? Fish1 rx=60, ry=38. Fish2 should be smaller overall but long/slender. Maybe body rx=45, ry=15. Long slender relative to its height, but smaller in size. Use ellipse cx=0 cy=0 rx=50 ry=16 fill="#7e57c2" stroke="#4527a0". Tail triangle at rear left: (-50,-15) (-80,0) (-50,15) fill="#9575cd". Dorsal fin: path d="M -15 -16 Q 0 -35 20 -16 Z" fill="#b39ddb". Side fin: path d="M 5 5 Q 15 20 25 5 Z" fill="#b39ddb". Eye at (28,-5): circle r=5 white, pupil r=2.5 black. Mouth: small line near front (45, 2) maybe path d="M 40 2 Q 45 5 50 2". Exactly one eye. Body shape slender. Color different. Size clearly smaller (rx 50 vs 60, ry 16 vs 38, area much smaller). Good.
+
+Need fish swim horizontally across screen. Use JS animate. We'll store fish objects with x, y, speed, dir, scale. Use requestAnimationFrame with delta time. Update x. Wrap: if dir=1 (moving right), when x > 1050 maybe x = -100. If dir=-1, when x < -100, x = 1050. Actually viewBox width 1000. Fish group origin at center. For fish1 rx=60 tail extends to -100, front to +60. So if x from -150 to 1150. We'll wrap when x > 1100 to -150, or x < -150 to 1100. But if moving left and fish points left, tail extends right? Let's compute with scale. We can just use bounding approximate. Simpler: keep x within [-150, 1150]. When fish1 moving right, if x > 1150 set x=-150. Fish2 moving left, if x < -150 set x=1150. Use transform translate(x,y) scale(dir,1) where dir = 1 for right, -1 for left. For fish2 dir=-1, its head points left. Since default points right, scale(-1,1) flips. Good. Need ensure fish not upside down. scale(-1,1) fine.
+
+Fish y positions: fish1 y=250, fish2 y=400 maybe. But seafloor at 540. Fish2 smaller. Use y=380. Maybe fish1 y=220, fish2 y=420. Fine.
+
+Bubbles: At least 5. We can create 8 bubbles with different sizes and speeds. Use JS to generate circles dynamically or hardcode with JS. Need no external. Use SVG <g id="bubbles"></g> and JS create 8 circles. Each bubble: circle with fill url(#bubble) stroke maybe #e1f5fe. Optional highlight ring: small circle white at top-left. But requirement says each bubble is a small circle with optional highlight ring. We can just use radial gradient. Need bubbles rise from somewhere on seafloor. Start at random x between 50 and 950, y near 540 (seafloor). Rise upward. When y < -20, respawn near seafloor with random x and new size/speed. Smaller bubbles rise faster. We'll have bubble objects {el, x, y, r, speed}. Update y -= speed*dt. If y < -r, reset y = 540 + random 0..20? Actually seafloor around 540-580. Start near seafloor: y = 540 + Math.random()*40 (so 540-580). When y < -20, respawn y = 540 + Math.random()*40. x random 50-950. Size r = 3 + Math.random()*8 (3-11). Speed = 40 + (12 - r)*5? Smaller faster. E.g., speed = 30 + (12 - r)*6. For r=3 speed=84; r=11 speed=36. Good. Use dt seconds. Update circle cy. Need each bubble circle with gradient fill and stroke. We can create in JS: circle = document.createElementNS(svgns, 'circle'); set attributes. Add to group. Maybe add highlight small circle? To keep simple, use radialGradient. But radialGradient with userSpaceOnUse? For circles, gradient works. Each bubble uses same fill="url(#bubble)". We can also add a small white circle highlight as child? But then each bubble is a group with two circles. Requirement "each bubble is a small circle (white or light-blue, with optional highlight ring for sphericality)". Using radial gradient is fine. We can add stroke="#e1f5fe" stroke-width="1" opacity. Good.
+
+Seaweed: Use groups with paths. We can animate sway via JS. Store seaweed groups with base transform and phase. Each seaweed group initially translate(x,y). Use path. We'll update transform="translate(x,y) rotate(angle)" where angle = Math.sin(time*speed + phase)*5. Need transform-origin bottom? Since path starts at (0,0) bottom and goes up, rotating around (0,0) after translate works: transform="translate(x,y) rotate(angle)". The path is drawn upward from (0,0). Rotating around (0,0) sways from base. Good. Use 3 seaweeds at x=120, 350, 750 maybe. y=540 (seafloor). Paths:
+Seaweed 1: d="M0 0 C -15 -30, 15 -60, -5 -90 C -20 -120, 10 -150, 0 -180" stroke="#2e7d32" stroke-width="12" fill="none" stroke-linecap="round". Height 180. At y=540, top at 360. Good.
+Seaweed 2: shorter, different green: d="M0 0 C 10 -25, -10 -50, 5 -80 C 15 -110, -5 -140, 0 -160" stroke="#388e3c" stroke-width="10". 
+Seaweed 3: maybe with leaves: path plus ellipses? But path enough. Add some ellipse leaves? Could add for visual. But keep size. Maybe 3 seaweeds with paths and a few ellipse leaves along path? Not necessary. Requirement at least 2 seaweed shapes. 3 paths good.
+
+Need full viewport SVG. Use width="100%" height="100%" or CSS. SVG viewBox 0 0 1000 600 preserveAspectRatio="xMidYMid slice". Body overflow hidden. Should fill viewport. If viewport aspect ratio differs, slice crops. Fish might go off edges but wrap based on 1000 coordinate. If viewport wider than 1000/600, xMidYMid slice will scale to cover, cropping top/bottom? Actually preserveAspectRatio="xMidYMid slice" means scale to cover viewport, cropping either horizontal or vertical. For a wide viewport, height is limiting? Let's think: viewBox 1000x600 aspect 1.667. If viewport 16:9 = 1.778, wider. Slice scales to width? To cover, scale = max(vw/1000, vh/600). If vw=1920, vh=1080, vw/1000=1.92, vh/600=1.8, scale=1.92, so height 600*1.92=1152 > 1080, crop vertical. So some top/bottom cropped. That's okay. Fish at y=220,420 visible. Seafloor at 540-600 might be cropped at bottom? If height cropped, center aligned, so top and bottom cropped equally. viewBox height 600 scaled to 1152, viewport 1080, crop 36 top and bottom in scaled units. In viewBox units, crop 36/1.92=18.75 units top and bottom. So bottom seafloor from 540 to 600, bottom 18.75 units cropped, so seafloor still visible from 540 to 581.25. Good. For very tall/narrow viewport, crop horizontal, but fish swim across. Fine.
+
+Need no console errors. Use requestAnimationFrame, guard dt. Use const svgns. Ensure elements exist. Use DOMContentLoaded? Script at end of body, so elements exist. We'll put script after SVG.
+
+Need under 18KB. Let's estimate. HTML + CSS + JS maybe 6-8KB. Fine.
+
+Need exactly 2 fish. We must not accidentally create more fish. Only two groups.
+
+Need each fish exactly 1 visible eye. We draw one eye per fish. Could the eye have white circle + pupil = two circles but it's one eye. Requirement "Exactly 1 visible eye (circle with a pupil dot)" means one eye. We have one white circle and one pupil per fish. That's fine. Ensure no other eye-like circles. Bubbles are circles but not eyes. Fine.
+
+Need mouth indication. We have path. Good.
+
+Need triangular tail. Use polygon or path with 3 points. We'll use <polygon> for tail. That's SVG primitive. Good.
+
+Need at least 1 fin. We have dorsal and side fin. Good.
+
+Need different body shape: fish1 round/short (ellipse rx=60 ry=38), fish2 long/slender (ellipse rx=50 ry=16). Different colors. Different sizes clearly larger. Fish1 area ~ π*60*38 ≈ 7160, fish2 ~ π*50*16 ≈ 2513. Fish1 clearly larger. Good.
+
+Need fish swim horizontally across screen at noticeably different speeds. We'll set fish1 speed=35 px/s, fish2 speed=80 px/s. They move. Wrap. Good.
+
+Need bubbles rising from somewhere on seafloor. Start y around 540. Good. At least 5. We'll use 8. Vary size and speed. Smaller faster. Good.
+
+Need seaweed rooted on seafloor. We set y=540, which is seafloor. Path starts at base. Good.
+
+Need sway gently or static. We'll sway via JS.
+
+Potential issue: if we use preserveAspectRatio slice, coordinate x=1000 maps to viewport. Fish wrap at x=1100, -150. Fine.
+
+Let's write code carefully.
+
+HTML skeleton:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Underwater Scene</title>
+<style>
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#001a33;}
+svg{display:block;width:100vw;height:100vh;}
+</style>
+</head>
+<body>
+<svg id="scene" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#4fc3f7"/>
+<stop offset="100%" stop-color="#003366"/>
+</linearGradient>
+<radialGradient id="bubbleGrad" cx="35%" cy="35%" r="65%">
+<stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+<stop offset="55%" stop-color="#b3e5fc" stop-opacity="0.5"/>
+<stop offset="100%" stop-color="#81d4fa" stop-opacity="0.15"/>
+</radialGradient>
+</defs>
+<rect width="1000" height="600" fill="url(#water)"/>
+
+<!-- seafloor -->
+<path d="M0 545 Q 80 525 160 540 T 320 535 T 480 550 T 640 535 T 800 550 T 1000 540 L 1000 600 L 0 600 Z" fill="#d2b48c"/>
+<path d="M0 560 Q 120 545 240 555 T 480 560 T 720 550 T 1000 565 L 1000 600 L 0 600 Z" fill="#c19a6b" opacity="0.7"/>
+<ellipse cx="180" cy="570" rx="55" ry="18" fill="#a67c52" opacity="0.8"/>
+<ellipse cx="820" cy="565" rx="70" ry="20" fill="#8d6e63" opacity="0.7"/>
+<ellipse cx="520" cy="575" rx="40" ry="12" fill="#a1887f" opacity="0.6"/>
+
+<!-- seaweed -->
+<g id="seaweed1" transform="translate(120,540)">
+<path d="M0 0 C -15 -30, 15 -60, -5 -90 C -20 -120, 10 -150, 0 -180" stroke="#2e7d32" stroke-width="12" fill="none" stroke-linecap="round"/>
+</g>
+<g id="seaweed2" transform="translate(350,540)">
+<path d="M0 0 C 10 -25, -10 -50, 5 -80 C 15 -110, -5 -140, 0 -160" stroke="#388e3c" stroke-width="10" fill="none" stroke-linecap="round"/>
+</g>
+<g id="seaweed3" transform="translate(760,540)">
+<path d="M0 0 C -12 -20, 12 -45, -2 -70 C -15 -95, 8 -120, 0 -150" stroke="#43a047" stroke-width="9" fill="none" stroke-linecap="round"/>
+</g>
+
+<!-- fish 1: large round orange -->
+<g id="fish1">
+<polygon points="-60,-25 -100,0 -60,25" fill="#ff7043" stroke="#bf360c" stroke-width="2"/>
+<ellipse cx="0" cy="0" rx="60" ry="38" fill="#ff8a65" stroke="#d84315" stroke-width="2"/>
+<path d="M -15 -35 Q 0 -70 25 -35 Z" fill="#ffb74d" stroke="#e65100" stroke-width="2"/>
+<path d="M 10 10 Q 25 30 35 10 Z" fill="#ffb74d" stroke="#e65100" stroke-width="2"/>
+<circle cx="30" cy="-10" r="7" fill="#ffffff" stroke="#333" stroke-width="1"/>
+<circle cx="32" cy="-10" r="3" fill="#111"/>
+<path d="M 52 8 Q 58 12 64 8" stroke="#b71c1c" stroke-width="2" fill="none" stroke-linecap="round"/>
+</g>
+
+<!-- fish 2: small slender purple -->
+<g id="fish2">
+<polygon points="-50,-15 -80,0 -50,15" fill="#9575cd" stroke="#4527a0" stroke-width="2"/>
+<ellipse cx="0" cy="0" rx="50" ry="16" fill="#7e57c2" stroke="#4527a0" stroke-width="2"/>
+<path d="M -15 -16 Q 0 -35 20 -16 Z" fill="#b39ddb" stroke="#4527a0" stroke-width="2"/>
+<path d="M 5 5 Q 15 20 25 5 Z" fill="#b39ddb" stroke="#4527a0" stroke-width="2"/>
+<circle cx="28" cy="-5" r="5" fill="#ffffff" stroke="#333" stroke-width="1"/>
+<circle cx="29.5" cy="-5" r="2.5" fill="#111"/>
+<path d="M 40 2 Q 45 5 50 2" stroke="#311b92" stroke-width="2" fill="none" stroke-linecap="round"/>
+</g>
+
+<g id="bubbles"></g>
+</svg>
+<script>
+(function(){
+  const svgNS = "http://www.w3.org/2000/svg";
+  const fish1 = document.getElementById("fish1");
+  const fish2 = document.getElementById("fish2");
+  const bubbleLayer = document.getElementById("bubbles");
+  const seaweed1 = document.getElementById("seaweed1");
+  const seaweed2 = document.getElementById("seaweed2");
+  const seaweed3 = document.getElementById("seaweed3");
+
+  // Fish state
+  const fish = [
+    { el: fish1, x: -100, y: 220, speed: 38, dir: 1 },
+    { el: fish2, x: 900, y: 400, speed: 82, dir: -1 }
+  ];
+
+  // Bubbles
+  const bubbles = [];
+  const bubbleCount = 8;
+  for (let i = 0; i < bubbleCount; i++) {
+    const r = 3 + Math.random() * 8; // 3..11
+    const c = document.createElementNS(svgNS, "circle");
+    c.setAttribute("fill", "url(#bubbleGrad)");
+    c.setAttribute("stroke", "#e1f5fe");
+    c.setAttribute("stroke-width", "1");
+    c.setAttribute("r", r);
+    bubbleLayer.appendChild(c);
+    bubbles.push({
+      el: c,
+      x: 50 + Math.random() * 900,
+      y: 540 + Math.random() * 40,
+      r: r,
+      speed: 30 + (12 - r) * 6 // smaller faster
+    });
+  }
+
+  // Seaweed sway state
+  const weeds = [
+    { el: seaweed1, x: 120, y: 540, phase: 0, speed: 1.1 },
+    { el: seaweed2, x: 350, y: 540, phase: 1.7, speed: 0.9 },
+    { el: seaweed3, x: 760, y: 540, phase: 3.1, speed: 1.3 }
+  ];
+
+  let lastTime = 0;
+  function animate(time) {
+    if (!lastTime) lastTime = time;
+    let dt = (time - lastTime) / 1000;
+    lastTime = time;
+    if (dt > 0.1) dt = 0.1; // clamp
+
+    // Fish movement
+    for (const f of fish) {
+      f.x += f.speed * f.dir * dt;
+      if (f.dir > 0 && f.x > 1150) f.x = -150;
+      if (f.dir < 0 && f.x < -150) f.x = 1150;
+      f.el.setAttribute("transform", `translate(${f.x},${f.y}) scale(${f.dir},1)`);
+    }
+
+    // Bubbles
+    for (const b of bubbles) {
+      b.y -= b.speed * dt;
+      if (b.y < -b.r) {
+        b.y = 540 + Math.random() * 40;
+        b.x = 50 + Math.random() * 900;
+        b.r = 3 + Math.random() * 8;
+        b.speed = 30 + (12 - b.r) * 6;
+        b.el.setAttribute("r", b.r);
+      }
+      b.el.setAttribute("cx", b.x);
+      b.el.setAttribute("cy", b.y);
+    }
+
+    // Seaweed sway
+    for (const w of weeds) {
+      const angle = Math.sin(time * 0.001 * w.speed + w.phase) * 5;
+      w.el.setAttribute("transform", `translate(${w.x},${w.y}) rotate(${angle})`);
+    }
+
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>
+
+Check requirements.
+
+- Full-viewport SVG 100vw x 100vh, no scrollbars. CSS html,body height 100%, overflow hidden. svg width 100vw height 100vh. Good.
+- Water gradient lighter top darker bottom. linearGradient id water y1=0 y2=1 with stops. Good.
+- Sandy seafloor along bottom ~10-15%. Seafloor paths from y=525 to 600, about 75 units of 600 = 12.5%. Good. Tan/beige/brown. Good.
+- Exactly 2 fish. We have fish1 and fish2 groups. No other fish. Good.
+- Each fish primitives only. Body ellipse. Tail polygon. Fin path. Eye circle + pupil. Mouth path. Good.
+- Different colors: orange vs purple. Different sizes: fish1 rx=60 ry=38; fish2 rx=50 ry=16. Fish1 clearly larger. Different body shape: round vs slender. Good.
+- Bubbles >=5. 8. Each bubble circle with radial gradient and stroke. Drift upward continuously. When reaches top (y < -r) respawn near seafloor. Continuous loop. Vary size, smaller faster. Speed formula: 30 + (12 - r)*6. For r=3 speed=84, r=11 speed=36. Good.
+- Seaweed at least 2. 3. Green vertical wavy path rooted on seafloor. Sway gently via JS. Good.
+- Both fish swim horizontally. Different speeds: 38 vs 82. Wrap. Good.
+- No external assets, no link, no script src, no fetch. Good.
+- No emoji, no Unicode pictographs. We have no emoji. Text only title. Good.
+- All fish, bubbles, seaweed SVG primitives. Yes.
+- Total file size under 18KB. Likely ~4-5KB. Good.
+- No console errors on load. Need ensure script runs after elements. It's at end. Good. Use template literals. Fine. Use requestAnimationFrame. Good.
+
+Potential issue: In fish2, scale(-1,1) flips the fish, but the mouth path and eye are mirrored. Still exactly one eye. Fine. The fish2 moves left with dir=-1, so scale(-1,1) makes it face left. Good. The transform is `translate(${f.x},${f.y}) scale(${f.dir},1)`. For fish2 dir=-1, scale(-1,1) flips. For fish1 dir=1, scale(1,1). Good. Note: SVG transform order: translate then scale, so scale applied after translate? Actually transform list applied left to right? In SVG, transform="translate(x,y) scale(s)" means first translate then scale? The transformation matrix is multiplied: T * S. So point is scaled then translated? Wait, SVG transform definitions: transform="translate(10,20) scale(2)" applies translate then scale? Actually matrices are post-multiplied: M = T * S. A point p is transformed as M*p = T*(S*p). So scale is applied first, then translate. That means the fish is scaled around origin, then translated. That's what we want: fish coordinates are scaled around origin then translated. So the fish's local origin ends up at (x,y). Good. For scale(-1,1), it flips around local origin, then translates. Good.
+
+Potential issue: Fish y positions. Fish1 y=220, fish2 y=400. Seafloor at ~540. Fish2 at 400, fine. Fish1 at 220. Good.
+
+Potential issue: Bubbles starting y=540+random*40 up to 580. Seafloor path covers y=540-600. Bubbles may start inside seafloor. But they rise. They might be behind seafloor? SVG order: seafloor drawn before bubbles, so bubbles drawn on top of seafloor. They appear on top of sand initially. That's okay, they rise from seafloor. Could start at y=540 exactly. Good.
+
+Potential issue: Bubble gradient id "bubbleGrad" radial gradient with cx="35%" cy="35%" r="65%". For circles, gradient units default objectBoundingBox, so percentage relative to bounding box. Works. Good.
+
+Potential issue: Seaweed sway angle uses time in ms * 0.001 * speed. At 60fps, angle changes smoothly. Good.
+
+Potential issue: The seaweed transform overrides initial transform. We set initial transform in HTML, then JS updates. The path is drawn from 0,0 upward. Initial transform translate(120,540) works. JS sets same translate + rotate. Good.
+
+Potential issue: The fish1 tail polygon points -60,-25 -100,0 -60,25. Body ellipse rx=60, so tail attaches at x=-60. Good. Dorsal fin path M -15 -35 Q 0 -70 25 -35 Z. Top of body at y=-38. Fin from y=-35 up to -70. Good. Side fin path M 10 10 Q 25 30 35 10 Z. That's below body? Body bottom at y=38. Side fin from y=10 to 30, inside body mostly. It might overlap body. Could be okay. But side fin should be visible. It's drawn after body, so it appears on top. It's orange lighter. Good.
+
+Fish2 tail polygon -50,-15 -80,0 -50,15. Body rx=50. Good. Dorsal fin M -15 -16 Q 0 -35 20 -16 Z. Body top at y=-16. Fin goes up to -35. Good. Side fin M 5 5 Q 15 20 25 5 Z. Body bottom at y=16. Fin from y=5 to 20. Good. Eye at (28,-5). Mouth at (40,2) to (50,2). Body front at x=50. Mouth near front. Good.
+
+Potential issue: Fish1 eye at (30,-10) radius 7. Body extends to x=60, so eye near front. Good. Mouth at (52,8) to (64,8). Body front at x=60. Mouth extends slightly beyond body? That's okay. It's a mouth indication.
+
+Need exactly 1 visible eye per fish. We have one white circle and one pupil. Good.
+
+Need no text labels. We have no text in SVG. Good.
+
+Need output only contents of html file, starting with <!DOCTYPE html>. No markdown fences. Good.
+
+Let's double-check file size. Approx 4KB. Good.
+
+Could improve bubbles to have highlight ring? Not required. Radial gradient gives sphericality. Good.
+
+Could add more rocks? Fine.
+
+Potential issue: "A sandy or rocky seafloor along the bottom (~10–15% of viewport)" Our seafloor path starts at y=525, which is 75/600 = 12.5%. Good.
+
+Potential issue: "Full-viewport SVG (100vw x 100vh), no scrollbars." We set svg width 100vw height 100vh. Body overflow hidden. Good. But some browsers might show scrollbars due to default margin? We set margin 0. Good.
+
+Potential issue: "Both fish must swim horizontally across the screen. Each fish must move at a noticeably different speed from the other. When a fish exits one side of the screen, it must reappear on the opposite side (wrap-around)." Our fish1 moves right, wraps when x>1150 to -150. Fish2 moves left, wraps when x<-150 to 1150. They move horizontally. Speeds 38 vs 82. Noticeably different. Good.
+
+Potential issue: "Bubbles rise continuously as specified above." Our bubbles update y -= speed*dt. They respawn. Good.
+
+Potential issue: "No console errors on load." We should ensure no syntax errors. Let's review JS syntax. We use template literals. Backticks are fine. `f.el.setAttribute("transform", `translate(${f.x},${f.y}) scale(${f.dir},1)`);` correct. `w.el.setAttribute("transform", `translate(${w.x},${w.y}) rotate(${angle})`);` correct. No missing semicolons? Fine. `if (!lastTime) lastTime = time;` fine. `let dt = (time - lastTime) / 1000;` fine. `if (dt > 0.1) dt = 0.1;` fine. `for (const f of fish)` fine. `for (const b of bubbles)` fine. `for (const w of weeds)` fine. `requestAnimationFrame(animate);` fine. Good.
+
+Potential issue: `const bubbleCount = 8;` then for loop. Good.
+
+Potential issue: `b.r = 3 + Math.random() * 8;` then `b.speed = 30 + (12 - b.r) * 6;` Good.
+
+Potential issue: We don't update bubble r attribute after respawn? We do: `b.el.setAttribute("r", b.r);` inside if. But we also need to update r if it changes? Only changes on respawn. Good. We update cx, cy every frame. Good.
+
+Potential issue: Initial bubble circles have no cx/cy set before first animate. In animate, we set them. But before first frame, they might be at 0,0? Actually we create circles and append. They have no cx/cy, so default 0. On first animate, we set cx/cy. But there might be a flash at top-left for one frame. To avoid, we can set initial cx/cy when creating. Let's set them in creation: `c.setAttribute("cx", ...)`. But we need random x,y. We can compute before creating. Let's adjust: inside loop, compute x, y, r, speed, then create circle and set attributes cx, cy, r. Then push. That avoids flash. Let's modify:
+
+for (let i = 0; i < bubbleCount; i++) {
+  const r = 3 + Math.random() * 8;
+  const x = 50 + Math.random() * 900;
+  const y = 540 + Math.random() * 40;
+  const c = document.createElementNS(svgNS, "circle");
+  c.setAttribute("cx", x);
+  c.setAttribute("cy", y);
+  c.setAttribute("r", r);
+  c.setAttribute("fill", "url(#bubbleGrad)");
+  c.setAttribute("stroke", "#e1f5fe");
+  c.setAttribute("stroke-width", "1");
+  bubbleLayer.appendChild(c);
+  bubbles.push({ el: c, x: x, y: y, r: r, speed: 30 + (12 - r) * 6 });
+}
+
+Good.
+
+Potential issue: Fish initial transform not set until first animate. We can set initial transform in HTML? We have groups without transform. On first frame, animate sets transform. There might be a flash at origin (0,0) before first frame. To avoid, we can set initial transform in HTML for fish1 and fish2. But our JS will override. We can add transform attribute to fish1: `transform="translate(-100,220)"` and fish2: `transform="translate(900,400) scale(-1,1)"`. But then our JS sets transform with translate and scale. That's fine. Let's add initial transforms to avoid flash. For fish1: `<g id="fish1" transform="translate(-100,220)">` but our JS sets scale(1,1) anyway. For fish2: `<g id="fish2" transform="translate(900,400) scale(-1,1)">`. Good.
+
+Potential issue: Seaweed initial transforms are set. Good.
+
+Potential issue: The SVG has `<g id="bubbles"></g>` after fish. Bubbles will be drawn on top of fish. That's okay. Bubbles rising might overlap fish. Fine.
+
+Potential issue: "exactly 2 fish" - we have 2 fish groups. Good.
+
+Potential issue: "Each fish must be RECOGNIZABLE as a fish without a text label." Our fish have body, tail, fins, eye, mouth. Good.
+
+Potential issue: "At least 1 fin (top dorsal fin OR side fin OR both)" - we have both. Good.
+
+Potential issue: "Exactly 1 visible eye (circle with a pupil dot)" - we have one eye per fish. Good.
+
+Potential issue: "A mouth indication (small line, curve, or open shape)" - we have path curve. Good.
+
+Potential issue: "Different overall body shape (e.g., one round/short, one long/slender)." Fish1 ellipse 60x38 (ratio 1.58), fish2 50x16 (ratio 3.125). Clearly different. Good.
+
+Potential issue: "Different sizes (one clearly larger than the other)." Fish1 is larger. Good.
+
+Potential issue: "Different colors." Orange vs purple. Good.
+
+Potential issue: "Bubbles vary in size; smaller bubbles may rise faster." Our speed formula makes smaller faster. Good.
+
+Potential issue: "When a bubble reaches the top of the viewport, it disappears and a new bubble respawns near the seafloor (continuous loop)." We reset when y < -r. Good.
+
+Potential issue: "Seaweed may sway gently OR remain static." We sway. Good.
+
+Potential issue: "No emoji, no Unicode pictographs." None. Good.
+
+Potential issue: "Total file size under 18 KB." Yes.
+
+Let's consider if the radial gradient for bubbles works with stroke. Yes.
+
+Could there be an issue with `preserveAspectRatio="xMidYMid slice"` and fish wrap? The fish coordinate system is 1000x600. When the viewport is very wide, the viewBox is scaled to cover, cropping top/bottom. The fish still swim across the visible area? The visible area in viewBox coordinates might be cropped horizontally? Actually slice: scale to cover, so if viewport aspect > viewBox aspect, width fills, height crops. The visible x range is 0-1000 (full width), y range is cropped. So fish swimming from -150 to 1150 will be visible for most of the range. Good. If viewport aspect < viewBox aspect (tall), height fills, width crops. Visible x range might be less than 0-1000, e.g., if viewport is 600x1000 (aspect 0.6), scale = max(600/1000=0.6, 1000/600=1.667) = 1.667, so width 1000*1.667=1667, viewport width 600, crop 533 each side. Visible x range in viewBox is centered: from (1667-600)/2 /1.667 = 533/1.667 = 320? Actually viewBox width 1000, scaled to 1667, cropped to 600, so visible viewBox x range = 1000 * (600/1667) = 360. Centered: x from 320 to 680. So fish swimming from -150 to 1150 will be off-screen for large portions. But they will still swim across the screen, entering and exiting the visible cropped area. The requirement says full-viewport SVG, fish swim horizontally across the screen. With slice, the visible screen is a subset. The fish wrap based on full 1000 width, so they might be invisible for some time, but they will reappear. That's acceptable? Maybe better to use preserveAspectRatio="none" to stretch, but then fish distorted. Or use viewBox with width/height set to 100% and preserveAspectRatio="xMidYMid meet" to fit entire viewBox, leaving letterboxing? That would not fill full viewport, background could be black bars. Requirement full-viewport SVG. Using slice is standard. Alternatively, we could use JS to set viewBox based on window size to match aspect ratio, avoiding cropping. But that adds complexity. Simpler: use SVG width 100vw height 100vh and viewBox="0 0 1000 600" preserveAspectRatio="none" would stretch shapes. Fish would be distorted on non-16:9 screens, but still recognizable. However, requirement doesn't forbid distortion. But better to avoid. Could use viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" as is. It's fine.
+
+Maybe use `preserveAspectRatio="xMidYMid meet"` and set background color of body to match water top? But then there would be empty space if aspect differs. Not full-viewport scene. So slice is best.
+
+Could use CSS to set svg width/height 100% and viewBox 0 0 100 100, preserveAspectRatio="none". That stretches. But fish would be distorted. Not ideal. I think slice is acceptable.
+
+Let's ensure the seafloor is visible. With slice, if viewport is tall, horizontal cropping occurs, seafloor still visible at bottom. If viewport is wide, vertical cropping occurs, seafloor might be cropped at bottom. We set seafloor from y=525 to 600. If viewport 16:9, crop about 18.75 units top and bottom, so seafloor visible from y=525 to 581.25. Good. If viewport is ultra-wide, crop more. E.g., 21:9 aspect 2.333, viewBox aspect 1.667, scale = max(vw/1000, vh/600). If vw=2560, vh=1080, scale = max(2.56, 1.8) = 2.56. Height scaled = 600*2.56=1536, viewport height 1080, crop 456/2=228 units? Wait: scaled height 1536, viewport 1080, crop 456 total, 228 each side. In viewBox units, crop = 228/2.56 = 89 units. So visible y range = 89 to 511. That would crop seafloor entirely! Because seafloor starts at 525, and visible y max is 511. That's bad. So on ultra-wide screens, seafloor might be cropped out. Need to handle aspect ratio better.
+
+To ensure full-viewport and seafloor visible, we should avoid slice cropping too much. Options:
+1. Use `preserveAspectRatio="none"` and accept stretching. Then full viewBox 0-600 height maps to viewport height, so seafloor always visible. Fish shapes stretched horizontally on wide screens, but still recognizable. The requirement doesn't forbid stretching. It says full-viewport SVG. Stretching is acceptable. Many such scenes use preserveAspectRatio="none". But fish might look weird on very wide screens. However, it guarantees all elements visible. Given hard requirements, safer to ensure seafloor visible. Use preserveAspectRatio="none". Then viewBox 0 0 1000 600 maps to full viewport, stretching x and y independently. Fish will be stretched horizontally on wide screens, making them longer. But still recognizable. The seafloor always at bottom 12.5%. Bubbles rise from seafloor. Fish swim across full width. Good.
+
+Alternatively, use viewBox="0 0 100 100" with preserveAspectRatio="none" and use percentage-like coordinates. But then fish shapes stretched. Same.
+
+Let's use `preserveAspectRatio="none"` to guarantee full coverage and all elements visible. The fish might be distorted, but acceptable. To reduce distortion, we can choose viewBox aspect close to typical screen. 1000x600 = 1.667. Most screens 16:9=1.778, close. Stretching is minimal on 16:9. On ultra-wide, fish stretched horizontally, but still fish. On tall screens, fish stretched vertically? Actually preserveAspectRatio="none" stretches x and y to fill. If viewport is tall (e.g., 600x1000), x scale = 600/1000=0.6, y scale=1000/600=1.667. Fish will be compressed horizontally and stretched vertically. That might make them look tall. But still recognizable. Could instead use JS to set viewBox to match aspect ratio and keep shapes? Too complex.
+
+Given the requirement "Full-viewport SVG (100vw x 100vh)", using preserveAspectRatio="none" is common. I'll use that.
+
+Let's change preserveAspectRatio to "none". The SVG will fill exactly. The seafloor will be at bottom 12.5% of viewport. Fish swim across full width. Bubbles rise from seafloor to top. Good.
+
+Potential issue: With preserveAspectRatio="none", the water gradient y1=0 y2=1 covers full height. Good.
+
+Let's update SVG tag: `<svg id="scene" viewBox="0 0 1000 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">`. Good.
+
+Now fish wrap: x from -150 to 1150. Since viewBox width 1000 maps to full viewport width, fish will be visible across. Good.
+
+Potential issue: On very wide screen, fish1 might appear stretched horizontally. But still fish. Acceptable.
+
+Could we make fish groups use vector-effect="non-scaling-stroke"? Not needed.
+
+Let's ensure no scrollbars. Body margin 0, overflow hidden. Good.
+
+Let's consider if the file is under 18KB. Our code is about 4-5KB. Good.
+
+Let's write final output exactly. No markdown. Start with <!DOCTYPE html>. End with </html>. Ensure no extra commentary.
+
+Double-check all tags closed. SVG has defs, rect, paths, ellipses, gs, polygon, ellipse, path, circle, path, g bubbles. Script. Body. Html. Good.
+
+Let's produce final.

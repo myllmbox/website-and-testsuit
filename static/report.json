@@ -5000,6 +5000,350 @@
     }
    },
    "logo": "assets/logos/myllmbox.png"
+  },
+  {
+   "id": "dsv41-1017-tf",
+   "name": "Yume (TP=2)",
+   "model": "DeepSeek-V4.1-Flash-1017 EXL3 2.9 bpw EAQ",
+   "hf": "https://huggingface.co/Mia-AiLab/DeepSeek-V4.1-Flash-1017-EXL3-EAQ-v1-2.9-bpw",
+   "stack": "TensorFold Zig (MiaAI-Lab) · DSpark drafts · 2× DGX Spark",
+   "image": "tensorfold-dsv41:exl3-tp2-8eb5919ff0a4",
+   "link": "https://github.com/yume-arasaki/yume_benchmarks/blob/main/reports/2026-10-21-dsv41-1017-tensorfold-two-sparks.md",
+   "spec": {
+    "max_context": 1048576,
+    "kv_pool": 1048576,
+    "kv_dtype": "fp4",
+    "kv_shared": true,
+    "seats": 4,
+    "notes": {
+     "model": "Mia's Zig kit; weights EXL3 2.9 bpw EAQ with Engram's tables on local disk. No static KV pool: the engine reserves weights and pays KV as it fills (0.00 GiB per stream at the full window), so the 1,048,576-token window is proven for one long conversation."
+    }
+   },
+   "gauntlet": {
+    "thinking_tps": 77.4,
+    "code_tps": 100.1,
+    "peak_tps": 125.3,
+    "avg_tps": 80.6,
+    "runs": 12,
+    "avg_thinking_tokens": 17793,
+    "avg_code_tokens": 3537
+   },
+   "quality": {
+    "pasture": [
+     {
+      "verdict": "pending",
+      "tokens": {
+       "thinking": 17328,
+       "code": 4571
+      }
+     },
+     {
+      "verdict": "pending",
+      "tokens": {
+       "thinking": 21842,
+       "code": 4199
+      }
+     },
+     {
+      "verdict": "pending",
+      "tokens": {
+       "thinking": 22297,
+       "code": 4047
+      }
+     },
+     {
+      "verdict": "pending",
+      "tokens": {
+       "thinking": 31682,
+       "code": 4069
+      }
+     },
+     {
+      "verdict": "pending",
+      "tokens": {
+       "thinking": 25677,
+       "code": 5018
+      }
+     },
+     {
+      "verdict": "pending",
+      "tokens": {
+       "thinking": 27749,
+       "code": 4518
+      }
+     }
+    ],
+    "fish": [
+     {
+      "verdict": "pending",
+      "tokens": {
+       "thinking": 10793,
+       "code": 2126
+      }
+     },
+     {
+      "verdict": "pending",
+      "tokens": {
+       "thinking": 5944,
+       "code": 1861
+      }
+     },
+     {
+      "verdict": "pending",
+      "tokens": {
+       "thinking": 10909,
+       "code": 3013
+      }
+     },
+     {
+      "verdict": "pending",
+      "tokens": {
+       "thinking": 9443,
+       "code": 2003
+      }
+     },
+     {
+      "verdict": "pending",
+      "tokens": {
+       "thinking": 12703,
+       "code": 4191
+      }
+     },
+     {
+      "verdict": "pending",
+      "tokens": {
+       "thinking": 17146,
+       "code": 2833
+      }
+     }
+    ]
+   },
+   "speed": {
+    "1": {
+     "code": {
+      "status": "measured",
+      "tps": 100.8,
+      "runs": [
+       100.8,
+       100.8,
+       100.7
+      ],
+      "peak": 108.9
+     },
+     "mixed": {
+      "status": "measured",
+      "tps": 86.6,
+      "runs": [
+       83.9,
+       83.6,
+       92.3
+      ],
+      "peak": 106.3
+     },
+     "prose": {
+      "status": "measured",
+      "tps": 60.3,
+      "runs": [
+       62.3,
+       60.6,
+       57.8
+      ],
+      "peak": 65.5
+     }
+    },
+    "2": {
+     "code": {
+      "status": "measured",
+      "tps": 130.4,
+      "runs": [
+       131.8,
+       128.8,
+       130.6
+      ],
+      "peak": 144.4
+     },
+     "mixed": {
+      "status": "measured",
+      "tps": 115.1,
+      "runs": [
+       114.8,
+       115.6,
+       115.0
+      ],
+      "peak": 136.7
+     },
+     "prose": {
+      "status": "measured",
+      "tps": 93.6,
+      "runs": [
+       88.1,
+       107.9,
+       84.9
+      ],
+      "peak": 99.2
+     }
+    },
+    "4": {
+     "code": {
+      "status": "measured",
+      "tps": 157.5,
+      "runs": [
+       157.7,
+       156.8,
+       158.0
+      ],
+      "peak": 171.2
+     },
+     "mixed": {
+      "status": "measured",
+      "tps": 154.7,
+      "runs": [
+       156.3,
+       154.3,
+       153.6
+      ],
+      "peak": 166.3
+     },
+     "prose": {
+      "status": "measured",
+      "tps": 114.0,
+      "runs": [
+       113.7,
+       115.4,
+       113.0
+      ],
+      "peak": 121.8
+     }
+    },
+    "6": {
+     "code": {
+      "status": "measured",
+      "tps": 157.5,
+      "runs": [
+       157.5,
+       157.2,
+       157.8
+      ],
+      "peak": 0
+     },
+     "mixed": {
+      "status": "measured",
+      "tps": 156.2,
+      "runs": [
+       155.3,
+       156.1,
+       157.3
+      ],
+      "peak": 0
+     },
+     "prose": {
+      "status": "measured",
+      "tps": 113.3,
+      "runs": [
+       113.5,
+       113.5,
+       113.0
+      ],
+      "peak": 0
+     }
+    },
+    "8": {
+     "code": {
+      "status": "measured",
+      "tps": 158.3,
+      "runs": [
+       159.0,
+       158.3,
+       157.6
+      ],
+      "peak": 0
+     },
+     "mixed": {
+      "status": "measured",
+      "tps": 156.5,
+      "runs": [
+       155.5,
+       156.6,
+       157.6
+      ],
+      "peak": 0
+     },
+     "prose": {
+      "status": "measured",
+      "tps": 112.8,
+      "runs": [
+       112.7,
+       113.9,
+       112.0
+      ],
+      "peak": 0
+     }
+    },
+    "12": {
+     "code": {
+      "status": "measured",
+      "tps": 159.1,
+      "runs": [
+       159.7,
+       158.6,
+       159.0
+      ],
+      "peak": 0
+     },
+     "mixed": {
+      "status": "measured",
+      "tps": 156.5,
+      "runs": [
+       156.3,
+       156.0,
+       157.3
+      ],
+      "peak": 0
+     },
+     "prose": {
+      "status": "measured",
+      "tps": 113.8,
+      "runs": [
+       112.8,
+       113.7,
+       114.9
+      ],
+      "peak": 0
+     }
+    },
+    "16": {
+     "code": {
+      "status": "measured",
+      "tps": 159.3,
+      "runs": [
+       158.9,
+       159.0,
+       160.0
+      ],
+      "peak": 0
+     },
+     "mixed": {
+      "status": "measured",
+      "tps": 156.6,
+      "runs": [
+       158.0,
+       155.6,
+       156.2
+      ],
+      "peak": 0
+     },
+     "prose": {
+      "status": "measured",
+      "tps": 113.0,
+      "runs": [
+       112.1,
+       113.1,
+       113.9
+      ],
+      "peak": 0
+     }
+    }
+   }
   }
  ]
 }

@@ -1,0 +1,50 @@
+· model detected: DeepSeek-V4.1-Flash-1017
+# test  http://100.89.129.80:8007  model=DeepSeek-V4.1-Flash-1017  c=2  window=warmup 30s + 300s measured (or first stream to finish)  thinking=off  max_tokens=20000  prompt=full
+  t=  10s  run= 2 wait= 0  gen  102.5 tok/s  per-stream  51.2  steps   0.0/s  acc 0.00  kv  0.2%  (not steady)
+  t=  20s  run= 2 wait= 0  gen  127.8 tok/s  per-stream  63.9  steps   0.0/s  acc 0.00  kv  0.3%  (not steady)
+  t=  30s  run= 2 wait= 0  gen  129.1 tok/s  per-stream  64.5  steps   0.0/s  acc 0.00  kv  0.5%
+  t=  40s  run= 2 wait= 0  gen  130.7 tok/s  per-stream  65.4  steps   0.0/s  acc 0.00  kv  0.6%
+  t=  50s  run= 2 wait= 0  gen  126.4 tok/s  per-stream  63.2  steps   0.0/s  acc 0.00  kv  0.7%
+  t=  60s  run= 2 wait= 0  gen  126.0 tok/s  per-stream  63.0  steps   0.0/s  acc 0.00  kv  0.8%
+  t=  70s  run= 2 wait= 0  gen  127.6 tok/s  per-stream  63.8  steps   0.0/s  acc 0.00  kv  0.9%
+  t=  80s  run= 2 wait= 0  gen  124.6 tok/s  per-stream  62.3  steps   0.0/s  acc 0.00  kv  1.1%
+  t=  90s  run= 2 wait= 0  gen  129.6 tok/s  per-stream  64.8  steps   0.0/s  acc 0.00  kv  1.2%
+  t= 100s  run= 2 wait= 0  gen  124.4 tok/s  per-stream  62.2  steps   0.0/s  acc 0.00  kv  1.3%
+  t= 110s  run= 2 wait= 0  gen  124.6 tok/s  per-stream  62.3  steps   0.0/s  acc 0.00  kv  1.4%
+  t= 120s  run= 2 wait= 0  gen  129.1 tok/s  per-stream  64.5  steps   0.0/s  acc 0.00  kv  1.5%
+  t= 130s  run= 2 wait= 0  gen  123.1 tok/s  per-stream  61.5  steps   0.0/s  acc 0.00  kv  1.7%
+  t= 140s  run= 2 wait= 0  gen  123.4 tok/s  per-stream  61.7  steps   0.0/s  acc 0.00  kv  1.8%
+  t= 150s  run= 2 wait= 0  gen  131.7 tok/s  per-stream  65.8  steps   0.0/s  acc 0.00  kv  1.9%
+  t= 160s  run= 2 wait= 0  gen  122.4 tok/s  per-stream  61.2  steps   0.0/s  acc 0.00  kv  2.0%
+  t= 170s  run= 2 wait= 0  gen  107.2 tok/s  per-stream  53.6  steps   0.0/s  acc 0.00  kv  2.1%
+  t= 180s  run= 2 wait= 0  gen  105.3 tok/s  per-stream  52.7  steps   0.0/s  acc 0.00  kv  2.2%
+  t= 190s  run= 2 wait= 0  gen  112.1 tok/s  per-stream  56.1  steps   0.0/s  acc 0.00  kv  2.3%
+  t= 200s  run= 2 wait= 0  gen  110.4 tok/s  per-stream  55.2  steps   0.0/s  acc 0.00  kv  2.4%
+  t= 210s  run= 2 wait= 0  gen  113.8 tok/s  per-stream  56.9  steps   0.0/s  acc 0.00  kv  2.5%
+  t= 220s  run= 2 wait= 0  gen  107.8 tok/s  per-stream  53.9  steps   0.0/s  acc 0.00  kv  2.6%
+  t= 230s  run= 2 wait= 0  gen  111.0 tok/s  per-stream  55.5  steps   0.0/s  acc 0.00  kv  2.8%
+  t= 240s  run= 2 wait= 0  gen  111.3 tok/s  per-stream  55.7  steps   0.0/s  acc 0.00  kv  2.9%
+  t= 250s  run= 2 wait= 0  gen  113.2 tok/s  per-stream  56.6  steps   0.0/s  acc 0.00  kv  3.0%
+  t= 260s  run= 2 wait= 0  gen  111.9 tok/s  per-stream  55.9  steps   0.0/s  acc 0.00  kv  3.1%
+  t= 270s  run= 2 wait= 0  gen  102.9 tok/s  per-stream  51.4  steps   0.0/s  acc 0.00  kv  3.2%
+  t= 280s  run= 2 wait= 0  gen   92.6 tok/s  per-stream  46.3  steps   0.0/s  acc 0.00  kv  3.3%
+  t= 290s  run= 2 wait= 0  gen   95.8 tok/s  per-stream  47.9  steps   0.0/s  acc 0.00  kv  3.4%
+  t= 300s  run= 2 wait= 0  gen   92.9 tok/s  per-stream  46.4  steps 237.7/s  acc 3.40  kv  1.9%  prefill 568 tok
+  t= 310s  run= 2 wait= 0  gen  101.5 tok/s  per-stream  50.7  steps   0.0/s  acc 0.00  kv  2.0%
+  t= 320s  run= 2 wait= 0  gen  105.6 tok/s  per-stream  52.8  steps   0.0/s  acc 0.00  kv  2.1%
+· cap reached at 330s (warmup 30 + 300 measured) — window ends here; aborting the streams
+· window over — aborting the remaining streams
+
+# watched 02:09:36 → 02:15:07 (331 s); steady part 02:10:06 → 02:14:56 (300 s, 30 samples)
+# summary (steady = after warmup, all 2 running, zero prefill in the sample):
+  samples 30/32 steady · requests 3 ok, 0 failed, 0 hit max_tokens, 2 aborted by cap · avg 5394 tok / 220 s per request
+  gen tok/s   avg (min–max): 115.6 (92.6–131.7)
+  per-stream  avg (min–max): 57.8 (46.3–65.8)
+  steps/s     avg (min–max): 237.7 (237.7–237.7)   (engine steps; ms/step avg 4)
+  acc len     avg (min–max): 3.40 (3.40–3.40)
+  running     avg (min–max): 2.0 (2.0–2.0)   kv% 2.0 (0.5–3.4)
+  ttft s      avg (min–max): 0.89 (0.66–1.34)   (first token after send, 2 prompts of 568 tok fired together = queue + prefill)
+
+# reports.md row:
+| 2026-10-22 02:15 | | 2 | full thinking off (steady 300s of 331s watched) | 116 (93–132) | 237.7 (237.7–237.7) | 3.40 (3.40–3.40) | | per-stream 58 (46–66); ttft 0.89 (0.66–1.34) s; test.py |
+· saved /private/tmp/myllmbox/bench/results/DeepSeek-V4.1-Flash-1017--dsv41-1017-tf/20261022-001633-site/full-c2-r2.json

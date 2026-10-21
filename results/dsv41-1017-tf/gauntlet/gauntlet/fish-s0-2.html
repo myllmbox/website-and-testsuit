@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Underwater Scene</title>
+<style>
+html,body{margin:0;padding:0;overflow:hidden;height:100%;background:#0b4f8a}
+svg{display:block;width:100vw;height:100vh}
+</style>
+</head>
+<body>
+<svg id="scene" viewBox="0 0 1000 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8fe3ff"/>
+      <stop offset="55%" stop-color="#2b8fd6"/>
+      <stop offset="100%" stop-color="#063a6b"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1000" height="600" fill="url(#water)"/>
+
+  <g stroke="#2e7d32" fill="none" stroke-linecap="round">
+    <path d="M 150 600 Q 130 550 150 500 Q 170 450 150 400" stroke-width="14"/>
+    <path d="M 170 600 Q 190 560 170 520 Q 150 480 170 440" stroke-width="8" stroke="#4caf50" opacity="0.8"/>
+    <path d="M 820 600 Q 800 540 820 480 Q 840 420 820 360" stroke-width="16"/>
+    <path d="M 840 600 Q 860 550 840 500 Q 820 450 840 400" stroke-width="9" stroke="#388e3c" opacity="0.8"/>
+  </g>
+
+  <path d="M0 520 Q 150 500 300 520 T 600 520 T 1000 520 L1000 600 L0 600 Z" fill="#d9c08a"/>
+  <path d="M0 540 Q 200 520 400 540 T 800 540 T 1000 550 L1000 600 L0 600 Z" fill="#c2a46b" opacity="0.8"/>
+  <path d="M0 570 Q 250 550 500 570 T 1000 570 L1000 600 L0 600 Z" fill="#a88755" opacity="0.7"/>
+
+  <g id="fish1" transform="translate(100,250)">
+    <path d="M -68 0 L -118 -38 L -118 38 Z" fill="#e86a1f"/>
+    <path d="M -25 -42 Q 10 -82 45 -42 Z" fill="#f28c28"/>
+    <ellipse cx="-5" cy="18" rx="18" ry="10" fill="#f28c28" transform="rotate(-20 -5 18)"/>
+    <ellipse cx="0" cy="0" rx="72" ry="45" fill="#ff9a3d"/>
+    <circle cx="42" cy="-12" r="8" fill="#ffffff"/>
+    <circle cx="44" cy="-12" r="4" fill="#111111"/>
+    <path d="M 68 -4 Q 78 2 68 8" fill="none" stroke="#b34d00" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <g id="fish2" transform="translate(500,400)">
+    <path d="M -50 0 L -90 -24 L -90 24 Z" fill="#1e88e5"/>
+    <path d="M -12 -16 Q 8 -42 30 -16 Z" fill="#64b5f6"/>
+    <ellipse cx="-2" cy="8" rx="14" ry="6" fill="#64b5f6" transform="rotate(-15 -2 8)"/>
+    <ellipse cx="0" cy="0" rx="52" ry="19" fill="#4fc3f7"/>
+    <circle cx="30" cy="-6" r="6" fill="#ffffff"/>
+    <circle cx="32" cy="-6" r="3" fill="#111111"/>
+    <path d="M 48 -2 Q 56 2 48 6" fill="none" stroke="#1565c0" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+
+  <g id="bubbles"></g>
+</svg>
+
+<script>
+(function(){
+  var fish1 = document.getElementById('fish1');
+  var fish2 = document.getElementById('fish2');
+  var bubbleLayer = document.getElementById('bubbles');
+
+  var fish1X = 100, fish1Y = 250, fish1Speed = 55;
+  var fish2X = 500, fish2Y = 400, fish2Speed = 32;
+
+  var bubbles = [];
+
+  function createBubbles(){
+    for(var i = 0; i < 9; i++){
+      var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      var c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      var h = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+
+      c.setAttribute('fill', '#ffffff');
+      c.setAttribute('fill-opacity', '0.18');
+      c.setAttribute('stroke', '#dcf5ff');
+      c.setAttribute('stroke-opacity', '0.9');
+      c.setAttribute('stroke-width', '1.5');
+
+      h.setAttribute('fill', '#ffffff');
+      h.setAttribute('fill-opacity', '0.9');
+
+      g.appendChild(c);
+      g.appendChild(h);
+      bubbleLayer.appendChild(g);
+
+      var r = 3 + Math.random() * 6;
+      var obj = {
+        g: g,
+        c: c,
+        h: h,
+        x: 50 + Math.random() * 900,
+        y: 530 + Math.random() * 60,
+        r: r,
+        speed: 85 - r * 4
+      };
+
+      bubbles.push(obj);
+
+      c.setAttribute('r', r);
+      h.setAttribute('r', r * 0.25);
+      h.setAttribute('cx', -r * 0.3);
+      h.setAttribute('cy', -r * 0.3);
+      g.setAttribute('transform', 'translate(' + obj.x + ',' + obj.y + ')');
+    }
+  }
+
+  var last = performance.now();
+
+  function frame(now){
+    var dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+
+    fish1X += fish1Speed * dt;
+    if(fish1X > 1120){ fish1X = -120; }
+    fish1.setAttribute('transform', 'translate(' + fish1X + ',' + fish1Y + ')');
+
+    fish2X += fish2Speed * dt;
+    if(fish2X > 1100){ fish2X = -100; }
+    fish2.setAttribute('transform', 'translate(' + fish2X + ',' + fish2Y + ')');
+
+    for(var i = 0; i < bubbles.length; i++){
+      var b = bubbles[i];
+      b.y -= b.speed * dt;
+
+      if(b.y < -20){
+        b.y = 540 + Math.random() * 30;
+        b.x = 40 + Math.random() * 920;
+        b.r = 3 + Math.random() * 6;
+        b.speed = 85 - b.r * 4;
+        b.c.setAttribute('r', b.r);
+        b.h.setAttribute('r', b.r * 0.25);
+        b.h.setAttribute('cx', -b.r * 0.3);
+        b.h.setAttribute('cy', -b.r * 0.3);
+      }
+
+      b.g.setAttribute('transform', 'translate(' + b.x + ',' + b.y + ')');
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  createBubbles();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
