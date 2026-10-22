@@ -5050,7 +5050,7 @@
     "seats": 4,
     "notes": {
      "model": "Mia's Zig kit; weights EXL3 2.9 bpw EAQ with Engram's tables on local disk. No static KV pool: the engine reserves weights and pays KV as it fills (0.00 GiB per stream at the full window), so the 1,048,576-token window is proven for one long conversation.",
-     "seats": "ships with 4 seats; c = 6–16 pending a re-run with the stack extended to 16 seats"
+     "seats": "ships with 4 seats; the c = 6–16 runs held 4 streams with the rest queued"
     }
    },
    "gauntlet": {
@@ -5253,46 +5253,130 @@
     },
     "6": {
      "code": {
-      "status": "pending"
+      "status": "measured",
+      "tps": 157.5,
+      "runs": [
+       157.5,
+       157.2,
+       157.8
+      ],
+      "peak": 0
      },
      "mixed": {
-      "status": "pending"
+      "status": "measured",
+      "tps": 156.2,
+      "runs": [
+       155.3,
+       156.1,
+       157.3
+      ],
+      "peak": 0
      },
      "prose": {
-      "status": "pending"
+      "status": "measured",
+      "tps": 113.3,
+      "runs": [
+       113.5,
+       113.5,
+       113.0
+      ],
+      "peak": 0
      }
     },
     "8": {
      "code": {
-      "status": "pending"
+      "status": "measured",
+      "tps": 158.3,
+      "runs": [
+       159.0,
+       158.3,
+       157.6
+      ],
+      "peak": 0
      },
      "mixed": {
-      "status": "pending"
+      "status": "measured",
+      "tps": 156.5,
+      "runs": [
+       155.5,
+       156.6,
+       157.6
+      ],
+      "peak": 0
      },
      "prose": {
-      "status": "pending"
+      "status": "measured",
+      "tps": 112.8,
+      "runs": [
+       112.7,
+       113.9,
+       112.0
+      ],
+      "peak": 0
      }
     },
     "12": {
      "code": {
-      "status": "pending"
+      "status": "measured",
+      "tps": 159.1,
+      "runs": [
+       159.7,
+       158.6,
+       159.0
+      ],
+      "peak": 0
      },
      "mixed": {
-      "status": "pending"
+      "status": "measured",
+      "tps": 156.5,
+      "runs": [
+       156.3,
+       156.0,
+       157.3
+      ],
+      "peak": 0
      },
      "prose": {
-      "status": "pending"
+      "status": "measured",
+      "tps": 113.8,
+      "runs": [
+       112.8,
+       113.7,
+       114.9
+      ],
+      "peak": 0
      }
     },
     "16": {
      "code": {
-      "status": "pending"
+      "status": "measured",
+      "tps": 159.3,
+      "runs": [
+       158.9,
+       159.0,
+       160.0
+      ],
+      "peak": 0
      },
      "mixed": {
-      "status": "pending"
+      "status": "measured",
+      "tps": 156.6,
+      "runs": [
+       158.0,
+       155.6,
+       156.2
+      ],
+      "peak": 0
      },
      "prose": {
-      "status": "pending"
+      "status": "measured",
+      "tps": 113.0,
+      "runs": [
+       112.1,
+       113.1,
+       113.9
+      ],
+      "peak": 0
      }
     }
    },
