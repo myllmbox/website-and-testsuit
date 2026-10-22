@@ -5065,42 +5065,42 @@
    "quality": {
     "pasture": [
      {
-      "verdict": "pending",
+      "verdict": "clean",
       "tokens": {
        "thinking": 17328,
        "code": 4571
       }
      },
      {
-      "verdict": "pending",
+      "verdict": "clean",
       "tokens": {
        "thinking": 21842,
        "code": 4199
       }
      },
      {
-      "verdict": "pending",
+      "verdict": "clean",
       "tokens": {
        "thinking": 22297,
        "code": 4047
       }
      },
      {
-      "verdict": "pending",
+      "verdict": "clean",
       "tokens": {
        "thinking": 31682,
        "code": 4069
       }
      },
      {
-      "verdict": "pending",
+      "verdict": "clean",
       "tokens": {
        "thinking": 25677,
        "code": 5018
       }
      },
      {
-      "verdict": "pending",
+      "verdict": "clean",
       "tokens": {
        "thinking": 27749,
        "code": 4518
@@ -5117,28 +5117,28 @@
       "note": "one element off: the fish swims tail-first (tail on the leading end)"
      },
      {
-      "verdict": "pending",
+      "verdict": "clean",
       "tokens": {
        "thinking": 5944,
        "code": 1861
       }
      },
      {
-      "verdict": "pending",
+      "verdict": "clean",
       "tokens": {
        "thinking": 10909,
        "code": 3013
       }
      },
      {
-      "verdict": "pending",
+      "verdict": "clean",
       "tokens": {
        "thinking": 9443,
        "code": 2003
       }
      },
      {
-      "verdict": "pending",
+      "verdict": "clean",
       "tokens": {
        "thinking": 12703,
        "code": 4191
