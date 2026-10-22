@@ -66,7 +66,8 @@ and the raw runs to `results/<id>/`. Check it locally (`python3 -m http.server 8
 
 ## 4. Pull request
 
-Commit `static/report.json`, `static/report.js`, `static/runs/<id>/` and `results/<id>/`, and say in the PR:
+Commit `static/report.json`, `static/report.js`, `static/runs/<id>/` and `results/<id>/` (the raw runs are for review; we
+archive them after the merge), and say in the PR:
 
 - the hardware (machine, GPU, memory, how many boxes) and the exact serve command or recipe;
 - anything that differs from the protocol above, and why.

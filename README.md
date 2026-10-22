@@ -13,7 +13,7 @@ Anyone can add an entry: run the same two scripts against your serve, build the 
 |---|---|
 | `static/` | the site: `index.html`, `app.js` (scores and draws everything in the browser), `styles.css`, `report.json` (all the data), `report.js` (the same data as a script), `runs/<id>/` (every gauntlet page), `prompts/` |
 | `bench/` | the measuring tools: `gauntlet.py`, `site.py`, `test.py` (the engine both use), `make-entry.py`, `prompts/` |
-| `results/<id>/` | the raw runs behind each contributed entry (every number can be recomputed from them) |
+| `results/<id>/` | raw runs a pull request brings for review (archived and removed after the merge) |
 | `AGENTS.md` | how it all works, for people and coding agents |
 
 ## View it locally

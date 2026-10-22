@@ -22,7 +22,7 @@ bench/
   site.py               the throughput matrix via test.py (thinking off)
   make-entry.py         run folders → report.json entry + pages + results/
   prompts/              every prompt the scripts send (the gauntlet prompts are the canonical copies)
-results/<id>/           raw runs behind a contributed entry (gauntlet/ + site/)
+results/<id>/           raw runs a PR brings for review (gauntlet/ + site/); archived by the maintainers and removed after merge
 ```
 
 ## An entry (`static/report.json` → `models[]`)
@@ -73,6 +73,7 @@ throughput matrix the contributor may extend or tune the stack (at least 16 seat
 they changed goes in `spec.notes.seats` / `spec.notes.model`.
 
 1. The maintainers verify the data against `results/<id>/` with their own tooling. Problems go back to the contributor.
+   After the merge the raw runs are archived privately and removed from the repo.
 2. Judge the 12 pages, write verdicts + notes.
 3. Merge, regenerate `report.js`, bump the `?v=` timestamps in `index.html`, deploy.
 
