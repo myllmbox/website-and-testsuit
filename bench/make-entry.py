@@ -79,6 +79,10 @@ def speed(folder):
     return out
 
 
+def me_cols():
+    return set(CONTENT.values())
+
+
 def write_report_js(report_path):
     data = json.loads(report_path.read_text(encoding="utf-8"))
     (report_path.parent / "report.js").write_text("window.REPORT = " + json.dumps(data, ensure_ascii=False) + ";\n", encoding="utf-8")
@@ -99,6 +103,10 @@ def main():
     ap.add_argument("--kv-dtype", required=True, help="fp8, bf16, …")
     ap.add_argument("--seats", type=int, required=True, help="max concurrent requests (max-num-seqs)")
     ap.add_argument("--note", default="", help="one line about the model / setup (shown under the spec)")
+    ap.add_argument("--note-seats", default="", help="if the matrix ran with more seats than shipped, say so, e.g. "
+                    "'ships with 4 seats; c = 6-16 ran with 16'")
+    ap.add_argument("--unsupported", default="", help="comma list of columns the stack cannot run (mixed, prose, code, "
+                    "structured): shown as unsupported at every c")
     ap.add_argument("--gauntlet", required=True, type=Path, help="bench/gauntlet.py output folder")
     ap.add_argument("--site", required=True, type=Path, help="bench/site.py output folder")
     ap.add_argument("--tokenizer", required=True, help="the model's tokenizer.json")
@@ -114,8 +122,16 @@ def main():
     g, q = gauntlet(a.gauntlet, Tokenizer.from_file(a.tokenizer), a.n)
     entry = {"id": a.id, "name": a.name, "model": a.model, "hf": a.hf, "stack": a.stack, "image": a.image, "link": a.link,
              "spec": {"max_context": a.max_context, "kv_pool": a.kv_pool, "kv_dtype": a.kv_dtype, "kv_shared": True,
-                      "seats": a.seats, **({"notes": {"model": a.note}} if a.note else {})},
+                      "seats": a.seats},
              "gauntlet": g, "quality": q, "speed": speed(a.site)}
+    notes = {k: v for k, v in (("model", a.note), ("seats", a.note_seats)) if v}
+    if notes:
+        entry["spec"]["notes"] = notes
+    for col in filter(None, (c.strip() for c in a.unsupported.split(","))):
+        if col not in me_cols():
+            sys.exit(f"✗ --unsupported: unknown column {col!r}")
+        for c in ("1", "2", "4", "6", "8", "12", "16"):
+            entry["speed"].setdefault(c, {})[col] = {"status": "unsupported"}
     if a.logo:
         entry["logo"] = a.logo
     entry = {k: v for k, v in entry.items() if v != ""}

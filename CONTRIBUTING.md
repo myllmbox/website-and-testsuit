@@ -37,9 +37,13 @@ Thinking off, c = 1 2 4 6 8 12 16 × {mixed, prose, code, structured} × 3 runs.
 for 30 s warm-up + 300 s measured, replacing every finished stream at once. Structured sends a strict `json_schema`
 `response_format` (`bench/prompts/structured-schema.json`).
 
+- **Default stack vs extended stack.** Spec, gauntlet and quality describe the stack **as it ships**. For the matrix you may
+  extend or tune it (at least 16 seats, so every rung really holds c streams); write down what you changed with
+  `--note-seats` / `--note` (e.g. "ships with 4 seats; c = 6–16 ran with 16"). A rung that never reaches c running requests
+  fails review.
 - More seats than 16 (a cluster)? Add rungs: `--cs 1,2,4,6,8,12,16,24,32,48,64`.
-- Your server can't do something (e.g. no `json_schema`)? Leave it out with `--contents full,story,code-ts`; the site shows
-  that column as unsupported.
+- Your server can't do something (e.g. no `json_schema`)? Leave it out with `--contents full,story,code-ts` and pass
+  `--unsupported structured` to `make-entry.py`; the site shows that column as unsupported.
 
 Output: `bench/results/<model>--<lane>/<timestamp>-site/`.
 

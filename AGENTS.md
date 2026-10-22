@@ -68,13 +68,13 @@ Judge visually; code style is not scored.
 
 ## Reviewing a contribution
 
-1. Recompute: run `bench/make-entry.py` on `results/<id>/gauntlet` + `results/<id>/site` (no `--write`) and diff against the
-   entry. Any mismatch = not merged.
-2. Sanity: `running.max` in each site json equals its c (the rung was really held); no `drift` hits in the gauntlet jsons;
-   the spec numbers match the stated serve command.
-3. Judge the 12 pages, write verdicts + notes.
-4. Regenerate `report.js` (make-entry does it; or `python3 -c` the same one-liner), bump the `?v=` timestamps in
-   `index.html` (seconds: Cloudflare caches js/css at the edge), deploy.
+**Default stack evaluated, extended stack measured.** Spec, gauntlet and quality describe the stack as it ships. For the
+throughput matrix the contributor may extend or tune the stack (at least 16 seats, so every rung holds c streams); whatever
+they changed goes in `spec.notes.seats` / `spec.notes.model`.
+
+1. The maintainers verify the data against `results/<id>/` with their own tooling. Problems go back to the contributor.
+2. Judge the 12 pages, write verdicts + notes.
+3. Merge, regenerate `report.js`, bump the `?v=` timestamps in `index.html`, deploy.
 
 ## Rules
 
