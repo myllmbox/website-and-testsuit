@@ -66,8 +66,9 @@ function scoreQuality(A, B) {
     const n = Math.max(A.quality?.[test]?.length || 0, B.quality?.[test]?.length || 0);
     for (let i = 0; i < n; i++) {
       const pa = A.quality?.[test]?.[i], pb = B.quality?.[test]?.[i];
-      out.push({ test, run: i + 1, pa, pb,
-        a: pa ? PAGE_POINTS[pa.verdict] ?? 0 : 0, b: pb ? PAGE_POINTS[pb.verdict] ?? 0 : 0 });
+      const pending = pa?.verdict === 'pending' || pb?.verdict === 'pending';   // not judged yet: scored for neither side
+      out.push({ test, run: i + 1, pa, pb, pending,
+        a: pending || !pa ? 0 : PAGE_POINTS[pa.verdict] ?? 0, b: pending || !pb ? 0 : PAGE_POINTS[pb.verdict] ?? 0 });
     }
   }
   return out;
@@ -188,7 +189,7 @@ function qualityBlock(A, B, rows) {
   const html = rows.map((r) => vrow(`<a class="plink" href="prompts/${r.test}.txt" data-prompt="${r.test}" title="Show the ${r.test} prompt"><b>${r.test}</b></a> · run ${r.run}`,
     pageVis(A, r.test, r.run, r.pa), ptsBox(r.a, r.b, 1, 'a'),
     pageVis(B, r.test, r.run, r.pb), ptsBox(r.b, r.a, 1, 'b'))).join('');
-  return { a: sum(rows, 'a'), b: sum(rows, 'b'), max: rows.length, html };
+  return { a: sum(rows, 'a'), b: sum(rows, 'b'), max: rows.filter((r) => !r.pending).length, html };
 }
 
 function speedSide(m, row, side, ymax, notes) {
@@ -246,6 +247,7 @@ function render(report, ia, ib) {
       m.link && `<a href="${esc(m.link)}" target="_blank" rel="noopener"><span class="ico" aria-hidden="true">📜</span><span class="t">Recipe ↗</span></a>`].filter(Boolean);
     return `<div class="links ${side}">${l.join('')}</div>`;
   };
+  const by = (m) => (m.measured_by ? ` · measured by ${m.measured_by.link ? `<a href="${esc(m.measured_by.link)}" target="_blank" rel="noopener">${esc(m.measured_by.name)}</a>` : esc(m.measured_by.name)}` : '');
   const fam = (m) => m.model.split(' ')[0];  // menu grouped by model (Qwen3.8-Flash-Next, GLM-5.3-Flash), report.json order inside
   const opt = (sel) => [...new Set(report.models.map(fam))].map((f) => `<optgroup label="${esc(f)}">${report.models.map((m, i) => fam(m) !== f ? '' :
     `<option value="${i}"${i === sel ? ' selected' : ''}>${esc(m.name)} — ${esc(m.model)}</option>`).join('')}</optgroup>`).join('');
@@ -255,13 +257,13 @@ function render(report, ia, ib) {
     <div class="hero">
       <p class="kicker">${esc(report.box)} · ${esc(report.date)}</p>
       <h1>${esc(report.title)}</h1>
-      <p class="sub">Every number below was measured on the same hardware, each stack as it ships.</p>
+      <p class="sub">Every number below was measured on DGX Spark hardware; each entry says who measured it.</p>
       <div class="pickers"><select id="pa" aria-label="Model A">${opt(ia)}</select><span class="vs">vs</span><select id="pb" aria-label="Model B">${opt(ib)}</select></div>
     </div>
     <div class="total">
-      ${logo(A, 'a')}<div class="side a"><span class="name">${esc(A.name)}</span><span class="meta">${esc(A.model)} · ${esc(A.stack)}</span></div>
+      ${logo(A, 'a')}<div class="side a"><span class="name">${esc(A.name)}</span><span class="meta">${esc(A.model)} · ${esc(A.stack)}${by(A)}</span></div>
       <div class="mid"><div class="scoreline"><span class="${big(ta, tb)}">${pts(ta)}</span><span class="vs">vs</span><span class="${big(tb, ta)}">${pts(tb)}</span><span class="pc ${big(ta, tb)}">${(100 * ta / tmax).toFixed(1)} %</span><span></span><span class="pc ${big(tb, ta)}">${(100 * tb / tmax).toFixed(1)} %</span></div>of ${tmax} points</div>
-      <div class="side b"><span class="name">${esc(B.name)}</span><span class="meta">${esc(B.model)} · ${esc(B.stack)}</span></div>${logo(B, 'b')}
+      <div class="side b"><span class="name">${esc(B.name)}</span><span class="meta">${esc(B.model)} · ${esc(B.stack)}${by(B)}</span></div>${logo(B, 'b')}
       ${links(A, 'a')}${links(B, 'b')}
     </div>
     <div class="names" aria-hidden="true"><span class="a">${esc(A.name)}</span><span></span><span class="divider"></span><span></span><span class="b">${esc(B.name)}</span></div>

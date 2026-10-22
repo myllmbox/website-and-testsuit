@@ -51,7 +51,7 @@ Output: `bench/results/<model>--<lane>/<timestamp>-site/`.
 
 ```bash
 pip install tokenizers
-./bench/make-entry.py --id <id> --name "<you or the stack> (TP=1)" --model "<Model> <quant>" --stack "<engine> · <drafting> · <hardware>" \
+./bench/make-entry.py --id <id> --name "<the stack, by its creator> (TP=1)" --measured-by "<you>" [--measured-by-link <profile url>] --model "<Model> <quant>" --stack "<engine> · <drafting> · <hardware>" \
     --hf <weights url> --link <recipe url> --image <image:tag> \
     --max-context <tokens> --kv-pool <tokens> --kv-dtype <fp8|bf16|…> --seats <max concurrent requests> \
     --gauntlet <gauntlet folder> --site <site folder> --tokenizer <the model's tokenizer.json> --write

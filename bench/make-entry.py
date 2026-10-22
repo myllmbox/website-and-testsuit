@@ -91,13 +91,15 @@ def write_report_js(report_path):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--id", required=True, help="url-safe id, e.g. vllm-fp8-tp1 (the ?a= / ?b= value)")
-    ap.add_argument("--name", required=True, help="who + what, e.g. 'Jane (TP=2)'")
+    ap.add_argument("--name", required=True, help="the stack, named after its creator, e.g. 'TensorFold (TP=2)'")
     ap.add_argument("--model", required=True, help="model + quant as served, e.g. 'Qwen3.8-Flash-Next FP4-Local'")
     ap.add_argument("--stack", required=True, help="engine · drafting · hardware, e.g. 'vLLM 0.32 · MTP 1–7 · 2× DGX Spark'")
     ap.add_argument("--hf", default="", help="weights link")
     ap.add_argument("--link", default="", help="recipe / how-to-reproduce link (required for a merge)")
     ap.add_argument("--image", default="", help="container image (tag or digest)")
-    ap.add_argument("--logo", default="", help="assets/logos/<you>.png (256 px), optional")
+    ap.add_argument("--logo", default="", help="assets/logos/<stack creator>.png (256 px), optional")
+    ap.add_argument("--measured-by", required=True, help="who ran the measurements (you), shown on the entry")
+    ap.add_argument("--measured-by-link", default="", help="a profile link for --measured-by, optional")
     ap.add_argument("--max-context", type=int, required=True, help="max tokens per request the serve accepts")
     ap.add_argument("--kv-pool", type=int, required=True, help="KV cache size in tokens (vLLM: 'GPU KV cache size' at boot)")
     ap.add_argument("--kv-dtype", required=True, help="fp8, bf16, …")
@@ -134,6 +136,7 @@ def main():
             entry["speed"].setdefault(c, {})[col] = {"status": "unsupported"}
     if a.logo:
         entry["logo"] = a.logo
+    entry["measured_by"] = {"name": a.measured_by, **({"link": a.measured_by_link} if a.measured_by_link else {})}
     entry = {k: v for k, v in entry.items() if v != ""}
     if not a.write:
         print(json.dumps(entry, indent=1, ensure_ascii=False))

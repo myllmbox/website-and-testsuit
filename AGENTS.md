@@ -30,24 +30,13 @@ results/<id>/           raw runs a PR brings for review (gauntlet/ + site/); arc
 | field | meaning |
 |---|---|
 | `id` | url-safe, unique; `?a=` / `?b=` |
+| `measured_by` | `{name, link?}`: who ran the measurements (shown on the entry), separate from the stack's creator |
 | `name`, `model`, `stack` | header line: who/what, model + quant, engine · drafting · hardware; `model`'s first word groups the menu |
 | `hf`, `link`, `image`, `logo` | weights, recipe, container, avatar (all optional on the page; `link` required for contributions) |
 | `spec` | `max_context`, `kv_pool` (tokens), `kv_dtype`, `kv_shared`, `seats`, `notes.{model,kv_pool,seats}` (one-liners shown under the rows) |
 | `gauntlet` | `thinking_tps`, `code_tps`, `peak_tps`, `avg_tps` (shown, not scored), `runs`, `avg_thinking_tokens`, `avg_code_tokens` |
 | `quality.{pasture,fish}[]` | per page in run order: `verdict` (clean · fixed · anomaly · broken · pending), `tokens.{thinking,code}`, `note`, `fix.{chars,what}` + `orig: true` when a fix was applied |
 | `speed["<c>"].<col>` | col = mixed · prose · code · structured: `{status: measured, tps, runs[], peak}`, or `{status: unsupported}` / `{status: pending}` |
-
-## How numbers are made (make-entry.py is the reference implementation)
-
-- **test.py sample**: every 10 s, Δ`vllm:generation_tokens_total` / Δt = aggregate gen tok/s. A sample is *steady* when it is
-  past the warm-up, all c streams run and no prompt tokens were processed in it (with `--refill`: past the warm-up).
-  `gen_tps.avg` = mean of steady samples; `peak_clean` = best clean sample.
-- **Gauntlet speed**: all samples of each run. A sample is *thinking* when its midpoint (cumulative tokens) lies before the
-  run's thinking-token count, else *code*. Per-run means → mean over the 12 runs. Peak = best sample of any run. Thinking
-  tokens = the model's tokenizer over `<stem>-reasoning.txt`, code tokens over `<stem>.txt`.
-- **Speed cell**: tps = mean of the 3 runs' `gen_tps.avg`; peak = max `peak_clean`. A run with no steady sample (an answer
-  shorter than the warm-up) is left out of its cell.
-- Sampling: bench tools never send temperature / top-p (the checkpoint's `generation_config` decides) unless a flag asks.
 
 ## Scoring (app.js; also printed in the site footer)
 

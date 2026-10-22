@@ -1,6 +1,6 @@
 {
- "title": "Qwen3.8-Flash-Next and GLM-5.3-Flash on DGX Spark",
- "date": "2026-10-21",
+ "title": "Qwen3.8-Flash-Next, GLM-5.3-Flash and DeepSeek-V4.1-Flash on DGX Spark",
+ "date": "2026-10-22",
  "box": "one DGX Spark (GB10, 128 GB unified memory) · (TP=2) = two Sparks",
  "models": [
   {
@@ -595,7 +595,10 @@
      }
     }
    },
-   "logo": "assets/logos/myllmbox.png"
+   "logo": "assets/logos/myllmbox.png",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
   },
   {
    "id": "mbx-v53",
@@ -1036,7 +1039,10 @@
      }
     }
    },
-   "logo": "assets/logos/myllmbox.png"
+   "logo": "assets/logos/myllmbox.png",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
   },
   {
    "id": "mbx-v52-tp2",
@@ -1639,7 +1645,10 @@
      }
     }
    },
-   "logo": "assets/logos/myllmbox.png"
+   "logo": "assets/logos/myllmbox.png",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
   },
   {
    "id": "mbx-v52",
@@ -2060,7 +2069,10 @@
      }
     }
    },
-   "logo": "assets/logos/myllmbox.png"
+   "logo": "assets/logos/myllmbox.png",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
   },
   {
    "id": "mbx-v51",
@@ -2493,7 +2505,10 @@
      }
     }
    },
-   "logo": "assets/logos/myllmbox.png"
+   "logo": "assets/logos/myllmbox.png",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
   },
   {
    "id": "azampatti-int4",
@@ -2921,7 +2936,10 @@
     "12": "box 2 run with SEQS=16 (its serve.sh knob; ships 8)",
     "16": "box 2 run with SEQS=16 (its serve.sh knob; ships 8)"
    },
-   "logo": "assets/logos/azampatti.png"
+   "logo": "assets/logos/azampatti.png",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
   },
   {
    "id": "tensorfold-v1",
@@ -3340,7 +3358,10 @@
      }
     }
    },
-   "logo": "assets/logos/miaai-lab.jpg"
+   "logo": "assets/logos/miaai-lab.jpg",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
   },
   {
    "id": "tensorfold",
@@ -3772,7 +3793,10 @@
     "12": "TensorFold at 16 × 80k context (its documented PARALLEL/CONTEXT knobs; stock serves 5)",
     "16": "TensorFold at 16 × 80k context (its documented PARALLEL/CONTEXT knobs; stock serves 5)"
    },
-   "logo": "assets/logos/miaai-lab.jpg"
+   "logo": "assets/logos/miaai-lab.jpg",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
   },
   {
    "id": "exl3-native",
@@ -4199,7 +4223,10 @@
     "4": "ExLlamaV3 at up to 16 jobs (its documented MAX_BATCH_SIZE knob; ships 1 or 4) on one shared 1,048,576-token pool",
     "6": "ExLlamaV3 at up to 16 jobs (its documented MAX_BATCH_SIZE knob; ships 1 or 4) on one shared 1,048,576-token pool"
    },
-   "logo": "assets/logos/cruz.jpg"
+   "logo": "assets/logos/cruz.jpg",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
   },
   {
    "id": "mbx-v2-tp2-glm",
@@ -4574,7 +4601,10 @@
      }
     }
    },
-   "logo": "assets/logos/myllmbox.png"
+   "logo": "assets/logos/myllmbox.png",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
   },
   {
    "id": "mbx-v1-tp2-glm",
@@ -4999,11 +5029,14 @@
      }
     }
    },
-   "logo": "assets/logos/myllmbox.png"
+   "logo": "assets/logos/myllmbox.png",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
   },
   {
    "id": "dsv41-1017-tf",
-   "name": "Yume (TP=2)",
+   "name": "TensorFold (TP=2)",
    "model": "DeepSeek-V4.1-Flash-1017 EXL3 2.9 bpw EAQ",
    "hf": "https://huggingface.co/Mia-AiLab/DeepSeek-V4.1-Flash-1017-EXL3-EAQ-v1-2.9-bpw",
    "stack": "TensorFold Zig (MiaAI-Lab) · DSpark drafts · 2× DGX Spark",
@@ -5260,6 +5293,11 @@
       "status": "pending"
      }
     }
+   },
+   "logo": "assets/logos/miaai-lab.jpg",
+   "measured_by": {
+    "name": "Yume",
+    "link": "https://x.com/yume_arasaki"
    }
   }
  ]
