@@ -1,0 +1,491 @@
+We need to produce a single HTML file with SVG underwater scene. Need to satisfy all requirements, under 18KB, no external assets, no emoji/unicode graphics.
+
+Let me plan.
+
+Structure:
+- HTML with full viewport, no scrollbars.
+- SVG with viewBox maybe "0 0 1000 700" preserveAspectRatio="xMidYMid slice" or use width 100% height 100%. Use viewBox to keep coordinates simple, but for full viewport, use width="100vw" height="100vh" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice". That's fine.
+
+Gradients: linearGradient vertical, lighter blue top (#3fb8d8 or #7fd8ef) to darker (#062a4a). Seafloor: a path along bottom ~10-15% of viewport, tan/beige/brown. In viewBox 0 0 1000 700, floor from y=610 to 700 (about 13%). Use a path with wavy top.
+
+Fish: two fish groups. Need body, tail triangle, at least one fin, exactly one visible eye (circle with pupil dot), mouth indication.
+
+Fish A: larger, round/short, orange color. Fish B: smaller, long/slender, purple/blue.
+
+Use SVG groups with transforms animated via JS (requestAnimationFrame) or CSS animation. Requirement: fish swim horizontally, different speeds, wrap around. Bubbles rise continuously, respawn at top near seafloor. Could do JS animation with requestAnimationFrame for both fish and bubbles. Simpler and reliable: JS updates positions each frame.
+
+Alternatively use CSS animations with infinite loop: fish translate across screen and wrap; but wrap-around with CSS would need two elements or animation with keyframes where at 100% it's offscreen and jump—CSS can't jump seamlessly; can use animation with steps? Better JS.
+
+We'll build fish as SVG groups with fixed shape coordinates, then translate via transform attribute updated in JS. Use viewBox coordinates 0..1000 x 0..700. Fish swim horizontally at different y positions.
+
+Fish 1 (large, round): orange body ellipse rx 70 ry 45 at origin (0,0). Tail: triangle path points e.g. M -70 0 L -110 -30 L -110 30 Z (tail at rear left if fish faces right). Actually fish facing right: head at +x, tail at -x. Body ellipse centered at 0. Tail polygon points (-70,0),(-115,-32),(-115,32). Dorsal fin: path M -10 -42 Q 5 -75 30 -40 Z or triangle on top. Side fin: ellipse rotated at (5,10) etc. Eye: circle at (45,-12) r 8 white, pupil circle at (47,-12) r 4 black. Mouth: small arc/line near head at (72,5) e.g. path M 68 5 Q 74 10 78 4 stroke.
+
+Fish 2 (small, slender): blue/purple body ellipse rx 55 ry 20. Tail triangle at (-55,0) to (-90,-22),(-90,22). Dorsal fin smaller. Eye at (35,-5) r 5. Mouth line. Different color.
+
+Need to ensure "exactly 1 visible eye" — one eye each. Fine.
+
+Fish swim horizontally: Fish 1 speed maybe 60 px/s, Fish 2 speed 110 px/s. Different speeds. Wrap: when x > 1000 + margin, reset to -margin; when x < -margin reset to 1000+margin. Use direction? Could swim in opposite directions? Requirement only horizontally, wrap. We can have both swim right, but different speeds. Or one left, one right. "When a fish exits one side of the screen, it must reappear on the opposite side" — okay.
+
+Maybe Fish 1 swims right, Fish 2 swims left. But then need flip fish shape for direction? Could use scale(-1,1) transform when facing left. Let's just have both swim right for simplicity; wrap from right to left. Actually requirement doesn't specify direction. Both right is fine, but visually maybe one left one right. Let's do Fish 1 (big) swims right at 50 px/s, Fish 2 (small) swims left at 110 px/s. For fish facing left, mirror group with scale(-1,1). Use transform="translate(x,y) scale(-1,1)" for left-facing. But note mouth etc. mirrored, still fine.
+
+Actually easier: create fish group with shapes facing right; apply transform translate(x,y) and if direction left, scale(-1,1). But when scaling -1, the x coordinates flip. Fine.
+
+Bubbles: at least 5. Create maybe 8 bubbles with varying radii, start positions near seafloor, rise at speeds inversely related to size. Use JS array of bubble objects with x, y, r, speed, wobble phase. Render as <circle> elements created dynamically or pre-created and updated. Since file size under 18KB, can create bubbles via JS on load. Each bubble: circle white/lightblue with opacity, plus a highlight ring? "optional highlight ring". We can add a smaller white circle offset for highlight. But that doubles elements. Simpler: use circle with stroke and fill rgba. Use one circle per bubble plus maybe highlight circle. 8 bubbles * 2 = 16 circles, fine.
+
+Respawn: when bubble.y + r < 0 (reaches top), reset y = seafloor y (e.g., 600 + random) and x random. Actually bubbles rise upward: y decreases. When y < -r, respawn near seafloor (y ~ 600-680). Continuous loop. Vary sizes 3-9. Smaller faster: speed = 30 + (10 - r) * 6 or something. Let's do speed = 25 + (12 - r) * 5. r between 3 and 10.
+
+Seaweed: at least 2. Use paths rooted at seafloor, green wavy vertical. Could animate sway with JS or CSS. Let's do static or gentle sway. Requirement allows static. But animation nice. Use SVG path with transform-origin at bottom and CSS animation rotate slightly. CSS animation with transform-box: fill-box; transform-origin: bottom center. Or JS sway via updating d? Simpler: use CSS keyframes on the path or group: transform: rotate(...) with transform-origin at base. However SVG CSS transform-origin can be tricky but works in modern browsers. Alternatively use JS to sway the seaweed paths by regenerating path each frame with sine wave. That's more code. Static is allowed: "Seaweed may sway gently OR remain static — your choice." Let's make static wavy paths. Or a stack of overlapping ellipses, also static. But maybe add a gentle sway via CSS animation on group with transform-origin. Let's keep static to save complexity, but maybe add subtle sway via CSS to make scene lively. CSS animation is fine and small. We'll add class sway with keyframes rotate(-3deg) to rotate(3deg) alternate. Need transform-origin: bottom center and transform-box: fill-box? For SVG, CSS transform-origin percentages refer to bounding box if transform-box: fill-box. Use `transform-box: fill-box; transform-origin: bottom center;`. Should work. But maybe simpler to use a group with a path and animate `transform` attribute via JS? Not necessary. Static meets requirement. I'll add CSS sway to be safe.
+
+Need full viewport, no scrollbars: html,body margin 0, overflow hidden, height 100%.
+
+SVG: width="100%" height="100%" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice". Note with slice, parts may be cropped, but that's fine for full viewport. However fish swimming across 0..1000 will be visible depending on aspect ratio. If viewport aspect ratio differs, slice crops horizontally or vertically. If wider than 1000/700, horizontal crop? Actually preserveAspectRatio slice: scales to cover, so if viewport is wider, vertical fits? Let's think: viewBox 1000x700 ratio 1.428. If viewport is 16:9 (1.777), wider, slice scales so height fills, width overflows (crops left/right). That means fish at x=0 or 1000 might be cropped. Better to use preserveAspectRatio="none" to stretch? Stretching distorts fish. Or use "xMidYMid meet" would letterbox (not full). Use 100vw 100vh with viewBox and preserveAspectRatio="xMidYMid slice" is common. Cropping is okay; but fish wrap from -margin to 1000+margin, so they may reappear at edges cropped. Might be acceptable. Alternatively use width/height 100% and viewBox="0 0 100 100" with vector-effect non-scaling? No. Let's use a viewBox that matches typical aspect? Could use JS to set viewBox based on window size, but that's more. Simpler: use SVG with width="100vw" height="100vh" and no viewBox, using percentage-based coordinates? But then fish shapes need coordinates in viewport units, complicated. Use viewBox 0 0 1000 700 and preserveAspectRatio="xMidYMid slice". Most likely acceptable. To avoid fish being cropped at edges, we can set fish wrap margins larger (-150 to 1150). But if cropped, they'd appear at viewport edges. Fine.
+
+Alternatively use `preserveAspectRatio="xMidYMid meet"` and set background to cover? No, requirement full-viewport SVG, no scrollbars. Meet would leave empty space unless background color fills. Could set SVG background gradient via CSS and the SVG content might letterbox. Not ideal. Use slice.
+
+Let's set body background color to dark blue so any letterbox is not visible. But slice covers entire viewport, so no letterbox.
+
+Now write code.
+
+HTML:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Underwater Scene</title>
+<style>
+  html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#062a4a; }
+  svg { display:block; width:100vw; height:100vh; }
+  .seaweed { transform-box: fill-box; transform-origin: bottom center; animation: sway 4s ease-in-out infinite alternate; }
+  @keyframes sway { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5ec8e8"/>
+      <stop offset="50%" stop-color="#1e7fb8"/>
+      <stop offset="100%" stop-color="#062a4a"/>
+    </linearGradient>
+    <!-- maybe gradient for floor -->
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c2a36b"/>
+      <stop offset="100%" stop-color="#8a6b3d"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="1000" height="700" fill="url(#water)"/>
+
+  <!-- Seafloor: wavy path from y=600 to 700 -->
+  <path d="M0,620 Q150,580 300,610 T600,600 T1000,620 L1000,700 L0,700 Z" fill="url(#sand)"/>
+  <!-- maybe some rocks -->
+  <ellipse cx="150" cy="660" rx="60" ry="25" fill="#7a5a32" opacity="0.8"/>
+  <ellipse cx="780" cy="670" rx="80" ry="30" fill="#6b4f2c" opacity="0.8"/>
+
+  <!-- Seaweed -->
+  <g class="seaweed">
+    <path d="M180,620 C160,560 210,520 190,460 C170,400 220,370 200,310 C190,280 200,260 210,250" fill="none" stroke="#2e8b57" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  <g class="seaweed">
+    <path d="M240,625 C260,570 220,530 240,480 C260,430 220,400 240,350" fill="none" stroke="#3cb371" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <g class="seaweed">
+    <path d="M850,615 C830,550 870,510 850,450 C830,390 870,360 850,300" fill="none" stroke="#228b22" stroke-width="14" stroke-linecap="round"/>
+  </g>
+  <!-- Additional seaweed stack of ellipses maybe -->
+  <g class="seaweed">
+    <ellipse cx="880" cy="600" rx="15" ry="10" fill="#2e8b57"/>
+    <ellipse cx="875" cy="580" rx="14" ry="10" fill="#2e8b57"/>
+    <ellipse cx="882" cy="560" rx="13" ry="9" fill="#3cb371"/>
+    <ellipse cx="876" cy="540" rx="12" ry="8" fill="#3cb371"/>
+  </g>
+
+  <!-- Bubbles container -->
+  <g id="bubbles"></g>
+
+  <!-- Fish 1: large, round, orange, faces right -->
+  <g id="fish1" transform="translate(200,300)">
+    <!-- tail -->
+    <path d="M -70,0 L -120,-35 L -120,35 Z" fill="#e67e22"/>
+    <!-- dorsal fin -->
+    <path d="M -20,-40 Q 0,-75 35,-38 Z" fill="#d35400"/>
+    <!-- body -->
+    <ellipse cx="0" cy="0" rx="75" ry="48" fill="#f39c12"/>
+    <!-- side fin -->
+    <ellipse cx="5" cy="18" rx="22" ry="10" fill="#e67e22" transform="rotate(20 5 18)"/>
+    <!-- eye -->
+    <circle cx="45" cy="-12" r="9" fill="white"/>
+    <circle cx="47" cy="-12" r="4.5" fill="#1a1a1a"/>
+    <!-- mouth -->
+    <path d="M 68,8 Q 75,14 80,6" fill="none" stroke="#b35300" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Fish 2: small, slender, purple/blue, faces left (mirrored) -->
+  <g id="fish2" transform="translate(700,150) scale(-1,1)">
+    <!-- tail -->
+    <path d="M -50,0 L -85,-20 L -85,20 Z" fill="#8e44ad"/>
+    <!-- dorsal fin -->
+    <path d="M -10,-18 Q 5,-35 25,-16 Z" fill="#6c3483"/>
+    <!-- body -->
+    <ellipse cx="0" cy="0" rx="55" ry="20" fill="#9b59b6"/>
+    <!-- side fin -->
+    <ellipse cx="5" cy="8" rx="14" ry="6" fill="#8e44ad" transform="rotate(15 5 8)"/>
+    <!-- eye -->
+    <circle cx="35" cy="-5" r="5" fill="white"/>
+    <circle cx="37" cy="-5" r="2.5" fill="#1a1a1a"/>
+    <!-- mouth -->
+    <path d="M 52,4 Q 56,7 59,3" fill="none" stroke="#5b2c6f" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+</svg>
+<script>
+(function(){
+  const svg = document.querySelector('svg');
+  const bubblesGroup = document.getElementById('bubbles');
+  const fish1 = document.getElementById('fish1');
+  const fish2 = document.getElementById('fish2');
+
+  // Fish state
+  const fishState = [
+    { el: fish1, x: 200, y: 300, speed: 50, dir: 1, margin: 150 }, // dir 1 = right
+    { el: fish2, x: 700, y: 150, speed: 110, dir: -1, margin: 120 } // dir -1 = left
+  ];
+  // Note fish2 is mirrored (scale(-1,1)) so it faces left. Its base transform is translate(x,y) scale(-1,1).
+  // For fish1, transform translate(x,y).
+
+  // Bubbles
+  const bubbles = [];
+  const numBubbles = 9;
+  const seafloorY = 600;
+  function createBubble(initial) {
+    const r = 3 + Math.random() * 7; // 3 to 10
+    const speed = 30 + (10 - r) * 6; // smaller faster
+    const x = 50 + Math.random() * 900;
+    const y = initial ? seafloorY + Math.random() * 80 : -r - Math.random() * 100;
+    // Actually initial should be near seafloor; respawn near seafloor.
+    return { x, y, r, speed, wobble: Math.random() * Math.PI * 2, wobbleSpeed: 1 + Math.random() };
+  }
+  for (let i = 0; i < numBubbles; i++) {
+    const b = createBubble(true);
+    // Ensure initial y near seafloor: createBubble(true) gives y = seafloorY + random*80 (which is 600-680). Good.
+    // But if initial true, y is near seafloor; for respawn also near seafloor.
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('fill', 'rgba(200,240,255,0.5)');
+    circle.setAttribute('stroke', 'rgba(255,255,255,0.8)');
+    circle.setAttribute('stroke-width', '1');
+    bubblesGroup.appendChild(circle);
+    b.el = circle;
+    bubbles.push(b);
+  }
+
+  let lastTime = performance.now();
+  function animate(now) {
+    const dt = Math.min((now - lastTime) / 1000, 0.1); // seconds, cap
+    lastTime = now;
+
+    // Fish movement
+    fishState.forEach(f => {
+      f.x += f.speed * f.dir * dt;
+      // Wrap-around
+      const off = 150; // offscreen margin
+      if (f.dir > 0 && f.x > 1000 + off) {
+        f.x = -off;
+      } else if (f.dir < 0 && f.x < -off) {
+        f.x = 1000 + off;
+      }
+      // Apply transform
+      if (f.el === fish1) {
+        f.el.setAttribute('transform', `translate(${f.x},${f.y})`);
+      } else {
+        f.el.setAttribute('transform', `translate(${f.x},${f.y}) scale(-1,1)`);
+      }
+    });
+
+    // Bubbles
+    bubbles.forEach(b => {
+      b.y -= b.speed * dt;
+      b.wobble += b.wobbleSpeed * dt;
+      const wobbleX = Math.sin(b.wobble) * 6;
+      // When above top, respawn near seafloor
+      if (b.y + b.r < 0) {
+        b.y = seafloorY + Math.random() * 80;
+        b.x = 50 + Math.random() * 900;
+        b.r = 3 + Math.random() * 7;
+        b.speed = 30 + (10 - b.r) * 6;
+        b.wobble = Math.random() * Math.PI * 2;
+        b.wobbleSpeed = 1 + Math.random();
+        b.el.setAttribute('r', b.r);
+      }
+      b.el.setAttribute('cx', b.x + wobbleX);
+      b.el.setAttribute('cy', b.y);
+      b.el.setAttribute('r', b.r);
+    });
+
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>
+
+Need to check requirements carefully:
+
+- Full-viewport SVG: width 100vw height 100vh. yes.
+- Water gradient: linearGradient lighter top darker bottom. yes.
+- Seafloor along bottom ~10-15%: from y=600 to 700 in 700 height => 100/700 ≈ 14.3%. yes.
+- Fish exactly 2, different colors, sizes, shapes. Fish1 orange, round/short (rx75 ry48), larger. Fish2 purple, slender (rx55 ry20), smaller. Both have body, triangular tail, dorsal fin, side fin, exactly 1 eye (circle+pupil), mouth. yes.
+- Bubbles at least 5: 9 bubbles. Circles white/light-blue with stroke. Rise continuously. Respawn at top -> near seafloor. Vary sizes; smaller faster. yes.
+- Seaweed at least 2: we have 4 groups (3 paths + one stack of ellipses). rooted on seafloor. green wavy path/stack of ellipses. Sway via CSS animation. yes.
+- Animation: both fish swim horizontally, different speeds (50 vs 110). wrap-around. Bubbles rise. yes.
+- Constraints: single file, no external. no emoji/unicode graphics. All SVG primitives. Under 18KB. Need to check file size. Our code is roughly 5-6 KB, well under.
+- No console errors: check JS. We use performance.now, requestAnimationFrame. Should be fine.
+
+Potential issues:
+- CSS animation sway on seaweed groups: transform-box: fill-box; transform-origin: bottom center; animation. This should work in modern browsers. However, for SVG elements, CSS transforms with transform-origin may have issues in some browsers, but it's not critical—if it doesn't sway, static is allowed. So fine.
+- Fish2 mirrored: transform="translate(x,y) scale(-1,1)". The base transform in HTML is translate(700,150) scale(-1,1). JS updates to translate(f.x,f.y) scale(-1,1). Correct.
+- Fish wrap: fish1 dir=1, moves right. when x > 1000+150=1150, resets to -150. fish2 dir=-1, moves left. when x < -150, resets to 1150. But note fish2's mirrored transform: translate(x,y) scale(-1,1). When x is large (e.g., 1150), the fish is drawn to the left of x due to scale(-1,1)? Actually scale(-1,1) flips the coordinate system: a point at local x=0 maps to x=0, local x=50 maps to x=-50. So the fish body extends from -55 to 55 local, after scale, from x-(-55)? Let's think: transform="translate(x,y) scale(-1,1)". A local point (lx,ly) becomes (x - lx, y + ly). So the fish shape (which spans lx from -85 to 55) maps to x - (-85) to x - 55, i.e., x+85 down to x-55. So the visual bounding box is [x-55, x+85]? Actually if lx ranges -85 to 55, then x - lx ranges x+85 to x-55. So visual min x = x-55, max x = x+85. So the fish's head (at lx=55) maps to x-55 (left side), tail at lx=-85 maps to x+85 (right side). So fish faces left, head at x-55. When x < -150, the fish is entirely offscreen left? If x = -150, visual max x = -150+85 = -65, so still offscreen. Respawn at 1150: visual min x = 1150-55 = 1095, max x = 1235, offscreen right. Good. So wrap works.
+
+- Fish1 visual bounding: local x from -120 to 80, so visual [x-120, x+80]. When x > 1150, min = 1030, offscreen right. Reset to -150, max = -70, offscreen left. Good.
+
+- Bubbles initial positions: createBubble(true) returns y = seafloorY + random*80 = 600-680. But seafloor path top is around y=600-620, so bubbles start within/near sand. That's okay, "rising from somewhere on the seafloor". They rise. Good. When respawn, y = seafloorY + random*80. Good.
+
+- Bubble respawn condition: if (b.y + b.r < 0) i.e., bubble fully above top. Then reset. Good.
+
+- Bubble wobble: we add wobbleX to cx, but x remains original. When respawn, x reset. Good.
+
+- Bubble element initial attributes: we set fill, stroke, stroke-width. r set in animate. cx, cy set in animate. But before first animate, bubbles have no cx/cy/r, but animate called immediately via requestAnimationFrame, so next frame they get set. Actually requestAnimationFrame(animate) will run before paint? It runs before next repaint. So bubbles will be set. Fine. Could set initial attributes to avoid flash, but not necessary.
+
+- Seaweed paths: stroke widths. The first seaweed path has a complex path. It's fine.
+
+- Rocks: ellipses. Fine.
+
+- File size: let's estimate. ~5.5 KB. Under 18KB.
+
+Potential issue: `transform-box: fill-box;` in CSS may not be supported for SVG in some browsers, but if not, animation may not apply correctly (could rotate around origin of SVG coordinate system). However, even if it rotates weirdly, it's still a plant; not a hard failure. But to be safe, maybe avoid CSS animation on SVG and just keep static, which satisfies "may sway gently OR remain static". The requirement explicitly allows static. Let's make seaweed static to avoid any potential transform-origin issues. But a gentle sway is nice. We can implement sway via JS updating the `d` attribute or `transform` attribute with proper transform-origin? That's more code. Static is simpler and safe. I'll remove CSS animation and just have static seaweed. But then "Seaweed may sway gently OR remain static — your choice." So static is allowed. Let's keep static to avoid any browser compatibility issues. However, the scene might be a bit static. We can add a subtle sway via SMIL animation? That's also possible but maybe unnecessary. Let's just remove the CSS animation class and keyframes. Actually, we can keep it but if it doesn't work, it's still static. But if it rotates around wrong origin, it might look like it's rotating around the middle of the viewport, which could be weird. Better to remove. Let's make static seaweed. The animation requirement only says "Both fish must swim... Bubbles rise...". Seaweed is optional animation. So static is fine.
+
+But we can add a gentle sway using JS: for each seaweed, apply a transform rotate with transform-origin at base. But SVG transform attribute doesn't support origin directly; we'd need to use translate and rotate around base. Could do: transform="translate(baseX, baseY) rotate(angle) translate(-baseX,-baseY)" updated each frame. That's doable but adds code. Not necessary. Let's keep static.
+
+I'll modify: remove `.seaweed` CSS and animation, keep groups as static. Or keep class but no animation. Simpler: remove the style block animation. Keep only basic CSS. Then seaweed is static.
+
+Wait, the requirement says "Seaweed may sway gently OR remain static — your choice." So static is acceptable. Let's do static to reduce risk.
+
+Now, check "exactly 1 visible eye (circle with a pupil dot)" for each fish. We have one circle white and one circle pupil. That's one eye. Good.
+
+"mouth indication (small line, curve, or open shape)" - we have path stroke. Good.
+
+"At least 1 fin (top dorsal fin OR side fin OR both)" - we have both dorsal and side fin. Good.
+
+"Different overall body shape (e.g., one round/short, one long/slender)" - Fish1 rx75 ry48 (ratio 1.56), Fish2 rx55 ry20 (ratio 2.75). Visually distinct. Fish1 is rounder, Fish2 slender. Good.
+
+"Different sizes (one clearly larger than the other)" - Fish1 body 150x96, Fish2 body 110x40. Clearly larger. Good.
+
+"Different colors" - orange vs purple. Good.
+
+"At least 5 bubbles rising from somewhere on the seafloor." - 9 bubbles, start near seafloor. Good.
+
+"Each bubble is a small circle (white or light-blue, with optional highlight ring for sphericality)." - We use fill rgba(200,240,255,0.5), stroke white. That's light-blue with ring. Good.
+
+"Bubbles drift upward continuously." - yes.
+
+"When a bubble reaches the top of the viewport, it disappears and a new bubble respawns near the seafloor (continuous loop)." - yes.
+
+"Bubbles vary in size; smaller bubbles may rise faster." - yes.
+
+"At least 2 seaweed shapes rooted on the seafloor." - we have 4. Rooted: paths start at y=620, 625, 615, and ellipses at y=600-580. The seafloor is from y=600 to 700. The paths start around y=620, which is on the seafloor. Good.
+
+"Each seaweed is a green vertical wavy path or a stack of overlapping ellipses suggesting a plant." - yes.
+
+"Both fish must swim horizontally across the screen." - yes.
+
+"Each fish must move at a noticeably different speed from the other." - 50 vs 110. Good.
+
+"When a fish exits one side of the screen, it must reappear on the opposite side (wrap-around)." - yes.
+
+"No console errors on load." - Check JS: we query elements. All exist. No external. `performance.now()` is fine. `requestAnimationFrame` fine. `document.createElementNS` fine. `setAttribute` fine. No errors.
+
+Potential issue: `Math.random()` in createBubble for initial true sets y = seafloorY + Math.random() * 80. But seafloorY=600. So y between 600 and 680. The bubbles will be drawn inside the sand area, which might look like they're inside the sand. But they rise quickly. Could start them slightly above the seafloor, e.g., y = 580 + random*20. But requirement says "rising from somewhere on the seafloor", so starting at y=600-680 is on the seafloor. They will rise. It's fine. Maybe better to start at y = 590 + random*30 to be just above the sand. Let's set initial y = 590 + Math.random() * 30. Actually the seafloor path top varies between 580 and 620. So y=590 might be slightly above sand in some places. That's okay. For respawn, same. Let's adjust createBubble to y = 580 + Math.random() * 40. That's near the seafloor. But to be safe, we can keep 600+random*80. The bubbles will rise from within the sand region and emerge. That's fine.
+
+Let's also add a highlight ring on bubbles? We have stroke. That's a ring. Good.
+
+One more thing: The fish shapes are defined with coordinates. For fish1, the mouth path is at x=68 to 80. The body ellipse extends to x=75. So mouth is at the front edge. Good. Eye at x=45. Good.
+
+For fish2, body ellipse rx=55, so front edge at x=55. Mouth at x=52-59. Eye at x=35. Good.
+
+Now, file size. Let's count roughly: HTML ~100 lines. Should be under 18KB. I'll write it cleanly.
+
+Let's produce final output. Ensure no markdown fences, only contents starting with <!DOCTYPE html>.
+
+Wait, I removed CSS animation. Let's finalize the code.
+
+I'll also add a slight opacity to bubbles for a nicer look. Already set.
+
+Let's write the final file.
+
+Check for any Unicode characters that might be considered emoji? We use only ASCII. No emoji. The title "Underwater Scene" is fine. No Unicode pictographs.
+
+I'll ensure no `<link>`, no `<script src>`, no fetch.
+
+Final code:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Underwater Scene</title>
+<style>
+html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#062a4a; }
+svg { display:block; width:100vw; height:100vh; }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5ec8e8"/>
+      <stop offset="50%" stop-color="#1e7fb8"/>
+      <stop offset="100%" stop-color="#062a4a"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c2a36b"/>
+      <stop offset="100%" stop-color="#8a6b3d"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1000" height="700" fill="url(#water)"/>
+
+  <path d="M0,620 Q150,580 300,610 T600,600 T1000,620 L1000,700 L0,700 Z" fill="url(#sand)"/>
+  <ellipse cx="150" cy="660" rx="60" ry="25" fill="#7a5a32" opacity="0.8"/>
+  <ellipse cx="780" cy="670" rx="80" ry="30" fill="#6b4f2c" opacity="0.8"/>
+
+  <g>
+    <path d="M180,620 C160,560 210,520 190,460 C170,400 220,370 200,310 C190,280 200,260 210,250" fill="none" stroke="#2e8b57" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  <g>
+    <path d="M240,625 C260,570 220,530 240,480 C260,430 220,400 240,350" fill="none" stroke="#3cb371" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <g>
+    <path d="M850,615 C830,550 870,510 850,450 C830,390 870,360 850,300" fill="none" stroke="#228b22" stroke-width="14" stroke-linecap="round"/>
+  </g>
+  <g>
+    <ellipse cx="880" cy="600" rx="15" ry="10" fill="#2e8b57"/>
+    <ellipse cx="875" cy="580" rx="14" ry="10" fill="#2e8b57"/>
+    <ellipse cx="882" cy="560" rx="13" ry="9" fill="#3cb371"/>
+    <ellipse cx="876" cy="540" rx="12" ry="8" fill="#3cb371"/>
+  </g>
+
+  <g id="bubbles"></g>
+
+  <g id="fish1" transform="translate(200,300)">
+    <path d="M -70,0 L -120,-35 L -120,35 Z" fill="#e67e22"/>
+    <path d="M -20,-40 Q 0,-75 35,-38 Z" fill="#d35400"/>
+    <ellipse cx="0" cy="0" rx="75" ry="48" fill="#f39c12"/>
+    <ellipse cx="5" cy="18" rx="22" ry="10" fill="#e67e22" transform="rotate(20 5 18)"/>
+    <circle cx="45" cy="-12" r="9" fill="white"/>
+    <circle cx="47" cy="-12" r="4.5" fill="#1a1a1a"/>
+    <path d="M 68,8 Q 75,14 80,6" fill="none" stroke="#b35300" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <g id="fish2" transform="translate(700,150) scale(-1,1)">
+    <path d="M -50,0 L -85,-20 L -85,20 Z" fill="#8e44ad"/>
+    <path d="M -10,-18 Q 5,-35 25,-16 Z" fill="#6c3483"/>
+    <ellipse cx="0" cy="0" rx="55" ry="20" fill="#9b59b6"/>
+    <ellipse cx="5" cy="8" rx="14" ry="6" fill="#8e44ad" transform="rotate(15 5 8)"/>
+    <circle cx="35" cy="-5" r="5" fill="white"/>
+    <circle cx="37" cy="-5" r="2.5" fill="#1a1a1a"/>
+    <path d="M 52,4 Q 56,7 59,3" fill="none" stroke="#5b2c6f" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+</svg>
+<script>
+(function(){
+  const bubblesGroup = document.getElementById('bubbles');
+  const fish1 = document.getElementById('fish1');
+  const fish2 = document.getElementById('fish2');
+
+  const fishState = [
+    { el: fish1, x: 200, y: 300, speed: 50, dir: 1 },
+    { el: fish2, x: 700, y: 150, speed: 110, dir: -1 }
+  ];
+
+  const bubbles = [];
+  const numBubbles = 9;
+  const seafloorY = 600;
+
+  function createBubble(initial) {
+    const r = 3 + Math.random() * 7;
+    const speed = 30 + (10 - r) * 6;
+    const x = 50 + Math.random() * 900;
+    const y = initial ? seafloorY + Math.random() * 80 : -r - Math.random() * 100;
+    return { x, y, r, speed, wobble: Math.random() * Math.PI * 2, wobbleSpeed: 1 + Math.random() };
+  }
+
+  for (let i = 0; i < numBubbles; i++) {
+    const b = createBubble(true);
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('fill', 'rgba(200,240,255,0.5)');
+    circle.setAttribute('stroke', 'rgba(255,255,255,0.8)');
+    circle.setAttribute('stroke-width', '1');
+    bubblesGroup.appendChild(circle);
+    b.el = circle;
+    bubbles.push(b);
+  }
+
+  let lastTime = performance.now();
+
+  function animate(now) {
+    const dt = Math.min((now - lastTime) / 1000, 0.1);
+    lastTime = now;
+
+    fishState.forEach(f => {
+      f.x += f.speed * f.dir * dt;
+      const off = 150;
+      if (f.dir > 0 && f.x > 1000 + off) {
+        f.x = -off;
+      } else if (f.dir < 0 && f.x < -off) {
+        f.x = 1000 + off;
+      }
+      if (f.el === fish1) {
+        f.el.setAttribute('transform', `translate(${f.x},${f.y})`);
+      } else {
+        f.el.setAttribute('transform', `translate(${f.x},${f.y}) scale(-1,1)`);
+      }
+    });
+
+    bubbles.forEach(b => {
+      b.y -= b.speed * dt;
+      b.wobble += b.wobbleSpeed * dt;
+      const wobbleX = Math.sin(b.wobble) * 6;
+      if (b.y + b.r < 0) {
+        b.y = seafloorY + Math.random() * 80;
+        b.x = 50 + Math.random() * 900;
+        b.r = 3 + Math.random() * 7;
+        b.speed = 30 + (10 - b.r) * 6;
+        b.wobble = Math.random() * Math.PI * 2;
+        b.wobbleSpeed = 1 + Math.random();
+      }
+      b.el.setAttribute('cx', b.x + wobbleX);
+      b.el.setAttribute('cy', b.y);
+      b.el.setAttribute('r', b.r);
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>
+
+Check that the bubbles' `r` attribute is set in animate. Yes.
+
+One minor thing: In createBubble, for initial false, y is negative. But we only call with true initially. Respawn logic sets y near seafloor. So fine.
+
+No console errors.
+
+File size: Let's estimate. The HTML is about 4.5 KB. Under 18 KB.
+
+I'll output only the file contents.

@@ -1,0 +1,1134 @@
+Let me write a self-contained HTML file with SVG scene. Need exactly 2 fish, bubbles >=5, seaweed >=2, animation with JS requestAnimationFrame or CSS/SMIL. Use JS for smooth control and wrap-around.
+
+Plan:
+- SVG viewBox with width/height matching viewport? Use full viewport with preserveAspectRatio="none"? Better use viewBox="0 0 1000 700" and preserveAspectRatio="xMidYMid slice"? Requirement full-viewport SVG 100vw x 100vh. Use width/height 100% and set viewBox dynamically to pixel size via JS on resize, keeping coordinate = pixels. Simpler: use viewBox="0 0 1200 800" with preserveAspectRatio="none" so it stretches — that distorts fish shapes. Alternatively set SVG width/height 100% and use JS to set viewBox to window.innerWidth/innerHeight and reposition seafloor via a group. Hmm, easier: use viewBox="0 0 100 100" with preserveAspectRatio="none" — but fish would distort.
+
+Best approach: fixed coordinate system with viewBox="0 0 1200 800" and preserveAspectRatio="xMidYMid slice" so it fills viewport without distortion (crops). Scene elements positioned within 1200x800. Seafloor at y=680..800 (15%). Bubbles rise from y=680 to top y=0. Fish swim across x from -200 to 1400 wrap.
+
+Slice cropping might cut off edges but fine. Actually with slice, on wide screens it scales to fill width and crops vertically... For a 16:9 viewport vs 3:2 viewBox, it fills. Fine.
+
+Let me design fish.
+
+Fish 1: large, round/plump orange fish.
+Body: ellipse cx=0 cy=0 rx=70 ry=48 (in a <g> positioned via transform).
+Tail: triangle polygon points "-70,-30 -110,0 -70,30"? Actually tail at rear (left side if fish faces right). Let's have fish face right: body ellipse, tail at left rear. Tail polygon: points="(-62,-28) (-108,0) (-62,28)".
+Dorsal fin: path above body, e.g. M -20,-44 Q 0,-78 30,-40 Z.
+Side fin: ellipse rotated near lower middle.
+Eye: circle white at (42,-12) r=9, pupil circle r=4.5 dark.
+Mouth: small curve near front: path M 68,6 q 8,6 -2,10? Or a small arc. Use path d="M 60,10 q 10,8 22,2" stroke.
+Colors: orange body with darker orange fins, gradient maybe.
+
+Fish 2: small, slender, elongated purple/teal fish. Body ellipse rx=55 ry=22 or use path teardrop. Tail triangle. Dorsal fin small triangle. Eye small. Mouth small line.
+
+Animation: JS loop updating transform translate(x,y) with scaleX flip based on direction. Both swim horizontally, different speeds. Fish 1 speed 60 px/s, fish 2 speed 140 px/s. Direction: fish1 moving right, fish2 moving left. Wrap.
+
+Bubbles: create 9 bubbles via JS, each with circle element and highlight ring? Use circle with fill white opacity 0.35, stroke white opacity 0.7, plus small highlight circle offset. Each bubble: a <g> with two circles. Store x, y, r, speed. Update y -= speed*dt; when y < -20 respawn at seafloor y ~ 660-700 with new x, r, speed. Smaller bubbles faster: speed = base * (12/r).
+
+Seaweed: 3 plants. Use paths with quadratic curves, green strokes with thick stroke-linecap round. Sway via CSS animation rotate around base or use animateTransform? Simpler: CSS keyframes with transform-origin at base and rotate small angle. But SVG transform-origin in CSS works in modern browsers: transform-box: fill-box; transform-origin: bottom center. Use that. Or use SMIL animate on path d — could do JS. Let's use CSS animation with transform-origin: 50% 100% and transform-box: fill-box. Should work.
+
+Actually careful: for a path, fill-box bounding box bottom center. Sway rotate ±4deg. Fine.
+
+Also add light rays maybe (optional). Keep file small.
+
+Seafloor: path with wavy top line, fill tan gradient. Plus some rocks (ellipses/circles brown).
+
+Let me write code.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Underwater</title>
+<style>
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#022}
+  svg{display:block;width:100vw;height:100vh}
+  .sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway 5s ease-in-out infinite}
+  @keyframes sway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+</style>
+</head>
+<body>
+<svg id="scene" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+<defs>
+ <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+   <stop offset="0" stop-color="#2fa8d8"/>
+   <stop offset="0.45" stop-color="#0f6fa8"/>
+   <stop offset="1" stop-color="#052a4d"/>
+ </linearGradient>
+ <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+   <stop offset="0" stop-color="#d9c48a"/>
+   <stop offset="1" stop-color="#8a6f3d"/>
+ </linearGradient>
+ <linearGradient id="fish1" x1="0" y1="0" x2="0" y2="1">
+   <stop offset="0" stop-color="#ffb347"/>
+   <stop offset="1" stop-color="#e8621c"/>
+ </linearGradient>
+ <linearGradient id="fish2" x1="0" y1="0" x2="1" y2="1">
+   <stop offset="0" stop-color="#9be7ff"/>
+   <stop offset="1" stop-color="#3d7bd6"/>
+ </linearGradient>
+</defs>
+<rect width="1200" height="800" fill="url(#water)"/>
+... light rays optional
+<g id="seafloor"> ... </g>
+<g id="weeds">...</g>
+<g id="fish1">...</g>
+<g id="fish2">...</g>
+<g id="bubbles"></g>
+</svg>
+<script>...</script>
+</body>
+</html>
+```
+
+Fish facing right, group with transform translate(x,y) and scale(-1,1) if moving left. Since I'll set transform attribute in JS: `translate(x,y) scale(s,1)`.
+
+Fish 1 geometry (center 0,0), facing right:
+- tail: polygon points="-60,-34 -112,0 -60,34" fill darker orange #d9541a
+- dorsal fin: path "M -22,-46 Q 4,-86 40,-40 Z" fill #f08a2e
+- pelvic/side fin: path "M -6,26 Q 10,54 -18,44 Z" or ellipse. Use ellipse cx=-8 cy=34 rx=16 ry=9 rotated. Simpler: path "M -12,30 Q 6,58 -26,48 Z".
+- body ellipse cx=0 cy=0 rx=72 ry=50 fill url(#fish1), stroke #b8441a stroke-width 2.
+- eye: circle cx=42 cy=-14 r=10 fill #fff; circle cx=45 cy=-14 r=5 fill #1a1a2e. Actually exactly 1 visible eye — fine.
+- mouth: path "M 66,4 q 10,8 20,2" stroke #b8441a stroke-width 3 fill none stroke-linecap round. Hmm mouth at front right edge x=72. Body edge at x=72 y=0. Mouth around (68,10): path "M 62,8 q 12,10 22,0"? Let's do "M 66,2 q 8,10 16,4" — a small curve. Fine.
+
+Fish 2 small slender, facing right, center 0,0:
+- body: ellipse rx=54 ry=20 fill url(#fish2) — long slender.
+- tail: polygon "-50,-16 -86,0 -50,16" fill #2f5fae
+- dorsal: path "M -18,-20 Q 0,-42 24,-16 Z" fill #59a9e6
+- eye: circle cx=34 cy=-5 r=6 fill white; pupil cx=36 cy=-5 r=3 fill #10102a
+- mouth: path "M 50,4 q 8,4 12,0" stroke #2f5fae width 2.
+- maybe pectoral fin: ellipse.
+
+Note fish2 is slender so eye at cy=-5, body ry=20.
+
+Fish positions: fish1 y=280, fish2 y=520 maybe. Fish1 moves right at 55 px/s starting x=-150. Fish2 moves left at 120 px/s starting x=1300.
+
+Wrap: if moving right and x > 1200 + 130 → x = -130. If moving left and x < -130 → x = 1300.
+
+Wait with scale(-1,1) for left-facing fish. Fish2 faces left → scale(-1,1).
+
+Bubbles: create with JS. Each bubble group: main circle r, fill "#bfefff" opacity 0.28, stroke "#e8fbff" opacity 0.7 stroke-width 1.5, plus highlight circle at (-r*0.3, -r*0.35) r*0.28 fill "#fff" opacity 0.8.
+
+Use document.createElementNS.
+
+Bubble count 10. Respawn: x random 60..1140, y random 640..700, r random 4..14, speed = 90 * (8/r) clamp... Smaller faster: speed = 60 + (14 - r) * 8 → r=4 → 140, r=14 → 60. Good.
+
+Animation loop with requestAnimationFrame, dt clamped.
+
+Seaweed: 3 plants at x=180, 620, 980, rooted at y=690 (seafloor top ~660-700). Use paths.
+
+Seaweed path example: stem from (0,0) up to (0,-140) wavy:
+`M 0,0 C -18,-40 18,-80 -6,-120 C -14,-140 -2,-160 4,-175` with stroke #2e8b57 width 10, fill none, linecap round. Add leaves as ellipses? Requirement: green vertical wavy path or stack of overlapping ellipses. Wavy paths fine. Add multiple strands per plant.
+
+Place plants in <g transform="translate(180,700)"> with class sway.
+
+Sway animation on each strand might look odd but fine. Apply class to the whole plant group.
+
+Seafloor: path from (0,660) wavy across to (1200,660) then down to bottom corners:
+`M 0,800 L 0,668 Q 150,640 300,672 Q 450,700 600,664 Q 760,628 900,676 Q 1050,706 1200,662 L 1200,800 Z` fill url(#sand).
+
+Rocks: few ellipses with brown fills at bottom.
+
+Light rays: optional polygons with white opacity 0.05 — nice, cheap. Add 3 polygons.
+
+Note the viewBox 1200x800 with slice: on typical 16:9 viewport (e.g., 1920x1080), aspect 1.777 vs viewBox 1.5 → slice scales to fill width: scale = 1920/1200 = 1.6 → height = 1280, cropped vertically (800*1.6=1280 vs 1080) so crops 100 top and bottom... that would crop seafloor! Hmm. That's bad.
+
+Better: use preserveAspectRatio="none" with viewBox matching? Distortion of fish shapes... Actually if viewBox aspect differs from viewport, "none" stretches fish. Hmm.
+
+Alternative: set viewBox dynamically in JS to match viewport aspect: viewBox="0 0 W H" where W,H = window.innerWidth/innerHeight, and place elements using those coordinates. That avoids distortion and cropping. But then positions computed in JS. Fish positions and bubbles use W/H variables. Seafloor path needs dynamic d. Doable: on resize, rebuild seafloor path d and reposition weeds.
+
+Simplest robust approach: use viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" — square. On wide viewport, fills width, crops top/bottom heavily. Not good either.
+
+Let's do JS-driven viewBox. Set SVG viewBox to `0 0 ${W} ${H}` on resize, with W=innerWidth, H=innerHeight. Seafloor height = 0.13*H. Seaweed positions relative. Fish y relative. Bubbles respawn using H.
+
+But fish scale: fish sizes fixed in px, fine.
+
+Implementation details:
+- W,H globals; on resize update viewBox and rebuild static geometry (seafloor path, weeds positions, ray polygons). Fish/bubbles keep positions; clamp maybe.
+
+Let's build seafloor path function:
+```
+function seafloorPath(W,H){
+  const top = H*0.86;
+  let d = `M 0 ${H} L 0 ${top}`;
+  const n = 6;
+  for(let i=1;i<=n;i++){
+    const x = W*i/n;
+    const y = top + Math.sin(i*1.7)*H*0.02 - ... 
+  }
+}
+```
+Simpler: use a fixed wavy path with quadratic curves scaled: 
+d = `M 0 ${H} L 0 ${top} Q ${W*0.12} ${top-H*0.03} ${W*0.25} ${top+H*0.01} Q ${W*0.4} ${top+H*0.04} ${W*0.55} ${top-H*0.02} Q ${W*0.7} ${top-H*0.05} ${W*0.85} ${top+H*0.02} Q ${W*0.95} ${top+H*0.04} ${W} ${top} L ${W} ${H} Z`
+
+That works.
+
+Weeds: place at x fractions 0.15, 0.52, 0.84; base y = top + small offset. Each plant height ~ H*0.28. Use paths built with relative coordinates scaled by height.
+
+Let me write weed path generator: given height h, strand path:
+`M 0 0 C ${-0.12*h} ${-0.3*h} ${0.12*h} ${-0.6*h} ${-0.05*h} ${-0.85*h} C ${-0.1*h} ${-0.95*h} ${0.02*h} ${-0.98*h} ${0.04*h} ${-h}`
+
+Add 2-3 strands per plant with slight x offsets and different heights, different greens.
+
+Bubbles: spawn near seafloor: x random within W*0.05..W*0.95, y = H*0.9 - random*H*0.05... Actually bubbles should rise from seafloor: start y between H*0.84 and H*0.92. Then rise until y < -20 → respawn. Initial spawn distribute randomly along y for immediate variety: y random from 0 to H*0.9. But requirement says bubbles rise from seafloor; initial random distribution is fine visually, but maybe spawn all at seafloor for authenticity — then all rise. To avoid a blank screen at start, stagger initial y random between H*0.2 and H*0.9. That's fine; they still respawn at seafloor.
+
+Hmm, "At least 5 bubbles rising from somewhere on the seafloor" — respawn at seafloor satisfies.
+
+Fish animation: store fish objects {el, x, y, speed, dir, scale}. Fish y also could bob slightly with sine — optional, adds life. Let's add gentle vertical bob: y = baseY + sin(t*1.3 + phase)*10. And fish also rotate slightly? Keep simple.
+
+Fish transform: `translate(${x},${y}) scale(${dir},1)` where dir = 1 for right, -1 for left. But if fish faces right in local coords, dir=-1 flips to face left. Good.
+
+Fish 1 speed 55, dir 1, baseY = H*0.36.
+Fish 2 speed 130, dir -1, baseY = H*0.62.
+
+Wrap margins based on fish half-length: fish1 ~112+... use margin 130; fish2 use 100. Use per-fish margin.
+
+Also handle resize: fish baseY recalculated as fractions of H — store baseYFrac.
+
+Let me write JS:
+
+```js
+const svg = document.getElementById('scene');
+const fishG = ... etc.
+let W=0,H=0;
+const fish1 = {el:document.getElementById('f1'), x:0, frac:0.36, speed:55, dir:1, margin:140, phase:0};
+const fish2 = {el:document.getElementById('f2'), x:0, frac:0.62, speed:130, dir:-1, margin:110, phase:1.5};
+const bubbles=[];
+```
+
+Actually fish elements are static SVG in markup with transform set by JS. Good.
+
+Build bubbles via JS creating elements.
+
+Loop:
+```js
+let last=performance.now();
+function frame(now){
+  let dt=(now-last)/1000; last=now;
+  if(dt>0.05) dt=0.05;
+  t += dt;
+  // fish
+  fish1.x += fish1.speed*dt;
+  if(fish1.x > W + fish1.margin) fish1.x = -fish1.margin;
+  ...
+```
+Wait wrap logic: for dir=1 (moving right), when x > W + margin → x = -margin. For dir=-1, when x < -margin → x = W + margin.
+
+Set transform with bob.
+
+Bubbles update.
+
+Resize handler: set W,H, svg.setAttribute('viewBox',`0 0 ${W} ${H}`), rebuild seafloor & weeds, reposition fish x if needed (keep x, clamp). Also on first load initialize fish x: fish1.x = -140 (just off left) or random. Let's set fish1.x = W*0.1 maybe; fish2.x = W*0.7. Actually starting visible is nice. fish1.x = W*0.15, fish2.x = W*0.8.
+
+But careful with initial resize before fish init. Order: resize() then init positions if first time.
+
+Let me structure:
+
+```js
+let W=innerWidth, H=innerHeight, first=true;
+function layout(){
+  W = innerWidth; H = innerHeight;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const top = H*0.855;
+  seafloor.setAttribute('d', ...);
+  rocks reposition...
+  weeds: position via transform attribute: translate(x, baseY)
+  if(first){ fish1.x = W*0.12; fish2.x = W*0.78; first=false; }
+  else { fish1.x = Math.min(fish1.x, W+...); }
+}
+```
+Simpler: don't reposition fish on resize, just leave x as is.
+
+Weeds: I'll generate 3 plant groups in markup? Their geometry depends on H. I could generate via JS into a group. Let's generate weeds in JS in layout() — clear and rebuild. Since layout runs rarely, fine.
+
+Weed generation:
+```js
+function buildWeeds(top){
+  weeds.innerHTML='';
+  const spots=[0.13,0.47,0.83];
+  const h0 = H*0.3;
+  spots.forEach((f,i)=>{
+    const g=document.createElementNS(NS,'g');
+    const x=W*f, base=top + H*0.02;
+    g.setAttribute('transform',`translate(${x},${base})`);
+    g.setAttribute('class','sway');
+    g.style.animationDelay = (-i*1.4)+'s';
+    g.style.animationDuration = (4.5+i)+'s';
+    const strands = 3;
+    for(let s=0;s<strands;s++){
+      const h = h0*(0.7 + 0.3*Math.random() ... 
+```
+Random each resize — fine but maybe deterministic. Use deterministic offsets.
+
+Let me just handcraft with a function:
+
+```js
+function strandPath(h, lean){
+  return `M 0 0 C ${-0.14*h} ${-0.28*h} ${0.14*h} ${-0.58*h} ${-0.04*h} ${-0.82*h} C ${-0.10*h} ${-0.93*h} ${0.03*h} ${-0.97*h} ${0.06*h+lean} ${-h}`;
+}
+```
+Hmm lean param not needed.
+
+Strands: s=0: h=h0, translate(0,0), stroke #2f9e5b width 9; s=1: h=h0*0.8, translate(-16,0) stroke #3cb371 width 7; s=2: h=h0*0.9, translate(16,0) stroke #267a45 width 7.
+
+Since translate within g: use nested <path transform="translate(-16,0)">.
+
+Colors: greens.
+
+Also add small rocks: 3 ellipses on seafloor with brown colors, positioned in JS or static with fractions? Static in markup with fixed coords won't scale on resize. Put rocks inside a group and position in layout(). Or skip rocks (optional). Seafloor requirement is just sandy/rocky floor. Add rocks in JS layout too — simple ellipses. Eh, could skip; but a couple of rocks add polish. I'll add rocks via JS in layout with fixed fractions.
+
+Light rays: add in JS layout as polygons from top. Optional; adds beauty. Three polygons with fill white opacity 0.04-0.06. I'll add them, positioned with fractions of W, length H.
+
+Now write everything carefully.
+
+SVG markup:
+
+```html
+<svg id="scene" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet" xmlns=...>
+```
+We'll override viewBox on load. preserveAspectRatio default xMidYMid meet works since viewBox matches viewport aspect exactly after layout. Good.
+
+Defs gradients.
+
+Then:
+```html
+<rect id="water" width="100%" height="100%" fill="url(#water)"/>
+<g id="rays"></g>
+<path id="seafloor" fill="url(#sand)"/>
+<g id="rocks"></g>
+<g id="weeds"></g>
+<g id="bubbles"></g>
+<g id="f1"> ... fish1 ... </g>
+<g id="f2"> ... fish2 ... </g>
+```
+
+Order: fish in front of bubbles? Bubbles behind fish or in front — doesn't matter. Put bubbles behind fish maybe. Fish above seaweed.
+
+Fish markup fish1:
+
+```html
+<g id="f1">
+  <polygon points="-58,-36 -112,0 -58,36" fill="#c94a12"/>
+  <path d="M -20,-46 Q 6,-92 40,-38 Z" fill="#f2913a"/>
+  <path d="M -10,32 Q 8,64 -30,50 Z" fill="#e07a26"/>
+  <ellipse rx="72" ry="50" fill="url(#fish1)" stroke="#b8441a" stroke-width="2.5"/>
+  <circle cx="42" cy="-14" r="10" fill="#fff" stroke="#b8441a" stroke-width="1.5"/>
+  <circle cx="45" cy="-14" r="5" fill="#221a2e"/>
+  <path d="M 64,4 Q 74,14 84,8" fill="none" stroke="#a83c14" stroke-width="3" stroke-linecap="round"/>
+</g>
+```
+
+Hmm mouth at x=84 while body edge at x=72; that's outside body. Mouth should be on the body front. Let's put mouth at x from 58 to 70: `M 58,6 Q 66,14 72,6`. Body ellipse at y=6: x = 72*sqrt(1-(6/50)^2) ≈ 72*0.9928 ≈ 71.5. So x=72 is at edge. Mouth curve from (56,4) to (70,12)? Let's do `M 56,2 Q 66,12 70,4`. Hmm. It should read as a mouth: small line near front. Use path "M 60,6 Q 68,14 74,6" — slightly crossing edge is okay visually. Actually simplest: a short stroke `M 62,4 L 72,10`? I'll use a small curve: d="M 60,4 Q 68,14 76,6" — but 76 > body edge at y=6 (~71.5). Slight overhang looks like open mouth, acceptable. Let's do "M 58,2 Q 68,12 74,4" — fine.
+
+Fish2:
+
+```html
+<g id="f2">
+  <polygon points="-46,-18 -88,0 -46,18" fill="#2d5aa8"/>
+  <path d="M -16,-19 Q 2,-44 26,-15 Z" fill="#6fb6ea"/>
+  <ellipse rx="54" ry="20" fill="url(#fish2)" stroke="#2d5aa8" stroke-width="2"/>
+  <circle cx="33" cy="-6" r="6.5" fill="#fff" stroke="#2d5aa8" stroke-width="1.2"/>
+  <circle cx="35" cy="-6" r="3.2" fill="#141428"/>
+  <path d="M 46,4 Q 52,8 56,4" fill="none" stroke="#2d5aa8" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="2" cy="12" rx="12" ry="6" fill="#8fd0f5" opacity="0.8" transform="rotate(-15 2 12)"/>
+</g>
+```
+
+Body edge at y=4: x=54*sqrt(1-(4/20)^2)=54*0.9798=52.9. Mouth from 46 to 56 slight overhang, ok. Adjust to "M 44,3 Q 50,9 53,3".
+
+Eye at cx=33, cy=-6, r=6.5 — inside body? At x=33, y range ±20*sqrt(1-(33/54)^2)= ±20*0.792=±15.8, so cy=-6 with r 6.5 → top at -12.5 fine within.
+
+Fish1 eye at cx=42, cy=-14: y range at x=42: ±50*sqrt(1-(42/72)^2)=±50*0.812=±40.6, fine.
+
+Now, fish2 is smaller (rx 54 vs 72) and slender (ry 20 vs 50) — good distinction. Colors orange vs blue/teal.
+
+Wait fish2's tail polygon from -46 to -88, body left edge -54. Tail attaches at -46 (inside body) fine.
+
+Now JS.
+
+```js
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('scene');
+const seafloor=document.getElementById('seafloor');
+const weeds=document.getElementById('weeds');
+const rocks=document.getElementById('rocks');
+const rays=document.getElementById('rays');
+const bubbleLayer=document.getElementById('bubbles');
+const f1=document.getElementById('f1');
+const f2=document.getElementById('f2');
+
+let W=0,H=0;
+
+function layout(){
+  W=window.innerWidth; H=window.innerHeight;
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  const top=H*0.855;
+  seafloor.setAttribute('d',
+    `M 0 ${H} L 0 ${top} Q ${W*0.12} ${top-H*0.035} ${W*0.25} ${top+H*0.012} Q ${W*0.4} ${top+H*0.045} ${W*0.55} ${top-H*0.02} Q ${W*0.7} ${top-H*0.05} ${W*0.86} ${top+H*0.025} Q ${W*0.95} ${top+H*0.045} ${W} ${top-H*0.01} L ${W} ${H} Z`);
+  // rays
+  rays.innerHTML='';
+  ...
+}
+```
+
+Careful with the seafloor: last Q endpoint at (W, top-0.01H) then L W,H. Fine.
+
+Rays: three polygons:
+```js
+const rayData=[[0.12,0.30],[0.4,0.22],[0.68,0.36],[0.85,0.2]];
+rayData.forEach(([fx,wf])=>{
+  const x0=W*fx, w=W*wf;
+  const p=document.createElementNS(NS,'polygon');
+  p.setAttribute('points', `${x0},0 ${x0+w},0 ${x0+w*0.45+H*0.06},${H*0.85} ${x0+w*0.05},${H*0.85}`);
+  p.setAttribute('fill','#ffffff');
+  p.setAttribute('opacity','0.045');
+  rays.appendChild(p);
+});
+```
+Hmm ray polygon geometry: top edge from x0 to x0+w at y=0; bottom edge narrower and shifted. Fine.
+
+Rocks:
+```js
+const rockData=[[0.08,0.55,0.06],[0.33,0.35,0.045],[0.62,0.5,0.055],[0.9,0.3,0.04]];
+rockData.forEach(([fx,ryf,rxf])=>{
+  const e=document.createElementNS(NS,'ellipse');
+  e.setAttribute('cx',W*fx);
+  e.setAttribute('cy',H*0.9);
+  e.setAttribute('rx',W*rxf*0.5);
+  e.setAttribute('ry',H*ryf*0.05);
+  ...
+});
+```
+Getting messy; simplify: rocks with fixed sizes relative to H: rx=H*0.05, ry=H*0.025, cy=H*0.9. Colors alternate #9c8250, #7d6a45, #b09660. Add stroke none.
+
+Weeds: build with top=H*0.855.
+
+```js
+function buildWeeds(top){
+  weeds.innerHTML='';
+  const spots=[0.12,0.46,0.82];
+  const colors=['#2f9e5b','#3cb371','#1f7a44'];
+  spots.forEach((fx,i)=>{
+    const g=document.createElementNS(NS,'g');
+    const x=W*fx, base=top+H*0.02;
+    g.setAttribute('transform',`translate(${x},${base})`);
+    g.setAttribute('class','sway');
+    g.style.animationDuration=(5+i*0.8)+'s';
+    g.style.animationDelay=(-i*1.3)+'s';
+    const h0=H*(0.22+0.05*(i%2));
+    const strands=[[0,1,9],[-14,0.78,7],[14,0.9,7]];
+    strands.forEach(([dx,hs,sw],j)=>{
+      const h=h0*hs;
+      const p=document.createElementNS(NS,'path');
+      p.setAttribute('d',`M 0 0 C ${-0.13*h} ${-0.26*h} ${0.13*h} ${-0.56*h} ${-0.04*h} ${-0.8*h} C ${-0.1*h} ${-0.9*h} ${0.04*h} ${-0.96*h} ${0.08*h} ${-h}`);
+      p.setAttribute('fill','none');
+      p.setAttribute('stroke',colors[j%3]);
+      p.setAttribute('stroke-width',sw);
+      p.setAttribute('stroke-linecap','round');
+      p.setAttribute('transform',`translate(${dx},0)`);
+      g.appendChild(p);
+    });
+    weeds.appendChild(g);
+  });
+}
+```
+
+Note stroke widths 9,7,7 fine.
+
+Hmm, sway with transform-box: fill-box on group — for groups, fill-box refers to bounding box of group. transform-origin: 50% 100% = bottom center. Rotation about base. Good. But CSS transform on SVG group with attribute transform: CSS transform overrides the transform attribute? In SVG2/CSS, the `transform` presentation attribute and CSS transform property are the same thing — CSS animation on transform will override the attribute! That's a problem: the translate attribute would be replaced by the animation's rotate.
+
+Yes: CSS transform property overrides the transform attribute. So use a nested structure: outer <g transform="translate(x,base)"> (no class), inner <g class="sway"> containing paths. Then CSS rotate applies to inner g, relative to its own bbox (paths start at y=-h and end at 0). transform-box: fill-box; transform-origin: 50% 100% → bottom center of bbox, which is the root point. 
+
+So structure: outer g with translate, inner g with class sway.
+
+Alternatively use SMIL animateTransform for rotation — but SMIL transform animation also replaces? animateTransform additive with existing transform attribute works if animateTransform is on the same element and the base transform is separate... It replaces too unless additive="sum". Let's stick with nested groups.
+
+Also CSS `transform-box: fill-box` support: modern browsers yes (Chrome 64+, Firefox 55+, Safari 11+). Fine.
+
+Bubbles:
+
+```js
+const bubbleData=[];
+function makeBubble(){
+  const g=document.createElementNS(NS,'g');
+  const c=document.createElementNS(NS,'circle');
+  c.setAttribute('fill','#cdeeff'); c.setAttribute('fill-opacity','0.25');
+  c.setAttribute('stroke','#e8fbff'); c.setAttribute('stroke-opacity','0.75');
+  c.setAttribute('stroke-width','1.5');
+  const hl=document.createElementNS(NS,'circle');
+  hl.setAttribute('fill','#ffffff'); hl.setAttribute('fill-opacity','0.85');
+  g.appendChild(c); g.appendChild(hl);
+  bubbleLayer.appendChild(g);
+  return {g,c,hl,x:0,y:0,r:0,sp:0};
+}
+```
+
+Bubble count 9. Init:
+```js
+for(let i=0;i<9;i++){
+  const b=makeBubble();
+  bubbleData.push(b);
+  resetBubble(b, true);
+}
+function resetBubble(b, initial){
+  b.r = 3 + Math.random()*11;          // 3..14
+  b.x = W*0.05 + Math.random()*W*0.9;
+  b.y = initial ? Math.random()*H*0.85 : H*(0.86+Math.random()*0.06);
+  b.sp = 45 + (14-b.r)*9;              // r=14 → 45, r=3 → 144
+  b.c.setAttribute('r', b.r);
+  b.hl.setAttribute('r', b.r*0.3);
+  b.hl.setAttribute('cx', -b.r*0.32);
+  b.hl.setAttribute('cy', -b.r*0.35);
+  b.g.setAttribute('transform', `translate(${b.x},${b.y})`);
+}
+```
+Wait highlight cx/cy relative to circle center: circle at (0,0) in group, highlight at offset. Set cx=-r*0.32, cy=-r*0.35. Good.
+
+Also wobble: x drift with sine — add horizontal sway: b.x += Math.sin(t*2 + phase)*... Let's add small drift: store phase; x = baseX + sin(t*1.5+phase)*8. Simpler: b.x += Math.sin(t*2+b.phase)*12*dt. Fine.
+
+Update:
+```js
+b.y -= b.sp*dt;
+if(b.y < -20) resetBubble(b,false);
+b.g.setAttribute('transform', `translate(${b.x},${b.y})`);
+```
+But resetBubble sets transform too; setting again is fine.
+
+Also bubble x might drift off screen; clamp not needed since reset random.
+
+Fish update:
+
+```js
+const fish1={el:f1, x:0, yf:0.36, sp:55, dir:1, margin:150, phase:0, amp:8};
+const fish2={el:f2, x:0, yf:0.62, sp:135, dir:-1, margin:110, phase:1.7, amp:6};
+
+function stepFish(f,dt,t){
+  f.x += f.sp*dt*f.dir;
+  const m = f.margin;
+  if(f.dir>0 && f.x > W+m) f.x = -m;
+  if(f.dir<0 && f.x < -m) f.x = W+m;
+  const y = H*f.yf + Math.sin(t*1.2 + f.phase)*f.amp;
+  const rot = Math.sin(t*1.2 + f.phase)*2; // degrees? maybe skip
+  f.el.setAttribute('transform',`translate(${f.x},${y}) scale(${f.dir},1)`);
+}
+```
+Note: scale(-1,1) flips; combined with translate it's fine (translate applied first, then scale about origin of local coords which is fish center). Good.
+
+Maybe skip rotation.
+
+Init fish x: after layout, set fish1.x = W*0.15, fish2.x = W*0.75.
+
+But if fish2 dir=-1 starting at 0.75W moving left, wraps at -110 → appears at W+110. Fine.
+
+Edge case: W very small. Fine.
+
+Time tracking: let t=0; dt from rAF.
+
+Also ensure no scrollbars: html,body overflow hidden, margin 0.
+
+Also `svg{display:block;width:100vw;height:100vh}` — 100vw may include scrollbar but overflow hidden so fine.
+
+Potential issue: on resize, W/H change and viewBox updated; bubbles' positions in old coordinate space may be out of bounds but they'll wrap. Fine.
+
+Let me also handle devicePixelRatio? Not needed.
+
+Now, is the file under 18KB? Yes, small.
+
+Let me double-check the "exactly 2 fish" — yes, two groups.
+
+"Exactly 1 visible eye (circle with pupil dot)" — each fish has one eye circle + pupil. Good. Note the eye white circle with stroke — counts as circle; pupil dot is another circle. Fine.
+
+Mouth indication — curves. Good.
+
+Bubbles at least 5 — 9.
+
+Seaweed at least 2 — 3.
+
+Now write final code carefully.
+
+One concern: CSS animation for sway uses `transform-box: fill-box` on the inner g. The inner g's bbox: paths from y=-h to 0, x from about -0.13h to +0.13h. transform-origin 50% 100% → x center of bbox, y bottom (y=0). Good, that's the root.
+
+But note: `transform-box: fill-box` for a <g> — supported? The spec says fill-box refers to object bounding box; for groups, browsers compute the group's bbox. I believe Chrome supports it. Alternatively use view-box with transform-origin computed... Let's keep fill-box; if it fails, rotation origin defaults differently but still sways (maybe pivot at 0,0 of user space, which is the base since group is translated? Actually with view-box, transform-origin: 50% 100% would be relative to the SVG viewport — wrong).
+
+Hmm, risk. Alternative safer approach: apply CSS animation directly on each path? No.
+
+Alternative: Use SMIL `<animateTransform>` on the inner g with type="rotate" values="0 0 0; -4 0 0; 0 0 0; 4 0 0; 0 0 0" — rotation about point (0,0) in local coords, which is exactly the base since the outer g translates. This is robust and no CSS quirks. SMIL is supported in Chrome/Firefox/Safari. Let's use animateTransform inside each plant group:
+
+```html
+<g class="plant">
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="0 0 0;-3 0 0;0 0 0;3 0 0;0 0 0" dur="6s" repeatCount="indefinite"/>
+    <path .../>
+  </g>
+</g>
+```
+Since animateTransform replaces transform attribute on that g, and g has no other transform, fine. The rotation center (0,0) is the base because paths start at 0,0. 
+
+But note animateTransform with type rotate values "angle cx cy" — correct syntax: "0 0 0" means rotate 0 degrees about (0,0). Good.
+
+Different durations per plant.
+
+This avoids CSS transform-box concerns. I'll use SMIL for seaweed sway. And maybe keep CSS minimal.
+
+But wait — animateTransform on the g while paths inside have their own transform attributes (translate for strands) — fine, unaffected.
+
+Let's implement buildWeeds with animateTransform elements created via JS.
+
+Alternatively write weeds statically with a fixed coordinate system... but H varies. JS generation is fine.
+
+Actually simpler: I could keep the SVG viewBox fixed at 1200x800 and use preserveAspectRatio="xMidYMid slice" — but cropping issue for seafloor. Hmm, actually with slice, the visible region is a centered crop; seafloor at bottom could be cropped off on very wide screens. With JS viewBox, no cropping. Stick with JS.
+
+Now writing the code.
+
+```js
+(function(){
+  'use strict';
+  var NS='http://www.w3.org/2000/svg';
+  var svg=document.getElementById('scene');
+  var seafloor=document.getElementById('seafloor');
+  var weeds=document.getElementById('weeds');
+  var rocks=document.getElementById('rocks');
+  var rays=document.getElementById('rays');
+  var bubbleLayer=document.getElementById('bubbles');
+  var f1=document.getElementById('f1');
+  var f2=document.getElementById('f2');
+
+  var W=0,H=0;
+  var fish1={el:f1,x:0,yf:0.36,sp:55,dir:1,margin:150,phase:0,amp:9};
+  var fish2={el:f2,x:0,yf:0.64,sp:135,dir:-1,margin:110,phase:1.7,amp:6};
+  var bubbles=[];
+  var t=0,last=0;
+
+  function el(name,attrs){
+    var e=document.createElementNS(NS,name);
+    for(var k in attrs) e.setAttribute(k,attrs[k]);
+    return e;
+  }
+
+  function layout(){
+    W=window.innerWidth||1200;
+    H=window.innerHeight||800;
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    var top=H*0.855;
+
+    seafloor.setAttribute('d',
+      'M 0 '+H+' L 0 '+top+
+      ' Q '+(W*0.12)+' '+(top-H*0.035)+' '+(W*0.25)+' '+(top+H*0.012)+
+      ' Q '+(W*0.40)+' '+(top+H*0.045)+' '+(W*0.55)+' '+(top-H*0.02)+
+      ' Q '+(W*0.70)+' '+(top-H*0.05)+' '+(W*0.86)+' '+(top+H*0.025)+
+      ' Q '+(W*0.95)+' '+(top+H*0.045)+' '+W+' '+(top-H*0.01)+
+      ' L '+W+' '+H+' Z');
+
+    // rays
+    rays.innerHTML='';
+    [[0.10,0.26],[0.38,0.20],[0.66,0.30],[0.84,0.18]].forEach(function(d){
+      var x0=W*d[0], w=W*d[1];
+      rays.appendChild(el('polygon',{
+        points: x0+',0 '+(x0+w)+',0 '+(x0+w*0.35+H*0.10)+','+(H*0.9)+' '+(x0+w*0.05)+','+(H*0.9),
+        fill:'#ffffff', opacity:'0.05'
+      }));
+    });
+
+    // rocks
+    rocks.innerHTML='';
+    [[0.09,0.06,0.030,'#9c8250'],[0.34,0.04,0.022,'#7d6a45'],
+     [0.63,0.055,0.026,'#b09660'],[0.91,0.035,0.020,'#8a7449']].forEach(function(r){
+      rocks.appendChild(el('ellipse',{
+        cx:W*r[0], cy:H*0.925, rx:W*r[1]*0.9, ry:H*r[2], fill:r[3]
+      }));
+    });
+```
+Hmm rx should be proportional to width: W*0.06*0.9 = 0.054W; on wide screen that's large relative to H. Better make rock sizes based on H: rx=H*r[2]*2.2, ry=H*r[2]. Let's use: rx = H*0.07, ry=H*0.03 for big rock. Use data [fx, scale] where rx=H*0.07*s, ry=H*0.03*s, cy=H*0.91.
+
+Redo:
+```js
+[[0.09,1.0,'#9c8250'],[0.34,0.7,'#7d6a45'],[0.63,0.85,'#b09660'],[0.91,0.6,'#8a7449']].forEach(function(r){
+  rocks.appendChild(el('ellipse',{cx:W*r[0], cy:H*0.92, rx:H*0.075*r[1], ry:H*0.032*r[1], fill:r[2]}));
+});
+```
+cy=0.92H with ry 0.032H → top at 0.888H, seafloor top is 0.855H, so rocks sit within sand. Good.
+
+Weeds:
+```js
+    weeds.innerHTML='';
+    var spots=[0.12,0.46,0.82];
+    var colors=['#2f9e5b','#43c07a','#1f7a44'];
+    spots.forEach(function(fx,i){
+      var outer=el('g',{transform:'translate('+(W*fx)+','+(top+H*0.025)+')'});
+      var inner=el('g',{});
+      inner.appendChild(el('animateTransform',{
+        attributeName:'transform', type:'rotate',
+        values:'0 0 0;-3.5 0 0;0 0 0;3.5 0 0;0 0 0',
+        dur:(5+i*0.9)+'s', repeatCount:'indefinite'
+      }));
+      var h0=H*(0.20+0.05*(i%2));
+      [[0,1.0,10],[-15,0.78,7],[15,0.9,7]].forEach(function(s,j){
+        var h=h0*s[1];
+        inner.appendChild(el('path',{
+          d:'M 0 0 C '+(-0.13*h)+' '+(-0.26*h)+' '+(0.13*h)+' '+(-0.56*h)+' '+(-0.04*h)+' '+(-0.80*h)+
+            ' C '+(-0.10*h)+' '+(-0.90*h)+' '+(0.04*h)+' '+(-0.96*h)+' '+(0.08*h)+' '+(-h),
+          fill:'none', stroke:colors[j%3], 'stroke-width':s[2], 'stroke-linecap':'round',
+          transform:'translate('+s[0]+',0)'
+        }));
+      });
+      outer.appendChild(inner);
+      weeds.appendChild(outer);
+    });
+```
+Careful: `el` function sets attributes via setAttribute; 'stroke-width' fine.
+
+But wait: `inner` g gets animateTransform, and paths inside have their own transform attributes — fine.
+
+One issue: the animateTransform element must be a child of the element it animates — yes, appended to inner.
+
+Bubbles setup after layout (needs W,H). Create in init.
+
+```js
+  function makeBubble(){
+    var g=el('g',{});
+    var c=el('circle',{fill:'#cdeeff','fill-opacity':'0.22',stroke:'#e8fbff','stroke-opacity':'0.75','stroke-width':'1.5'});
+    var hl=el('circle',{fill:'#ffffff','fill-opacity':'0.8'});
+    g.appendChild(c); g.appendChild(hl);
+    bubbleLayer.appendChild(g);
+    return {g:g,c:c,hl:hl,x:0,y:0,r:0,sp:0,ph:Math.random()*6.28};
+  }
+```
+
+resetBubble as described.
+
+Init:
+```js
+  function initBubbles(){
+    for(var i=0;i<9;i++){
+      var b=makeBubble();
+      bubbles.push(b);
+      resetBubble(b,true);
+    }
+  }
+```
+
+But initBubbles must be after W,H set. Call layout() then initBubbles().
+
+Fish initial x: set in layout? Only once:
+```js
+  var started=false;
+  ... in layout after computing W,H:
+  if(!started){ fish1.x=W*0.18; fish2.x=W*0.72; started=true; }
+```
+But layout runs before fish exist? Fish defined at top. Fine.
+
+Hmm, on resize, fish x stays; fine.
+
+Now animation loop:
+
+```js
+  function frame(now){
+    if(!last) last=now;
+    var dt=(now-last)/1000; last=now;
+    if(dt>0.05) dt=0.05;
+    t+=dt;
+
+    stepFish(fish1,dt);
+    stepFish(fish2,dt);
+
+    for(var i=0;i<bubbles.length;i++){
+      var b=bubbles[i];
+      b.y-=b.sp*dt;
+      b.x+=Math.sin(t*1.6+b.ph)*14*dt;
+      if(b.y<-25){ resetBubble(b,false); }
+      else { b.g.setAttribute('transform','translate('+b.x+','+b.y+')'); }
+    }
+    requestAnimationFrame(frame);
+  }
+```
+
+stepFish:
+```js
+  function stepFish(f,dt){
+    f.x+=f.sp*f.dir*dt;
+    if(f.dir>0 && f.x>W+f.margin) f.x=-f.margin;
+    else if(f.dir<0 && f.x<-f.margin) f.x=W+f.margin;
+    var y=H*f.yf+Math.sin(t*1.1+f.phase)*f.amp;
+    f.el.setAttribute('transform','translate('+f.x+','+y+') scale('+f.dir+',1)');
+  }
+```
+
+resetBubble sets transform too.
+
+Resize listener with debounce? Just call layout on resize; also re-init bubbles positions? No, keep.
+
+But layout() rebuilds weeds/rocks/rays with new W/H — bubbles keep old coords, ok.
+
+Also after resize, if H changed a lot, fish y updates automatically since computed from H.
+
+Potential issue: on resize the bubble y may be > H, but they're rising anyway. Fine.
+
+Let's also set `last=0` initially and start rAF.
+
+Now check: fish2 dir=-1, scale(-1,1) → the fish faces left. Good.
+
+Speed difference: 55 vs 135 — noticeably different.
+
+Fish sizes: fish1 72rx, fish2 54rx with ry 20. Clearly different.
+
+Colors: orange gradient vs blue gradient.
+
+Now let me verify the fish shapes look reasonable.
+
+Fish1: ellipse rx72 ry50 centered at origin. Tail polygon (-58,-36) (-112,0) (-58,36) — a triangle behind. Since body left edge is -72 at y=0, tail base at -58 is inside body (covered by body? body drawn after tail, so body covers tail base). Order: tail, dorsal, side fin, body, eye, mouth. Body drawn after fins hides fin bases. Good.
+
+Dorsal fin path: M -20,-46 Q 6,-92 40,-38 Z. Points at y=-46 and -38 near body top (top is -50 at x=0). Body drawn after covers bases. Fin sticks up to -92? That's 92 above center, body top -50. Fin extends 42 above — reasonable.
+
+Side fin: M -10,32 Q 8,64 -30,50 Z — below body (body bottom -? at x=-10: y=50*sqrt(1-0.019)=49.5). Fin from y=32 (inside) to 64. Drawn before body so the part inside body is hidden. Good, fin appears below.
+
+Hmm actually pectoral fin typically at side, but drawn before body means hidden. Since it extends below body, visible part shows. Fine.
+
+Eye at (42,-14) r10 white with stroke; pupil (45,-14) r5 dark. Good.
+
+Mouth: "M 58,2 Q 68,12 74,4". At x=58..74, y=2..12. Body edge at y=6 is x≈71.5. So mouth curve extends slightly beyond. Looks like mouth at front. OK.
+
+Fish2: ellipse rx54 ry20. Tail triangle (-46,-18)(-88,0)(-46,18). Dorsal fin M -16,-19 Q 2,-44 26,-15 Z. Eye (33,-6) r6.5, pupil (35,-6) r3.2. Mouth M 44,3 Q 50,9 53,3. Pectoral ellipse at (2,12) rx12 ry6 rotated -15 — drawn after body (I placed it last), so it appears on top of body near bottom. That's fine as a side fin.
+
+Wait ordering in fish2: polygon, path dorsal, ellipse body, eye circles, mouth, pectoral ellipse. Pectoral drawn last on top of body — visible. Good.
+
+Check that pectoral doesn't overlap eye: eye at (33,-6), fin at (2,12) rx12 → x range -10..14. No overlap.
+
+Now the water gradient: light blue top to dark bottom. `#2fa8d8` top → `#0a5a8a` mid → `#03223d` bottom. Fine.
+
+Sand gradient: `#e2cf9a` → `#8a6f3d`.
+
+Let me write out the full file now, being careful about quotes.
+
+Also add `preserveAspectRatio` default; since viewBox matches aspect after layout it's fine.
+
+Potential issue: on load, before JS runs, viewBox="0 0 1200 800" with preserveAspectRatio default meet → letterboxing briefly. Fine, then layout sets proper viewBox. Actually to be safe set initial viewBox via JS immediately at script start (script at end of body). Fine.
+
+Also set `background:#03223d` on body so no white flash.
+
+Let me consider performance: setting transform attribute each frame on ~9 bubbles + 2 fish — fine.
+
+Now write it.
+
+Also check total size < 18KB — easily.
+
+Let me write the HTML.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Underwater Scene</title>
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#03223d}
+#scene{display:block;width:100vw;height:100vh}
+</style>
+</head>
+<body>
+<svg id="scene" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#3fb3dd"/>
+<stop offset="0.45" stop-color="#1173a8"/>
+<stop offset="1" stop-color="#03223d"/>
+</linearGradient>
+<linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#e2cf9a"/>
+<stop offset="1" stop-color="#8a6f3d"/>
+</linearGradient>
+<linearGradient id="fish1g" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ffb347"/>
+<stop offset="1" stop-color="#e8621c"/>
+</linearGradient>
+<linearGradient id="fish2g" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#a8ecff"/>
+<stop offset="1" stop-color="#3d7bd6"/>
+</linearGradient>
+</defs>
+<rect x="0" y="0" width="100%" height="100%" fill="url(#water)"/>
+<g id="rays"></g>
+<path id="seafloor" fill="url(#sand)" d="M0 800 L0 684 Q120 660 250 690 Q400 720 550 684 Q700 650 860 692 Q950 715 1200 684 L1200 800 Z"/>
+<g id="rocks"></g>
+<g id="weeds"></g>
+<g id="bubbles"></g>
+<g id="f1">
+<polygon points="-58,-36 -112,0 -58,36" fill="#c94a12"/>
+<path d="M -20,-46 Q 6,-92 40,-38 Z" fill="#f2913a"/>
+<path d="M -10,32 Q 8,64 -30,50 Z" fill="#e07a26"/>
+<ellipse rx="72" ry="50" fill="url(#fish1g)" stroke="#b8441a" stroke-width="2.5"/>
+<circle cx="42" cy="-14" r="10" fill="#ffffff" stroke="#b8441a" stroke-width="1.5"/>
+<circle cx="45" cy="-14" r="5" fill="#221a2e"/>
+<path d="M 58,2 Q 68,12 74,4" fill="none" stroke="#a83c14" stroke-width="3" stroke-linecap="round"/>
+</g>
+<g id="f2">
+<polygon points="-46,-18 -88,0 -46,18" fill="#2d5aa8"/>
+<path d="M -16,-19 Q 2,-44 26,-15 Z" fill="#6fb6ea"/>
+<ellipse rx="54" ry="20" fill="url(#fish2g)" stroke="#2d5aa8" stroke-width="2"/>
+<circle cx="33" cy="-6" r="6.5" fill="#ffffff" stroke="#2d5aa8" stroke-width="1.2"/>
+<circle cx="35" cy="-6" r="3.2" fill="#141428"/>
+<path d="M 44,3 Q 50,9 53,3" fill="none" stroke="#2d5aa8" stroke-width="2" stroke-linecap="round"/>
+<ellipse cx="2" cy="12" rx="12" ry="6" fill="#9fd8f8" opacity="0.85" transform="rotate(-15 2 12)"/>
+</g>
+</svg>
+<script>
+...
+</script>
+</body>
+</html>
+```
+
+Wait: bubbles layer is placed before fish, so fish drawn on top. Fine.
+
+Also the seafloor default d will be overwritten by layout.
+
+Now the JS. Let me write it fully.
+
+```js
+(function(){
+'use strict';
+var NS='http://www.w3.org/2000/svg';
+var svg=document.getElementById('scene');
+var seafloor=document.getElementById('seafloor');
+var weeds=document.getElementById('weeds');
+var rocks=document.getElementById('rocks');
+var rays=document.getElementById('rays');
+var bubbleLayer=document.getElementById('bubbles');
+var f1=document.getElementById('f1');
+var f2=document.getElementById('f2');
+
+var W=1200,H=800,t=0,last=0,started=false;
+
+var fish1={el:f1,x:0,yf:0.36,sp:55,dir:1,margin:150,phase:0,amp:9};
+var fish2={el:f2,x:0,yf:0.64,sp:135,dir:-1,margin:110,phase:1.7,amp:6};
+var bubbles=[];
+
+function el(n,a){var e=document.createElementNS(NS,n);for(var k in a){e.setAttribute(k,a[k]);}return e;}
+
+function resetBubble(b,initial){
+  b.r=3+Math.random()*11;
+  b.x=W*0.05+Math.random()*W*0.9;
+  b.y=initial? Math.random()*H*0.8 : H*(0.86+Math.random()*0.06);
+  b.sp=45+(14-b.r)*9;
+  b.c.setAttribute('r',b.r);
+  b.hl.setAttribute('r',b.r*0.3);
+  b.hl.setAttribute('cx',-b.r*0.32);
+  b.hl.setAttribute('cy',-b.r*0.35);
+  b.g.setAttribute('transform','translate('+b.x+','+b.y+')');
+}
+
+function layout(){
+  W=window.innerWidth||1200;
+  H=window.innerHeight||800;
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  var top=H*0.855;
+
+  seafloor.setAttribute('d','M 0 '+H+' L 0 '+top+
+    ' Q '+(W*0.12)+' '+(top-H*0.035)+' '+(W*0.25)+' '+(top+H*0.012)+
+    ' Q '+(W*0.40)+' '+(top+H*0.045)+' '+(W*0.55)+' '+(top-H*0.02)+
+    ' Q '+(W*0.70)+' '+(top-H*0.05)+' '+(W*0.86)+' '+(top+H*0.025)+
+    ' Q '+(W*0.95)+' '+(top+H*0.045)+' '+W+' '+(top-H*0.01)+
+    ' L '+W+' '+H+' Z');
+
+  rays.innerHTML='';
+  [[0.10,0.26],[0.38,0.20],[0.66,0.30],[0.84,0.18]].forEach(function(d){
+    var x0=W*d[0], w=W*d[1];
+    rays.appendChild(el('polygon',{
+      points:x0+',0 '+(x0+w)+',0 '+(x0+w*0.35+H*0.10)+','+(H*0.9)+' '+(x0+w*0.05)+','+(H*0.9),
+      fill:'#ffffff',opacity:'0.05'
+    }));
+  });
+
+  rocks.innerHTML='';
+  [[0.09,1.0,'#9c8250'],[0.34,0.7,'#7d6a45'],[0.63,0.85,'#b09660'],[0.91,0.6,'#8a7449']].forEach(function(r){
+    rocks.appendChild(el('ellipse',{
+      cx:W*r[0],cy:H*0.92,rx:H*0.075*r[1],ry:H*0.032*r[1],fill:r[2]
+    }));
+  });
+
+  weeds.innerHTML='';
+  var spots=[0.12,0.46,0.82];
+  var colors=['#2f9e5b','#43c07a','#1f7a44'];
+  spots.forEach(function(fx,i){
+    var outer=el('g',{transform:'translate('+(W*fx)+','+(top+H*0.025)+')'});
+    var inner=el('g',{});
+    inner.appendChild(el('animateTransform',{
+      attributeName:'transform',type:'rotate',
+      values:'0 0 0;-3.5 0 0;0 0 0;3.5 0 0;0 0 0',
+      dur:(5+i*0.9)+'s',repeatCount:'indefinite'
+    }));
+    var h0=H*(0.20+0.05*(i%2));
+    [[0,1.0,10],[-15,0.78,7],[15,0.9,7]].forEach(function(s,j){
+      var h=h0*s[1];
+      inner.appendChild(el('path',{
+        d:'M 0 0 C '+(-0.13*h)+' '+(-0.26*h)+' '+(0.13*h)+' '+(-0.56*h)+' '+(-0.04*h)+' '+(-0.80*h)+
+          ' C '+(-0.10*h)+' '+(-0.90*h)+' '+(0.04*h)+' '+(-0.96*h)+' '+(0.08*h)+' '+(-h),
+        fill:'none',stroke:colors[j%3],'stroke-width':s[2],'stroke-linecap':'round',
+        transform:'translate('+s[0]+',0)'
+      }));
+    });
+    outer.appendChild(inner);
+    weeds.appendChild(outer);
+  });
+
+  if(!started){
+    fish1.x=W*0.18;
+    fish2.x=W*0.72;
+    started=true;
+  }
+}
+```
+
+Wait: `el('animateTransform', {...})` — setAttribute('attributeName','transform') works. Good.
+
+Bubbles init after layout:
+
+```js
+function initBubbles(){
+  for(var i=0;i<9;i++){
+    var g=el('g',{});
+    var c=el('circle',{fill:'#cdeeff','fill-opacity':'0.22',stroke:'#e8fbff','stroke-opacity':'0.75','stroke-width':'1.5'});
+    var hl=el('circle',{fill:'#ffffff','fill-opacity':'0.8'});
+    g.appendChild(c);g.appendChild(hl);
+    bubbleLayer.appendChild(g);
+    var b={g:g,c:c,hl:hl,x:0,y:0,r:0,sp:0,ph:Math.random()*6.283};
+    bubbles.push(b);
+    resetBubble(b,true);
+  }
+}
+```
+
+Note: resetBubble uses W,H which must be set — layout called first.
+
+Then:
+
+```js
+function stepFish(f,dt){
+  f.x+=f.sp*f.dir*dt;
+  if(f.dir>0&&f.x>W+f.margin){f.x=-f.margin;}
+  else if(f.dir<0&&f.x<-f.margin){f.x=W+f.margin;}
+  var y=H*f.yf+Math.sin(t*1.1+f.phase)*f.amp;
+  f.el.setAttribute('transform','translate('+f.x+','+y+') scale('+f.dir+',1)');
+}
+
+function frame(now){
+  if(!last){last=now;}
+  var dt=(now-last)/1000;
+  last=now;
+  if(dt>0.05){dt=0.05;}
+  t+=dt;
+
+  stepFish(fish1,dt);
+  stepFish(fish2,dt);
+
+  for(var i=0;i<bubbles.length;i++){
+    var b=bubbles[i];
+    b.y-=b.sp*dt;
+    b.x+=Math.sin(t*1.6+b.ph)*14*dt;
+    if(b.y<-25){resetBubble(b,false);}
+    else{b.g.setAttribute('transform','translate('+b.x+','+b.y+')');}
+  }
+  requestAnimationFrame(frame);
+}
+
+layout();
+initBubbles();
+window.addEventListener('resize',layout);
+requestAnimationFrame(frame);
+})();
+```
+
+One issue: `resetBubble` on wrap sets transform; fine.
+
+Another: bubble x may go beyond W due to drift, but reset covers.
+
+Also if W changes drastically, bubbles' x may be out of view until respawn; minor.
+
+Potential issue: fish2 starting at 0.72W moving left with speed 135, wraps at -110. Fine.
+
+Check fish1 wrap margin 150: fish1 length extends from -112 to +74, so half-length ~112; margin 150 ensures full off-screen. Good. fish2 extends -88..+56, margin 110 good.
+
+Edge: fish1 moving right, when x > W+150 → set x=-150. Good.
+
+Now double-check the sway: animateTransform rotate about (0,0) in the inner g's coordinate system. Since outer g translates to the base, inner g's (0,0) is the base point. Paths start at (0,0) and go up. Rotating ±3.5 degrees about base. 
+
+But wait: strands have transform translate(-15,0) or (15,0), so their bases are offset ±15 from pivot; rotation moves them slightly — fine, looks natural.
+
+Does animateTransform begin automatically? Default begin="0s" — starts at document load. Since created dynamically after load, SMIL timeline... Elements added dynamically with begin="0s" might not start correctly? In Chrome, dynamically inserted SMIL with begin="0s" starts immediately when inserted? There have been issues where SMIL animations added after document load with begin="0s" are already "past" their begin time and apply the end state or start from 0... Actually SMIL uses the document timeline; an animation with begin="0s" inserted later should be considered active (it started at time 0). Typically it works and animates. Hmm, there's a known quirk: dynamically created SVG animations do run in Chrome/Firefox. I recall that adding animate elements via JS does work.
+
+To be safer, use begin="0s" plus... or set `begin: 'indefinite'` and call beginElement()? That's extra complexity. Alternatively use CSS animation on the inner g with transform-box fill-box — but the risk there is transform-origin. Hmm.
+
+Alternative safest: don't animate seaweed at all — requirement says "may sway gently OR remain static — your choice." Static is allowed! That removes all risk. But swaying is nicer. I could animate via JS in the frame loop: set transform on the inner g each frame: `rotate(angle 0 0)`. That's fully reliable. 3 plants × per frame — trivial.
+
+Let's do JS sway: store plant inner groups in an array with phase and amplitude, update each frame:
+`inner.setAttribute('transform','rotate('+(Math.sin(t*1.2+phase)*3.5)+' 0 0)')`.
+
+This overrides nothing else (inner has no other transform). Reliable. Do that.
+
+So in layout, collect `plantInner=[]` and push {el:inner, ph:i*1.7}. But layout rebuilds weeds on resize, so reset the array each layout.
+
+In frame: loop over plants and set rotation.
+
+Good, drop SMIL entirely.
+
+Note: layout may be called before `plants` declared? Declare var plants=[] at top.
+
+Also note: `weeds.innerHTML=''` in layout clears; then rebuild.
+
+Frame function references plants — fine.
+
+Let me finalize.
+
+One more check: `el` with attribute names like 'stroke-width' works with setAttribute. Yes.
+
+`'fill-opacity'` fine.
+
+Also for the `animateTransform` removal — no longer needed.
+
+Now, CSS: no animation needed. Keep minimal.
+
+Let me also double check the SVG root: since we set viewBox to exactly viewport size, `width:100vw;height:100vh` and default preserveAspectRatio xMidYMid meet — aspect matches exactly, so no letterboxing.
+
+Potential scrollbar: body overflow hidden, fine. `100vw` might cause horizontal scrollbar if vertical scrollbar exists, but overflow hidden prevents.
+
+Write final.
+
+Let me compute fish2 dorsal fin: M -16,-19 Q 2,-44 26,-15 Z — apex at y=-44 while body top at x=2 is -20*sqrt(1-(2/54)^2)≈-19.9. Fin extends to -44, 24 above. Good.
+
+Also fish2 pectoral fin ellipse at (2,12): body bottom at x=2 is about -? y=+20. So ellipse center y=12 inside body, rx12 ry6 → bottom at 18, inside body mostly. It will show as a lighter oval on the body — reads as a fin marking. Acceptable. Maybe move to cy=16 so it protrudes slightly: bottom 22 > 20, slight protrusion. Use cy=16, ry=6, rotate -15. Good.
+
+Let me double check the mouth for fish1 doesn't look like a random stroke: "M 58,2 Q 68,12 74,4" — a curve near the front right. At x=58..74, y 2..12, body right edge around x=71 at y≈6. So it straddles the edge — looks like a mouth at the front. Good.
+
+Fish1 eye at (42,-14) is toward the front-top. Good.
+
+Final check on gradient IDs: fish1g, fish2g, water, sand. Used correctly.
+
+One more: the `rays` polygons extend to H*0.9 which is under the seafloor top (0.855H)? They'd be drawn behind seafloor since rays come before seafloor in document order. Good — seafloor covers the bottom part.
+
+Actually rays are drawn after the water rect, before seafloor. Good.
+
+Rocks after seafloor. Weeds after rocks. Bubbles after weeds. Fish last. Good.
+
+Bubbles rising in front of seaweed — fine.
+
+Now produce final output. Count size roughly: ~5-6KB. Fine.
+
+Double check JS syntax carefully, especially string concatenations with numbers.
+
+`' Q '+(W*0.12)+' '+(top-H*0.035)+...` fine.
+
+In weeds: `d:'M 0 0 C '+(-0.13*h)+' '+(-0.26*h)+...` — if h positive, -0.13*h negative, string like "C -12.3 -24.6 ...". Fine.
+
+Note `(-0.13*h)` produces e.g. -12.34 with many decimals; fine size-wise.
+
+Frame loop: `if(!last){last=now;}` — but last could be 0 initially, and now is a timestamp > 0, so ok. But if now is 0? Rare. Fine.
+
+Also after first frame dt=0. Fine.
+
+Write it out.
+
+One more thought about `stepFish` wrap when W changes: not an issue.
+
+Also, the fish `scale(f.dir,1)` with dir=-1: transform="translate(x,y) scale(-1,1)". Correct.
+
+Let me write the final answer.

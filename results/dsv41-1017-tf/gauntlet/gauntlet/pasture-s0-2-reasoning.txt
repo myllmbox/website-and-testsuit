@@ -1,0 +1,521 @@
+We need to produce a single HTML file with SVG pasture scene. Need all requirements. Let's plan carefully.
+
+Canvas: full viewport SVG 100vw x 100vh. Use viewBox maybe "0 0 1200 800" with preserveAspectRatio="none"? Better use viewBox 0 0 1200 800 and width/height 100%. But full viewport with 100vw x 100vh. Horizon at 65% of viewport => y = 0.65 * 800 = 520. Sky gradient from light blue top to lighter near horizon. Grass lower 35% y 520 to 800.
+
+Sun: yellow circle upper portion, halo lighter yellow, at least 6 ray lines/triangles.
+
+Clouds: at least 3, each from 3+ overlapping circles/ellipses. Wrap around using CSS animation translateX. We can use SVG groups with animation. Need wrap: use animation moving from -200 to 1400 and reset. Each cloud group has circles. Use CSS keyframes.
+
+Trees: at least 2 rooted on grass. Trunk brown rectangle, canopy overlapping circles. Sway gently optional.
+
+Animals exactly 4 species: cow, sheep, pig, horse, all visible at once. Draw with SVG primitives. Need bounce animation with out-of-phase. Use CSS keyframe animation on group with transform translateY. Since SVG transform origin, we can animate transform: translateY. Each group has class bounce and different animation-delay.
+
+Need animals standing on grass. Positions: across field spaced. Use grass baseline maybe y=700 or so. Bounce amplitude 10-20 px. Need animals roughly proportional. Horse larger. Cow medium. Sheep medium. Pig smaller.
+
+Need no text labels. Animals recognizable.
+
+Let's design SVG coordinates. viewBox 0 0 1200 800.
+
+Horizon y=520.
+
+Sun at x=950, y=120, r=50. Halo circle r=80 fill lighter yellow opacity. Rays: 8 lines from r=60 to r=90 around center. Use group with lines. Could rotate lines.
+
+Clouds: define 3 cloud groups. Each with ellipses. Cloud 1 at y=100, cloud 2 y=180, cloud 3 y=60. Animate translateX from -300 to 1500 over e.g. 60s, 80s, 45s. Use CSS keyframes cloudMove with from translateX(-300px) to translateX(1500px) but SVG coordinates in viewBox units; CSS transform on SVG group uses px which maps to user units? In SVG with viewBox, CSS transform px values are user units? Actually CSS transforms on SVG elements use px units interpreted as user units in the SVG coordinate system? In SVG2, transform properties use px but coordinate system. It should work with translateX in px matching user units. However, for responsive scaling, better use SMIL animateTransform for translate. But CSS keyframes with transform: translateX(-300px) may be interpreted in CSS pixels, not viewBox units, causing mismatch on resize. Safer use SMIL `<animateTransform attributeName="transform" type="translate" from="-300 0" to="1500 0" dur="60s" repeatCount="indefinite"/>`. SMIL works in all modern browsers? Chrome supports SMIL. Alternatively use CSS animation with transform-box and viewBox units? Could use CSS keyframes using percentages? Hmm. Simpler: use SMIL for clouds. Requirement says CSS keyframes or SMIL. For bounce, use SMIL or CSS. Use CSS keyframes for bounce on groups with transform: translateY. Since animals are within SVG, CSS transform translateY in px may be relative to CSS px, but if viewBox scales, the bounce amplitude in user units could scale weirdly. But acceptable? Better use SMIL animateTransform for bounce too, which operates in user units. Use SMIL for both clouds and bounce. That satisfies "CSS keyframe animations or SMIL <animate>". Need out of phase: use begin="0s", "0.25s", etc. For bounce, use animateTransform type="translate" values="0 0; 0 -15; 0 0" dur="0.8s" repeatCount="indefinite" begin="0s". But if multiple animateTransform on same group? We need cloud translation and maybe tree sway. For animals only bounce. We can nest groups: outer group positioned, inner group animated translateY. Or apply animateTransform to animal group directly. Since animals have static positions, we can put each animal in a `<g transform="translate(x,y)">` and inside another `<g>` with animateTransform translateY. Or just animate the inner group. For cloud, we can put cloud shapes in group and animateTransform translate. That's fine.
+
+Need exactly 4 legs visible for each animal. Must count. Need draw legs as separate rects/lines with visible separation. Ensure not hidden by body. Draw legs behind body? Typically draw legs first then body on top, but legs visible below body. If body covers top of legs, legs still visible below. Need exactly 4 legs visible; make 4 distinct legs with spacing. For profile view, can show 4 legs: front two and back two. Draw legs at different x positions, slightly overlapping but visible. Could draw two front legs close together, two back legs close together. To ensure "exactly 4 legs visible", use 4 separate shapes with clear gaps or distinct colors. For cow: white body with black patches. Legs white/black hooves? Exactly 4 legs visible. Use rects with rounded ends. For sheep: dark legs, exactly 4. For pig: pink legs, exactly 4. For horse: brown legs, longer, exactly 4.
+
+Need animals facing viewer or profile. Profile is easiest. Head turned toward viewer? For profile, head at side. For cow, head can be at left or right. We can make them face left or right. Need visible eyes (2) — in profile you might only see one eye, but requirement says 2 eyes. So maybe draw head facing viewer slightly? But profile with two eyes is tricky. Could draw head in profile but include two eyes on the face (like both eyes visible on the side? Not realistic but meets requirement). Better draw animals in side view with head turned toward viewer (3/4 view) to show two eyes. But drawing from primitives, we can put two eyes on head circle. For cow, head is a rounded rect/ellipse at front, with two eyes dots. That works.
+
+Let's design each animal in its own local coordinate system, then position with transform. Use groups.
+
+Cow: Body white/cream with black patches. Size roughly 180x100. Position around x=150, baseline y=680. Let's define local coordinates with origin at bottom center of animal (feet at y=0). Easier: define each animal with feet at y=0, body above. Then place with transform="translate(x, groundY)". But bounce animation moves it up/down. If feet at y=0 and groundY=700, then bounce translateY negative moves up. Good.
+
+Let's design cow local coordinates: width ~200, height ~140. Feet at y=0. Body: ellipse cx=0? Let's set body centered at x=0, y=-70, rx=90, ry=50. White fill. Black patches: several ellipses/paths on body. Legs: 4 rects from y=-40 to y=0. Positions x=-60, -30, 30, 60? Need visible. Use rect width=12 height=45, y=-45 to 0, fill white with black hooves? Actually legs white with black hoof. But requirement says exactly 4 legs visible. Draw legs first, then body on top. Legs extend below body. Body bottom at y=-20, legs from y=-40 to 0, so top of legs covered by body. Legs visible from y=-20 to 0. To make all 4 visible, place x=-65, -40, 40, 65. Body rx=90 so covers x -90 to 90. Legs at -65, -40, 40, 65. They will be visible below body. Good. Head: at right side? Let's make cow facing left or right. Let's put head at right x=90, y=-100. Head shape: ellipse cx=90, cy=-100, rx=35, ry=30, white. Or rounded rect. Ears/horns: two small ears/horns on top of head. Horns: two small triangles/curves. Eyes: two black dots on head at (80,-105) and (100,-105)? But head at right side, viewer sees face? Could draw head as circle with two eyes. Nose: pink nose at front (right side) x=115, y=-90, ellipse rx=12, ry=8 pink. Udder: pink udder under body near rear? Requirement: pink udder OR pink nose. We can add both. Udder: pink ellipse under body at x=-30, y=-25, rx=20, ry=10, with small teats? Not necessary. But add pink nose. Ensure cow recognizable: white body with black patches, 4 legs, horns/ears, 2 eyes, pink nose. Black patches: at least 3. Draw 3-4 black ellipses/paths on body. Use clipPath? Simpler: draw black ellipses within body area. They might extend outside body; use clipPath to clip to body ellipse. Could define clipPath for body. But to keep simple, place black ellipses fully inside body ellipse. Body rx=90, ry=50, center (0,-70). Black patches: ellipse cx=-40, cy=-80, rx=25, ry=18; ellipse cx=20, cy=-60, rx=20, ry=15; ellipse cx=50, cy=-85, rx=15, ry=12. These fit within body? Body at y=-70, ry=50, so y from -120 to -20. At x=50, body half-height = 50*sqrt(1-(50/90)^2)=50*sqrt(1-0.3086)=50*0.831=41.5, so y -70±41.5 => -111.5 to -28.5. Patch at y=-85 ry=12 => -97 to -73, fits. Good.
+
+Legs: 4 legs. But if body is white, legs white, might blend. Add dark hooves at bottom. Legs: rect x=-65, y=-40, width=10, height=40, fill white, stroke black? Add hoof rect at y=-5 height=5 black. But legs start at y=-40, body covers top. Feet at y=0. Let's use legs as rects with rounded corners. For cow, legs white with black hooves. Exactly 4.
+
+Tail: optional, not required but can add. Not necessary.
+
+Head: Let's make cow head at right side, facing right. Body center 0, head center x=85, y=-95. Head ellipse rx=30, ry=25 white. Ears: two small ellipses at top left and top right of head. Horns: two small triangles above ears? Requirement says 2 horns or 2 small ears. We can do 2 ears. Ears: ellipse at (70,-120) rx=10 ry=6, and (100,-120) rx=10 ry=6, fill white, stroke black? Actually cow ears are floppy. Use ellipses. Eyes: two black circles at (75,-100) and (95,-100) r=4. Nose: pink ellipse at (110,-85) rx=12 ry=8. Nostrils: two small dark dots? Not required for cow but fine. Mouth line. This head is facing right, viewer sees side? Eyes on head: two eyes visible on the side? That's okay.
+
+But wait: if head is at right side, body extends left. Cow facing right. Good.
+
+Sheep: fluffy white body from multiple overlapping circles. Dark legs exactly 4. Dark face, 2 eyes, 2 ears. Size similar to cow but maybe slightly smaller. Local origin feet y=0. Body: cluster of white circles. Center at x=0, y=-70. Use circles: cx=-40, cy=-75, r=35; cx=0, cy=-80, r=40; cx=35, cy=-70, r=35; cx=-20, cy=-45, r=30; cx=20, cy=-45, r=30; etc. Fluffy. Legs: 4 dark rects, x=-50, -25, 25, 50, y=-40 to 0, width=8, fill #333. Face: dark gray circle at right side x=70, y=-90, r=25. Ears: two dark ellipses at top of face. Eyes: two white circles with black pupils? Or just black eyes? On dark face, white eyes with black pupils. Use white circles r=5, black pupils r=2.5. Ears: ellipses at (55,-110) and (85,-110) rx=10 ry=6, fill #333. Wool tuft on top of head? Optional. Ensure 4 legs visible: legs dark, body white, visible below. Body circles cover top of legs, legs visible from y=-20 to 0. Place legs at x=-55, -30, 30, 55. Body circles at y=-70, r=35 cover down to y=-35, so legs from y=-40 to 0: top part covered, bottom visible. Good.
+
+Pig: pink oval body. Exactly 4 legs. Pink snout with 2 nostrils. 2 triangular ears. 2 eyes. Curly tail. Smaller. Local origin feet y=0. Body: ellipse cx=0, cy=-45, rx=50, ry=35, fill pink. Legs: 4 rects, x=-35, -15, 15, 35, y=-25 to 0, width=8, fill pink darker. Head: at right side x=50, y=-55, circle r=25 pink. Snout: ellipse at x=70, y=-50, rx=12, ry=8, fill lighter pink. Nostrils: two small dark ellipses inside snout. Eyes: two black dots at (45,-65) and (60,-65)? But head at x=50, eyes on head. Ears: two triangles at top of head: points (40,-80), (30,-95), (50,-85)? Need 2 triangular ears. Draw two triangles: one at (35,-80) to (25,-95) to (45,-85); another at (55,-80) to (65,-95) to (75,-85). Or simpler: two small triangles on top of head. Tail: curly path at left side x=-50, y=-50. Use path with curves: M -50 -50 C -60 -60, -60 -40, -50 -45 C -40 -50, -45 -60, -50 -55? Need small curly tail. We'll draw path with stroke pink darker, fill none, stroke-width 3. Ensure body not covering tail: draw tail first. Legs: 4 visible. Pig body pink, legs pink. Add darker hooves? Not required. Ensure exactly 4 legs. Body rx=50, legs at -35, -15, 15, 35. Visible below body.
+
+Horse: brown body longer than tall. Exactly 4 legs, longer. Long neck. Visible mane. 2 ears. 2 eyes. Tail at rear. Larger. Local origin feet y=0. Body: ellipse cx=0, cy=-70, rx=80, ry=40, fill brown. Legs: 4 long legs, x=-55, -25, 25, 55, y=-50 to 0? Actually longer than others: legs height 60. Body bottom at y=-30. Legs from y=-60 to 0, width=10. Body covers top. Legs brown, hooves dark. Neck: long shape from body front (right side) going up. Use a polygon or rect rotated? Simpler: path for neck: M 60,-90 L 90,-160 L 110,-160 L 80,-90 Z? Or use a thick line/rect. Better: draw neck as a path: M 55,-90 Q 70,-150 90,-160 L 110,-150 Q 90,-100 80,-80 Z. Fill brown. Head: at top of neck, x=100, y=-165, ellipse rx=25, ry=20, fill brown. Ears: two small triangles on top of head. Mane: darker brown line/shape along neck. Draw a path along back of neck: M 60,-90 Q 70,-140 90,-155 L 100,-150 Q 80,-120 75,-85 Z? Or just a thick dark brown stroke along neck. Use path with stroke dark brown, stroke-width 8, fill none, from (65,-95) to (95,-155). Eyes: two black dots on head at (90,-170) and (110,-170)? Head facing right. Tail: at left rear, path from (-80,-80) curving down. Use path M -80,-80 Q -110,-90 -100,-60 Q -95,-50 -85,-55? Fill brown? Or stroke. Draw tail as a path with stroke brown, stroke-width 6. Need visible tail at rear. Good.
+
+Positions across field. Ground line y=520. Grass from 520 to 800. Animals stand on grass. Their feet at y=700 maybe. But ground extends to 800, so animals at y=700 leaves 100px below. That's fine, they are on grass. Maybe place feet at y=720. Use different x positions: Cow at x=150, Sheep at x=420, Pig at x=650, Horse at x=950. Ensure no overlap. Sizes: Cow width ~200, Sheep ~200, Pig ~120, Horse ~200. Spaced.
+
+Bounce animation: Each animal group inside a `<g transform="translate(x, groundY)">` with inner `<g>` that has `<animateTransform attributeName="transform" type="translate" values="0 0; 0 -15; 0 0" dur="0.8s" repeatCount="indefinite" begin="0s"/>`. But if inner group has transform animation, it will override any static transform? We can structure: outer `<g transform="translate(x,720)">` contains `<g>` with animateTransform. Inside that, the animal primitives with coordinates relative to feet at 0. Good. The animateTransform values are relative to the inner group's initial transform (none). So it translates by 0,-15 etc. Works.
+
+Need out of phase: begin="0s", "0.2s", "0.4s", "0.6s". Different durations maybe 0.7s, 0.8s, 0.9s. Use begin offsets.
+
+Clouds: Use groups with animateTransform. Need wrap around. We can set from="-300 0" to="1500 0" dur="60s" repeatCount="indefinite". But when it resets, it jumps. That's wrap around. Good. But if cloud exits one side, reappears on other. The from is -300 (off left), to 1500 (off right). At end, it resets to -300. Good. Each cloud different y, speed, start. Use begin="0s", "-20s", "-40s" to offset. But negative begin may not be well supported? SMIL supports begin="-20s" meaning start immediately at 20s into animation? Actually negative begin is allowed; it starts at that offset. Or use begin="0s" and different durations. To have clouds already distributed, use different begin values with negative? In SMIL, begin can be "0s" or "-20s". It should work. Alternatively, set initial transform positions and animate from different starting positions. Simpler: use begin="0s", "-15s", "-30s". Should be fine. Need at least 3 clouds. We'll make 3 cloud groups. Each with 4 overlapping ellipses. Cloud 1 at y=100, scale 1. Cloud 2 at y=180, scale 0.8. Cloud 3 at y=60, scale 0.6. Animate from -300 to 1500. But note: cloud group initial position: if animateTransform from="-300 0", the group will be at -300 at start, meaning off-screen left. With negative begin, it will be somewhere. Good.
+
+Sky gradient: define linearGradient id="sky" x1=0 y1=0 x2=0 y2=1. Stops: 0% #87CEEB (light blue), 100% #E0F6FF (lighter blue/white). Apply to rect covering y=0 to 520. Actually horizon at 65% of 800 = 520. So sky rect y=0 height=520 fill url(#sky). Grass rect y=520 height=280 fill green gradient. Use linearGradient for grass: #4CAF50 to #2E7D32. Add subtle texture? Optional. Maybe add some small grass blades or darker patches. Not required. Add a horizon line: a line or rect at y=520 with slightly darker green? The sky meets grass; clear horizon line. Could draw a thin line at y=520 with stroke #2E7D32 or a light stroke. Or just the color transition. We'll add a rect at y=519 height=2 fill #A5D6A7 or stroke.
+
+Sun: at x=950, y=120. Halo circle r=80 fill #FFF9C4 opacity 0.5. Sun circle r=50 fill #FFD54F. Rays: 8 lines. Use group at (950,120). Lines from r=55 to r=80. Use stroke #FFEB3B stroke-width=4 stroke-linecap=round. Or triangles. Lines easier. Use `<g transform="translate(950,120)">` then lines with x1=0 y1=-60 x2=0 y2=-85, etc. Rotate each line by 45 degrees. Or use a single path with multiple lines. We'll write 8 `<line>` elements with transform rotate. Actually easier: `<line x1="0" y1="-60" x2="0" y2="-90" transform="rotate(0)"/>`, rotate(45), etc. Good.
+
+Trees: at least 2. Rooted on grass. Place at x=100, y=520? Tree trunk base at y=520? Wait grass starts at 520, so tree base at y=520 (horizon). But animals stand at y=720, so trees at horizon might look far. Could place trees on grass, maybe base at y=550 or 600. But they need to be rooted on grass. Put tree 1 at x=100, base y=600. Tree 2 at x=1100, base y=580. But animals at y=720, so trees behind them. That's fine. Trees should be visible. Trunk: brown rect. Canopy: overlapping circles green. Draw trunk from y=0 to -100 relative to base. Canopy circles at top. Use groups. Maybe sway gently? Optional. We can keep static or add slight sway. To keep simple, static. But we can add a subtle sway using animateTransform on canopy? Not necessary.
+
+Let's plan tree 1: base at (100, 600). Trunk: rect x=-10, y=-120, width=20, height=120, fill #8B4513. Canopy: circles at (0,-150) r=50; (-40,-130) r=40; (40,-130) r=40; (0,-100) r=45? Overlapping. Fill #2E7D32, #388E3C, etc. Tree 2: base at (1100, 580). Trunk: rect x=-12, y=-140, width=24, height=140. Canopy: circles at (0,-180) r=55; (-45,-150) r=45; (45,-150) r=45; (0,-120) r=50. Use different greens.
+
+Need ensure trees not buried in ground: trunk base at y=600 or 580, which is below horizon (520), so on grass. Good.
+
+Animals: Let's detail each species drawing. Need exactly 4 legs visible for each. We'll draw legs first, then body, then head, etc. Use local coordinate system with feet at y=0. We'll place them at groundY = 700 (so feet at y=700). But grass extends to 800, so animals are on grass. Bounce moves them up. They will not float because animation moves up and down, feet leave ground during bounce? That's fine, bouncing means they hop. Requirement says "bounce in place — gentle vertical hop loop". So they can leave ground slightly. At rest, feet at ground. Good.
+
+Let's set groundY = 720. Then feet at y=720. Bounce amplitude 15. So they hop up to 705. Good.
+
+Cow details:
+- Local coordinates: feet y=0.
+- Legs: four rects. Let's define leg positions: x=-70, -40, 40, 70. width=12, height=50, y=-50 to 0. Fill #FFF8E1 (cream). Add hooves: rect x=-70, y=-8, width=12, height=8, fill #333; similarly for others. But if body covers top, legs from y=-50 to 0. Body bottom at y=-20. So legs visible from y=-20 to 0. Actually body ellipse center y=-70, ry=50 => bottom y=-20. So legs from y=-50 to 0: top 30px covered by body, bottom 20px visible. That's enough. But to ensure 4 legs visible, make them distinct. Use x=-75, -35, 35, 75. Body rx=90, so legs at ±75 are near edge. At x=75, body half-height = 50*sqrt(1-(75/90)^2)=50*sqrt(1-0.694)=50*0.553=27.6, so body bottom at y=-70+27.6=-42.4. So leg at x=75 visible from y=-42.4 to 0. Good. Legs at x=-35, 35 also visible. But we need 4 legs; use x=-75, -40, 40, 75. They will be visible. Draw legs with rounded bottom? Use rect with rx=3.
+- Body: ellipse cx=0, cy=-70, rx=90, ry=50, fill #FFF8E1. Stroke #D7CCC8? Maybe.
+- Black patches: use 3 ellipses. Patch 1: cx=-40, cy=-80, rx=25, ry=18, fill #212121. Patch 2: cx=25, cy=-60, rx=20, ry=15, fill #212121. Patch 3: cx=55, cy=-85, rx=15, ry=12, fill #212121. Ensure within body. Check patch 3 at cx=55, cy=-85: body at x=55, half-height=50*sqrt(1-(55/90)^2)=50*sqrt(1-0.373)=50*0.792=39.6, so y range -70±39.6 = -109.6 to -30.4. Patch y -85±12 = -97 to -73, fits. Patch 1 at cx=-40: body half-height=50*sqrt(1-(40/90)^2)=50*sqrt(1-0.1975)=50*0.896=44.8, y range -114.8 to -25.2. Patch y -80±18 = -98 to -62, fits. Good.
+- Udder: pink ellipse under body near rear (left side). cx=-40, cy=-18, rx=20, ry=12, fill #F8BBD0. Add two small teats? Not necessary. But ensure it doesn't interfere with legs. Place at y=-15, might overlap legs? Draw udder after body, before legs? Actually legs drawn first, then body, then udder on top of body. Udder at y=-18, body bottom at y=-20, so udder below body. Good.
+- Head: at right side. Head group at (85, -95). Head ellipse cx=85, cy=-95, rx=30, ry=25, fill #FFF8E1. Ears: two ellipses at (70,-120) and (100,-120) rx=10 ry=6, fill #FFF8E1, stroke #D7CCC8. Horns: requirement says 2 horns or 2 small ears. We have 2 ears, so okay. But cows also have horns. Could add 2 small horns as triangles. But "2 horns or 2 small ears" means either is fine. We'll add ears.
+- Eyes: two black circles at (75,-100) and (95,-100) r=4, fill #212121. Add white highlight? Not necessary.
+- Nose: pink ellipse at (110,-85) rx=12 ry=8, fill #F8BBD0. Nostrils: two small dark ellipses at (107,-85) and (113,-85) rx=2 ry=2, fill #C2185B. Mouth: small line at (110,-78). This gives pink nose.
+- Tail: optional. Could add small tail at left. Not required but adds character. Maybe a thin line with tuft. Keep simple.
+
+But wait: head at x=85, body extends to x=90, so head slightly overlaps body. That's fine. Head center y=-95, body top at y=-120, so head is within body vertical range. It might look like head attached to body. Good.
+
+Sheep details:
+- Feet y=0. Body: fluffy white. Use multiple overlapping circles. Center around x=0, y=-70. Circles:
+  - cx=-50, cy=-70, r=35
+  - cx=-20, cy=-85, r=35
+  - cx=15, cy=-85, r=35
+  - cx=50, cy=-70, r=35
+  - cx=-30, cy=-45, r=30
+  - cx=0, cy=-45, r=30
+  - cx=30, cy=-45, r=30
+  - cx=-10, cy=-100, r=25? Maybe. This creates fluffy body.
+  Fill #FAFAFA or #FFFFFF. Add slight stroke #E0E0E0? Not necessary.
+- Legs: 4 dark rects. x=-55, -25, 25, 55. width=8, height=45, y=-45 to 0. Fill #333. Since body circles cover down to y=-45? Some circles at cy=-45 r=30 extend to y=-15. So legs from y=-45 to 0: top part covered, bottom visible. But need exactly 4 legs visible. Legs at x=-55, -25, 25, 55. Body circles at those x positions? At x=-55, circle cx=-50 r=35 covers down to y=-70+35=-35? Wait circle cx=-50 cy=-70 r=35, bottom at -35. So leg at x=-55 from y=-45 to 0: top 10px covered (y=-45 to -35), bottom 35px visible. Good. At x=-25, circle cx=-20 cy=-85 r=35 bottom at -50; circle cx=-30 cy=-45 r=30 bottom at -15. So leg visible from y=-15 to 0? Actually leg from -45 to 0, body covers from -45 to -15, visible from -15 to 0. That's only 15px. Might be too short. Better adjust legs to be more visible. Make body circles higher, or legs longer. Let's set legs height=55, from y=-55 to 0. Body bottom around y=-30. Then visible 30px. Let's redesign sheep body to sit higher. Body center y=-80, circles radius 35, bottom at -45. Legs from y=-50 to 0. Visible from -45 to 0 (45px). Good. Let's set body circles:
+  - cx=-50, cy=-80, r=35 (bottom -45)
+  - cx=-20, cy=-95, r=35 (bottom -60)
+  - cx=15, cy=-95, r=35 (bottom -60)
+  - cx=50, cy=-80, r=35 (bottom -45)
+  - cx=-30, cy=-55, r=30 (bottom -25)
+  - cx=0, cy=-55, r=30 (bottom -25)
+  - cx=30, cy=-55, r=30 (bottom -25)
+  This gives fluffy body from y=-130 to -25. Legs at x=-55, -25, 25, 55. Leg height 50, y=-50 to 0. At x=-55, body bottom -45, so leg visible from -45 to 0 (45px). At x=-25, circle cx=-30 cy=-55 r=30 bottom -25, so leg visible from -25 to 0 (25px). But still visible. To make all 4 legs clearly visible, we can draw legs on top of body? No, legs should be behind body. But if body covers too much, legs might be short. Let's make legs longer and extend lower. Set leg height 60, y=-60 to 0. Body bottom around -25. Visible from -25 to 0 (25px) for middle legs, but that's okay. Or adjust body circles to be higher. Let's set body circles all cy around -85, bottom -50. Then legs from -60 to 0, visible 50px. Let's do:
+  - cx=-50, cy=-85, r=35
+  - cx=-20, cy=-100, r=35
+  - cx=15, cy=-100, r=35
+  - cx=50, cy=-85, r=35
+  - cx=-30, cy=-60, r=30 (bottom -30)
+  - cx=0, cy=-60, r=30 (bottom -30)
+  - cx=30, cy=-60, r=30 (bottom -30)
+  Legs at x=-55, -25, 25, 55, height=60, y=-60 to 0. At x=-55, body bottom -50 (from first circle), visible 50px. At x=-25, body bottom -30 (from circle cx=-30 cy=-60 r=30), visible 30px. Good.
+- Face: dark gray circle at right side x=70, y=-100, r=25, fill #555. Ears: two dark ellipses at (55,-120) and (85,-120) rx=10 ry=6, fill #555. Eyes: two white circles at (60,-105) and (80,-105) r=5, fill white; black pupils at same positions r=2.5. This shows 2 eyes on dark face.
+- Wool tuft on top of head? Optional. Could add a few small white circles on top of face to blend. But dark face is distinct.
+
+Pig details:
+- Feet y=0. Body: pink oval. Center x=0, y=-45, rx=50, ry=35, fill #F48FB1. Maybe darker pink outline. Legs: 4 rects, x=-35, -15, 15, 35, width=8, height=30, y=-30 to 0, fill #F06292. Body bottom at y=-10? Wait body center y=-45, ry=35, bottom y=-10. Legs from y=-30 to 0: top covered, visible from -10 to 0 (10px). That's too short. Need legs longer. Set body center y=-55, ry=35, bottom y=-20. Legs height 40, y=-40 to 0. Visible from -20 to 0 (20px). Better. Let's set pig body: ellipse cx=0, cy=-55, rx=50, ry=35, fill #F48FB1. Legs: x=-35, -15, 15, 35, width=10, height=40, y=-40 to 0, fill #F06292. Body bottom -20, so legs visible 20px. Good. To make exactly 4 legs visible, ensure they are distinct. At x=-35, body half-height at x=35: 35*sqrt(1-(35/50)^2)=35*sqrt(1-0.49)=35*0.714=25, so body bottom at -55+25=-30. So leg at x=35 visible from -30 to 0 (30px). At x=15, body bottom at -55+35*sqrt(1-(15/50)^2)= -55+35*0.954= -55+33.4=-21.6, visible ~21px. Good.
+- Head: at right side x=50, y=-65, circle r=25, fill #F48FB1. Ears: two triangles. One at top left of head: points (35,-80), (25,-100), (45,-85). Another at top right: points (55,-80), (65,-100), (75,-85). Fill #F06292. Or use small triangles. Ensure 2 triangular ears. Eyes: two black dots at (45,-70) and (60,-70) r=3, fill #212121.
+- Snout: ellipse at x=70, y=-60, rx=12, ry=8, fill #F8BBD0. Nostrils: two small dark ellipses at (67,-60) and (73,-60) rx=2 ry=3, fill #C2185B. Mouth line below.
+- Tail: curly path at left side. Body left edge at x=-50. Tail at x=-50, y=-55. Draw path: M -50,-55 C -65,-65 -65,-40 -50,-45 C -40,-50 -45,-65 -55,-60? Need a small curly tail. Use stroke #F06292 stroke-width=3 fill=none. Or draw a path with curves. Ensure visible. Since body covers left edge, tail should start at body edge and curve out. Place tail at x=-50, y=-50. Path: M -50,-50 q -15,-10 -10,-25 q 5,-10 15,-5 q 10,5 5,15? That might be too big. Simpler: path d="M -50,-50 C -65,-55 -65,-40 -55,-45 C -45,-50 -50,-65 -60,-60" stroke. This makes a curly tail. Good.
+
+Horse details:
+- Feet y=0. Body: brown ellipse, longer than tall. cx=0, cy=-80, rx=85, ry=45, fill #8B4513 (saddle brown). Legs: 4 long legs. x=-60, -30, 30, 60. width=10, height=70, y=-70 to 0. Body bottom at y=-35. So legs visible from -35 to 0 (35px) but horse legs longer. Actually body bottom y=-80+45=-35. Legs from y=-70 to 0: top covered, bottom visible 35px. To make them look longer, we can lower body? Or set body center y=-90, ry=40, bottom y=-50. Legs from y=-80 to 0, visible 30px. Hmm. Horse legs should be longer than others. We can make legs extend further below body by placing body higher. Set body center y=-100, ry=40, bottom y=-60. Legs height=80, y=-80 to 0. Visible from -60 to 0 = 60px. Good. But then body is higher, horse total height ~180. That's fine. Let's set horse body: cx=0, cy=-100, rx=85, ry=40, fill #8B4513. Legs: x=-60, -30, 30, 60, width=10, height=80, y=-80 to 0, fill #8B4513. Add darker hooves at bottom. Body bottom y=-60. Legs visible from -60 to 0. Good.
+- Neck: long neck from front of body (right side) going up. Body right edge at x=85, y=-100. Neck should connect to head at around x=110, y=-180. Draw a polygon/path: M 60,-110 L 90,-190 L 110,-185 L 80,-90 Z? Let's design: Neck as a thick path. Use `<path d="M 70,-110 Q 90,-160 100,-190 L 120,-185 Q 100,-140 90,-90 Z" fill="#8B4513"/>`. This gives a long neck leaning right. Head: at top of neck, x=110, y=-190, ellipse rx=25, ry=20, fill #8B4513. Ears: two small triangles on top of head. Mane: darker brown line/shape along neck. Draw a path along the back of neck: from (80,-110) to (110,-190) with stroke #5D4037 stroke-width=8 fill=none. Or a filled shape: `<path d="M 70,-110 Q 90,-160 100,-190 L 110,-185 Q 90,-140 80,-95 Z" fill="#5D4037"/>`. This is the mane. Eyes: two black dots on head at (100,-195) and (120,-195) r=3.5. Ears: triangles at (95,-210) and (125,-210). Tail: at left rear, x=-85, y=-110. Draw a path curving down: `M -85,-110 Q -120,-120 -110,-80 Q -105,-60 -95,-70` with stroke #5D4037 stroke-width=8 fill=none. Or fill shape. Good.
+
+Need ensure exactly 4 legs visible for horse. Legs at x=-60, -30, 30, 60. Body covers top. At x=60, body half-height at x=60: 40*sqrt(1-(60/85)^2)=40*sqrt(1-0.498)=40*0.708=28.3, body bottom at -100+28.3=-71.7. So leg at x=60 visible from -71.7 to 0 = 71.7px. Good. At x=30, body bottom at -100+40*sqrt(1-(30/85)^2)= -100+40*0.937= -100+37.5=-62.5, visible 62.5px. Good.
+
+Now positions. GroundY=720. Place:
+- Cow at x=150, groundY=720. Cow width ~200 (from -100 to 100). So spans x=50 to 250. Good.
+- Sheep at x=400, groundY=720. Sheep width ~200. Spans 300 to 500.
+- Pig at x=620, groundY=720. Pig width ~120. Spans 560 to 680.
+- Horse at x=900, groundY=720. Horse width ~200. Spans 800 to 1000.
+All spaced. No overlap. Trees at x=100, base y=600 (behind cow? Cow at x=150, tree at x=100, might overlap cow? Tree canopy at y=600-150=450, cow body at y=720-100=620. Tree base y=600, cow feet y=720. Tree is behind and to left. Cow spans x=50 to 250, tree trunk at x=100, canopy extends x=50 to 150. They might overlap visually. But trees are behind animals? In SVG, order matters. We should draw trees first, then animals on top. So cow will cover tree trunk partially. That's fine. But cow at x=150, tree at x=100, they might look crowded. Let's place tree 1 at x=80, tree 2 at x=1050. Cow at x=250? Let's adjust positions to avoid crowding. Field width 1200. Place animals: Cow at x=200, Sheep at x=450, Pig at x=680, Horse at x=950. Trees: left tree at x=80, right tree at x=1120. This gives space. Cow spans x=100 to 300. Tree at x=80, canopy extends to x=130, might overlap cow slightly. That's okay, but we can move tree further left to x=50. Let's set tree 1 base at (60, 600). Canopy circles at cx=0 r=50 extends to x=110? Actually relative to base x=60, canopy at x=60+0=60, r=50 => x=10 to 110. Cow at x=200 spans 100 to 300. Overlap at x=100-110. Minor. Could move cow to x=220. Let's set:
+- Cow: x=220, y=720. Spans 120 to 320.
+- Sheep: x=480, y=720. Spans 380 to 580.
+- Pig: x=700, y=720. Spans 640 to 760.
+- Horse: x=980, y=720. Spans 880 to 1080.
+Trees: tree1 at x=80, base y=600. tree2 at x=1120, base y=580. Tree2 canopy extends to x=1120±55 => 1065 to 1175. Horse spans 880 to 1080. Overlap at 1065-1080. Minor. Could move horse to x=950. Spans 850 to 1050. Tree2 at 1120, canopy 1065-1175, no overlap. Good. Let's set horse x=950. Pig x=700. Sheep x=480. Cow x=220.
+
+Check spacing: Cow 120-320, Sheep 380-580, Pig 640-760, Horse 850-1050. Gaps: 320-380 (60), 580-640 (60), 760-850 (90). Good.
+
+Now, bounce animation. Use SMIL animateTransform inside each animal group. Structure:
+```
+<g transform="translate(220,720)">
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0 0; 0 -15; 0 0" dur="0.8s" repeatCount="indefinite" begin="0s"/>
+    <!-- cow drawing with feet at y=0 -->
+  </g>
+</g>
+```
+Wait: if the inner group has animateTransform, it will translate the drawing. The outer group places it at (220,720). The inner group initially has no transform, so it's at (0,0). The animateTransform translates it by 0,-15 etc. So the feet will move up. Good.
+
+For sheep, begin="0.2s", dur="0.9s". Pig begin="0.4s", dur="0.7s". Horse begin="0.6s", dur="0.85s". This gives out-of-phase.
+
+Clouds: Use `<g>` with animateTransform. Example:
+```
+<g>
+  <animateTransform attributeName="transform" type="translate" from="-300 0" to="1500 0" dur="60s" repeatCount="indefinite" begin="0s"/>
+  <!-- cloud shapes at y=100 -->
+  <ellipse cx="0" cy="100" rx="60" ry="25" fill="#fff"/>
+  <ellipse cx="40" cy="90" rx="50" ry="30" fill="#fff"/>
+  <ellipse cx="-40" cy="95" rx="45" ry="22" fill="#fff"/>
+  <ellipse cx="10" cy="110" rx="70" ry="20" fill="#fff"/>
+</g>
+```
+But note: the cloud shapes have cx,cy absolute coordinates. The animateTransform translates the whole group. The initial from="-300 0" means the group is shifted left by 300. So the cloud at cx=0 will appear at x=-300. That's off-screen. With begin="0s", it starts off-screen and moves right. To have clouds already visible, use begin negative or set initial transform and animate from different starting positions. We can use `begin="-20s"` to start mid-animation. For cloud 1, begin="0s" might be off-screen initially. That's okay, it will drift in. But requirement says at least 3 clouds drifting. They can start off-screen and drift in. But we want visible clouds on load. Better use negative begin so they are already distributed. SMIL supports negative begin: `begin="-20s"`. Let's use:
+- Cloud 1: begin="-10s", dur="70s", from="-300 0" to="1500 0". At t=0, it is 10s into the 70s animation, so position = -300 + (1500-(-300))*(10/70) = -300 + 1800*0.1428 = -300 + 257 = -43. So slightly left of screen. Good.
+- Cloud 2: begin="-30s", dur="90s". Position = -300 + 1800*(30/90) = -300 + 600 = 300. Visible.
+- Cloud 3: begin="-50s", dur="60s". Position = -300 + 1800*(50/60) = -300 + 1500 = 1200. Just off right. Maybe begin="-45s": -300+1800*(45/60)= -300+1350=1050. Visible near right. Good.
+We can also vary y positions. Cloud 1 y=120, Cloud 2 y=200, Cloud 3 y=80. Each cloud group has shapes at those y's. The animateTransform translates horizontally, so y remains.
+
+Need ensure clouds wrap. from="-300 0" to="1500 0" with repeatCount="indefinite". At end, jumps back to -300. Good.
+
+Sky gradient: use linearGradient. Need horizon line. Grass gradient. Add some grass texture: maybe small darker green ellipses or lines. Optional. Could add a few small grass tufts using paths. Not required but adds visual. Keep file size under 30KB. We can add a few simple grass blades. But not necessary.
+
+Sun rays: at least 6. Use 8 lines.
+
+Let's write the HTML.
+
+Structure:
+```
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  html, body { margin:0; padding:0; overflow:hidden; width:100%; height:100%; }
+  svg { display:block; width:100vw; height:100vh; }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#87CEEB"/>
+      <stop offset="100%" stop-color="#E0F6FF"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4CAF50"/>
+      <stop offset="100%" stop-color="#2E7D32"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky -->
+  <rect x="0" y="0" width="1200" height="520" fill="url(#sky)"/>
+  <!-- Grass -->
+  <rect x="0" y="520" width="1200" height="280" fill="url(#grass)"/>
+  <!-- Horizon line -->
+  <rect x="0" y="519" width="1200" height="2" fill="#A5D6A7"/>
+
+  <!-- Sun -->
+  <g transform="translate(950,120)">
+    <circle cx="0" cy="0" r="80" fill="#FFF9C4" opacity="0.5"/>
+    <circle cx="0" cy="0" r="50" fill="#FFD54F"/>
+    <line x1="0" y1="-60" x2="0" y2="-90" stroke="#FFEB3B" stroke-width="4" stroke-linecap="round"/>
+    <line x1="0" y1="-60" x2="0" y2="-90" stroke="#FFEB3B" stroke-width="4" stroke-linecap="round" transform="rotate(45)"/>
+    <line x1="0" y1="-60" x2="0" y2="-90" stroke="#FFEB3B" stroke-width="4" stroke-linecap="round" transform="rotate(90)"/>
+    <line x1="0" y1="-60" x2="0" y2="-90" stroke="#FFEB3B" stroke-width="4" stroke-linecap="round" transform="rotate(135)"/>
+    <line x1="0" y1="-60" x2="0" y2="-90" stroke="#FFEB3B" stroke-width="4" stroke-linecap="round" transform="rotate(180)"/>
+    <line x1="0" y1="-60" x2="0" y2="-90" stroke="#FFEB3B" stroke-width="4" stroke-linecap="round" transform="rotate(225)"/>
+    <line x1="0" y1="-60" x2="0" y2="-90" stroke="#FFEB3B" stroke-width="4" stroke-linecap="round" transform="rotate(270)"/>
+    <line x1="0" y1="-60" x2="0" y2="-90" stroke="#FFEB3B" stroke-width="4" stroke-linecap="round" transform="rotate(315)"/>
+  </g>
+
+  <!-- Clouds -->
+  <!-- Cloud 1 -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" from="-300 0" to="1500 0" dur="70s" repeatCount="indefinite" begin="-10s"/>
+    <ellipse cx="0" cy="120" rx="60" ry="25" fill="#FFFFFF"/>
+    <ellipse cx="40" cy="110" rx="50" ry="30" fill="#FFFFFF"/>
+    <ellipse cx="-40" cy="115" rx="45" ry="22" fill="#FFFFFF"/>
+    <ellipse cx="10" cy="130" rx="70" ry="20" fill="#FFFFFF"/>
+  </g>
+  <!-- Cloud 2 -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" from="-300 0" to="1500 0" dur="90s" repeatCount="indefinite" begin="-30s"/>
+    <ellipse cx="0" cy="200" rx="50" ry="20" fill="#F5F5F5"/>
+    <ellipse cx="35" cy="190" rx="45" ry="25" fill="#F5F5F5"/>
+    <ellipse cx="-35" cy="195" rx="40" ry="18" fill="#F5F5F5"/>
+    <ellipse cx="10" cy="210" rx="55" ry="15" fill="#F5F5F5"/>
+  </g>
+  <!-- Cloud 3 -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" from="-300 0" to="1500 0" dur="60s" repeatCount="indefinite" begin="-45s"/>
+    <ellipse cx="0" cy="80" rx="40" ry="15" fill="#FFFFFF"/>
+    <ellipse cx="25" cy="70" rx="35" ry="20" fill="#FFFFFF"/>
+    <ellipse cx="-25" cy="75" rx="30" ry="14" fill="#FFFFFF"/>
+    <ellipse cx="5" cy="90" rx="45" ry="12" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Trees -->
+  <!-- Tree 1 -->
+  <g transform="translate(80,600)">
+    <rect x="-10" y="-120" width="20" height="120" fill="#8B4513" rx="4"/>
+    <circle cx="0" cy="-150" r="50" fill="#2E7D32"/>
+    <circle cx="-40" cy="-130" r="40" fill="#388E3C"/>
+    <circle cx="40" cy="-130" r="40" fill="#388E3C"/>
+    <circle cx="0" cy="-100" r="45" fill="#43A047"/>
+  </g>
+  <!-- Tree 2 -->
+  <g transform="translate(1120,580)">
+    <rect x="-12" y="-140" width="24" height="140" fill="#8B4513" rx="4"/>
+    <circle cx="0" cy="-180" r="55" fill="#2E7D32"/>
+    <circle cx="-45" cy="-150" r="45" fill="#388E3C"/>
+    <circle cx="45" cy="-150" r="45" fill="#388E3C"/>
+    <circle cx="0" cy="-120" r="50" fill="#43A047"/>
+  </g>
+
+  <!-- Animals -->
+  <!-- Cow -->
+  <g transform="translate(220,720)">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0 0; 0 -15; 0 0" dur="0.8s" repeatCount="indefinite" begin="0s"/>
+      <!-- Cow legs -->
+      <rect x="-75" y="-50" width="12" height="50" fill="#FFF8E1" rx="3"/>
+      <rect x="-75" y="-8" width="12" height="8" fill="#212121" rx="2"/>
+      <rect x="-40" y="-50" width="12" height="50" fill="#FFF8E1" rx="3"/>
+      <rect x="-40" y="-8" width="12" height="8" fill="#212121" rx="2"/>
+      <rect x="40" y="-50" width="12" height="50" fill="#FFF8E1" rx="3"/>
+      <rect x="40" y="-8" width="12" height="8" fill="#212121" rx="2"/>
+      <rect x="75" y="-50" width="12" height="50" fill="#FFF8E1" rx="3"/>
+      <rect x="75" y="-8" width="12" height="8" fill="#212121" rx="2"/>
+      <!-- Cow body -->
+      <ellipse cx="0" cy="-70" rx="90" ry="50" fill="#FFF8E1"/>
+      <!-- Black patches -->
+      <ellipse cx="-40" cy="-80" rx="25" ry="18" fill="#212121"/>
+      <ellipse cx="25" cy="-60" rx="20" ry="15" fill="#212121"/>
+      <ellipse cx="55" cy="-85" rx="15" ry="12" fill="#212121"/>
+      <!-- Udder -->
+      <ellipse cx="-40" cy="-18" rx="20" ry="12" fill="#F8BBD0"/>
+      <!-- Head -->
+      <ellipse cx="85" cy="-95" rx="30" ry="25" fill="#FFF8E1"/>
+      <!-- Ears -->
+      <ellipse cx="70" cy="-120" rx="10" ry="6" fill="#FFF8E1" stroke="#D7CCC8" stroke-width="1"/>
+      <ellipse cx="100" cy="-120" rx="10" ry="6" fill="#FFF8E1" stroke="#D7CCC8" stroke-width="1"/>
+      <!-- Eyes -->
+      <circle cx="75" cy="-100" r="4" fill="#212121"/>
+      <circle cx="95" cy="-100" r="4" fill="#212121"/>
+      <!-- Nose -->
+      <ellipse cx="110" cy="-85" rx="12" ry="8" fill="#F8BBD0"/>
+      <ellipse cx="107" cy="-85" rx="2" ry="2" fill="#C2185B"/>
+      <ellipse cx="113" cy="-85" rx="2" ry="2" fill="#C2185B"/>
+      <path d="M 105 -78 Q 110 -74 115 -78" stroke="#C2185B" stroke-width="1.5" fill="none"/>
+    </g>
+  </g>
+
+  <!-- Sheep -->
+  <g transform="translate(480,720)">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0 0; 0 -12; 0 0" dur="0.9s" repeatCount="indefinite" begin="0.2s"/>
+      <!-- Sheep legs -->
+      <rect x="-55" y="-60" width="8" height="60" fill="#333333" rx="2"/>
+      <rect x="-25" y="-60" width="8" height="60" fill="#333333" rx="2"/>
+      <rect x="25" y="-60" width="8" height="60" fill="#333333" rx="2"/>
+      <rect x="55" y="-60" width="8" height="60" fill="#333333" rx="2"/>
+      <!-- Sheep body (fluffy) -->
+      <circle cx="-50" cy="-85" r="35" fill="#FFFFFF"/>
+      <circle cx="-20" cy="-100" r="35" fill="#FFFFFF"/>
+      <circle cx="15" cy="-100" r="35" fill="#FFFFFF"/>
+      <circle cx="50" cy="-85" r="35" fill="#FFFFFF"/>
+      <circle cx="-30" cy="-60" r="30" fill="#FFFFFF"/>
+      <circle cx="0" cy="-60" r="30" fill="#FFFFFF"/>
+      <circle cx="30" cy="-60" r="30" fill="#FFFFFF"/>
+      <circle cx="-10" cy="-120" r="25" fill="#FFFFFF"/>
+      <!-- Sheep face -->
+      <circle cx="70" cy="-100" r="25" fill="#555555"/>
+      <!-- Ears -->
+      <ellipse cx="55" cy="-120" rx="10" ry="6" fill="#555555"/>
+      <ellipse cx="85" cy="-120" rx="10" ry="6" fill="#555555"/>
+      <!-- Eyes -->
+      <circle cx="60" cy="-105" r="5" fill="#FFFFFF"/>
+      <circle cx="60" cy="-105" r="2.5" fill="#212121"/>
+      <circle cx="80" cy="-105" r="5" fill="#FFFFFF"/>
+      <circle cx="80" cy="-105" r="2.5" fill="#212121"/>
+    </g>
+  </g>
+
+  <!-- Pig -->
+  <g transform="translate(700,720)">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0 0; 0 -10; 0 0" dur="0.7s" repeatCount="indefinite" begin="0.4s"/>
+      <!-- Pig tail -->
+      <path d="M -50 -50 C -65 -55 -65 -40 -55 -45 C -45 -50 -50 -65 -60 -60" stroke="#F06292" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- Pig legs -->
+      <rect x="-35" y="-40" width="10" height="40" fill="#F06292" rx="2"/>
+      <rect x="-15" y="-40" width="10" height="40" fill="#F06292" rx="2"/>
+      <rect x="15" y="-40" width="10" height="40" fill="#F06292" rx="2"/>
+      <rect x="35" y="-40" width="10" height="40" fill="#F06292" rx="2"/>
+      <!-- Pig body -->
+      <ellipse cx="0" cy="-55" rx="50" ry="35" fill="#F48FB1"/>
+      <!-- Pig head -->
+      <circle cx="50" cy="-65" r="25" fill="#F48FB1"/>
+      <!-- Pig ears (triangles) -->
+      <polygon points="35,-80 25,-100 45,-85" fill="#F06292"/>
+      <polygon points="55,-80 65,-100 75,-85" fill="#F06292"/>
+      <!-- Pig eyes -->
+      <circle cx="45" cy="-70" r="3" fill="#212121"/>
+      <circle cx="60" cy="-70" r="3" fill="#212121"/>
+      <!-- Pig snout -->
+      <ellipse cx="70" cy="-60" rx="12" ry="8" fill="#F8BBD0"/>
+      <ellipse cx="67" cy="-60" rx="2" ry="3" fill="#C2185B"/>
+      <ellipse cx="73" cy="-60" rx="2" ry="3" fill="#C2185B"/>
+      <path d="M 65 -54 Q 70 -50 75 -54" stroke="#C2185B" stroke-width="1.5" fill="none"/>
+    </g>
+  </g>
+
+  <!-- Horse -->
+  <g transform="translate(950,720)">
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0 0; 0 -18; 0 0" dur="0.85s" repeatCount="indefinite" begin="0.6s"/>
+      <!-- Horse tail -->
+      <path d="M -85 -110 Q -120 -120 -110 -80 Q -105 -60 -95 -70" stroke="#5D4037" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <!-- Horse legs -->
+      <rect x="-60" y="-80" width="10" height="80" fill="#8B4513" rx="2"/>
+      <rect x="-60" y="-8" width="10" height="8" fill="#3E2723" rx="2"/>
+      <rect x="-30" y="-80" width="10" height="80" fill="#8B4513" rx="2"/>
+      <rect x="-30" y="-8" width="10" height="8" fill="#3E2723" rx="2"/>
+      <rect x="30" y="-80" width="10" height="80" fill="#8B4513" rx="2"/>
+      <rect x="30" y="-8" width="10" height="8" fill="#3E2723" rx="2"/>
+      <rect x="60" y="-80" width="10" height="80" fill="#8B4513" rx="2"/>
+      <rect x="60" y="-8" width="10" height="8" fill="#3E2723" rx="2"/>
+      <!-- Horse body -->
+      <ellipse cx="0" cy="-100" rx="85" ry="40" fill="#8B4513"/>
+      <!-- Horse neck -->
+      <path d="M 70,-110 Q 90,-160 100,-190 L 120,-185 Q 100,-140 90,-90 Z" fill="#8B4513"/>
+      <!-- Horse mane -->
+      <path d="M 70,-110 Q 90,-160 100,-190 L 110,-185 Q 90,-140 80,-95 Z" fill="#5D4037"/>
+      <!-- Horse head -->
+      <ellipse cx="110" cy="-190" rx="25" ry="20" fill="#8B4513"/>
+      <!-- Horse ears -->
+      <polygon points="95,-210 100,-225 108,-212" fill="#8B4513"/>
+      <polygon points="115,-210 120,-225 128,-212" fill="#8B4513"/>
+      <!-- Horse eyes -->
+      <circle cx="100" cy="-195" r="3.5" fill="#212121"/>
+      <circle cx="120" cy="-195" r="3.5" fill="#212121"/>
+      <!-- Horse muzzle -->
+      <ellipse cx="125" cy="-180" rx="10" ry="7" fill="#A1887F"/>
+      <ellipse cx="123" cy="-180" rx="2" ry="2" fill="#3E2723"/>
+      <ellipse cx="127" cy="-180" rx="2" ry="2" fill="#3E2723"/>
+    </g>
+  </g>
+
+  <!-- Grass tufts (optional) -->
+  <g opacity="0.6">
+    <path d="M 300 750 Q 305 740 310 750" stroke="#2E7D32" stroke-width="2" fill="none"/>
+    <path d="M 305 750 Q 310 735 315 750" stroke="#388E3C" stroke-width="2" fill="none"/>
+    <path d="M 600 730 Q 605 720 610 730" stroke="#2E7D32" stroke-width="2" fill="none"/>
+    <path d="M 605 730 Q 610 715 615 730" stroke="#388E3C" stroke-width="2" fill="none"/>
+    <path d="M 850 760 Q 855 750 860 760" stroke="#2E7D32" stroke-width="2" fill="none"/>
+    <path d="M 855 760 Q 860 745 865 760" stroke="#388E3C" stroke-width="2" fill="none"/>
+    <path d="M 1100 740 Q 1105 730 1110 740" stroke="#2E7D32" stroke-width="2" fill="none"/>
+    <path d="M 1105 740 Q 1110 725 1115 740" stroke="#388E3C" stroke-width="2" fill="none"/>
+  </g>
+</svg>
+</body>
+</html>
+```
+
+Need check requirements carefully.
+
+- Full viewport SVG 100vw x 100vh: CSS `svg { width:100vw; height:100vh; }` and body margin 0, overflow hidden. Good.
+- Sky gradient covering upper ~65%: sky rect height 520 out of 800 = 65%. Good.
+- Grass lower ~35%: 280/800 = 35%. Good.
+- Clear horizon line: rect at y=519 height 2. Good.
+- Sun yellow circle upper portion, halo, at least 6 rays: 8 rays. Good.
+- Clouds: at least 3, each 3+ overlapping circles/ellipses. Cloud 1 has 4 ellipses, Cloud 2 has 4, Cloud 3 has 4. Drifting and wrap. Good.
+- Trees: at least 2, rooted on grass. Tree 1 base at y=600 (grass), Tree 2 base at y=580 (grass). Trunk brown, canopy overlapping circles. Good.
+- Animals: exactly 4 distinct species, all visible. Cow, Sheep, Pig, Horse. Each constructed from SVG primitives only. No emoji/text. Good.
+- Cow: white/cream body with at least 3 black patches. Yes, 3 ellipses. Exactly 4 legs visible: we have 4 legs at x=-75,-40,40,75. Need to verify they are all visible and not hidden. Body ellipse rx=90, ry=50, center (0,-70). Legs at x=-75: body half-height at x=75? Actually symmetric. At x=75, body bottom y = -70 + 50*sqrt(1-(75/90)^2) = -70 + 50*0.553 = -70 + 27.65 = -42.35. Leg from y=-50 to 0. So leg top at -50 is covered by body until -42.35, then visible from -42.35 to 0. That's 42px visible. At x=-40, body bottom = -70 + 50*sqrt(1-(40/90)^2) = -70 + 50*0.896 = -70 + 44.8 = -25.2. Leg visible from -25.2 to 0 = 25px. At x=40, same. At x=-75, visible. So 4 legs visible. But wait: the legs are drawn before body, so body covers top. The hooves at y=-8 to 0 are visible. Yes. 2 horns or 2 small ears: we have 2 ears. 2 eyes: yes. Pink udder or pink nose: we have both. Good.
+- Sheep: fluffy white body multiple overlapping circles. Yes, 8 circles. Exactly 4 dark legs visible: 4 rects at x=-55,-25,25,55, height 60. Body circles bottom: at x=-55, circle cx=-50 cy=-85 r=35 bottom -50. Leg from -60 to 0, visible from -50 to 0 (50px). At x=-25, circle cx=-30 cy=-60 r=30 bottom -30. Leg visible from -30 to 0 (30px). At x=25, circle cx=30 cy=-60 r=30 bottom -30. Visible 30px. At x=55, circle cx=50 cy=-85 r=35 bottom -50. Visible 50px. So all 4 legs visible. Dark face gray. 2 eyes (white with black pupils). 2 ears (ellipses). Good.
+- Pig: pink oval body. Exactly 4 legs visible: 4 rects at x=-35,-15,15,35, height 40. Body ellipse cx=0 cy=-55 rx=50 ry=35. Bottom at -20. Legs from -40 to 0. At x=-35: body half-height at x=35 = 35*sqrt(1-(35/50)^2)=35*0.714=25, bottom at -55+25=-30. Leg visible from -30 to 0 = 30px. At x=15: bottom at -55+35*sqrt(1-(15/50)^2)= -55+35*0.954= -55+33.4=-21.6. Visible 21.6px. At x=35: bottom -30. At x=-15: similar. So all 4 visible. Pink snout with 2 nostrils: yes. 2 small triangular ears: yes. 2 eyes: yes. Small curly tail: path at left. Good.
+- Horse: brown body longer than tall: ellipse rx=85 ry=40, so width 170, height 80. Yes. Exactly 4 legs visible: 4 rects at x=-60,-30,30,60, height 80. Body bottom at y=-60. At x=60: body half-height = 40*sqrt(1-(60/85)^2)=40*0.708=28.3, bottom at -100+28.3=-71.7. Leg visible from -71.7 to 0 = 71.7px. At x=30: bottom -62.5. Visible 62.5px. So all 4 visible. Long neck: path. Visible mane: darker path along neck. 2 ears: triangles. 2 eyes: yes. Tail at rear: path. Good.
+- All 4 animals standing on grass: feet at y=720, grass from 520 to 800. Yes.
+- Roughly proportional: cow ~200x120, sheep ~200x150, pig ~120x100, horse ~200x220. Horse larger. Good.
+- No overlapping animals: positions spaced. Cow 120-320, Sheep 380-580, Pig 640-760, Horse 850-1050. No overlap.
+- Each animal clearly visible head/face turned toward viewer or profile: Cow head at right side, profile with two eyes visible. Sheep face at right side. Pig head at right. Horse head at top right. All have eyes visible. Good.
+- Animation: all 4 bounce in place. We use animateTransform with values "0 0; 0 -15; 0 0" etc. They don't translate horizontally. Each out of phase: begin 0s, 0.2s, 0.4s, 0.6s. Good.
+- Clouds drift continuously: yes, animateTransform.
+- No external assets, no fetch, no console errors. SMIL should work. Need to ensure no syntax errors.
+
+Potential issues:
+- In SMIL, `begin="-10s"` might not work in some browsers? It is valid SMIL. Chrome supports negative begin. But to be safe, we could use `begin="0s"` and set initial transform via `transform` attribute? But then animation from="-300 0" will override initial transform? Actually animateTransform with from/to will set transform to from at begin. If begin="0s", it starts at -300. To have clouds already visible, we can use multiple clouds with different starting positions by using `from` values. But `from` and `to` define the animation. We can set `from` to different values for each cloud, e.g., cloud 1 from="-300 0" to="1500 0", cloud 2 from="300 0" to="1800 0"? But then it won't wrap around at the same boundary. Better to use negative begin. It's standard. Alternatively, use `begin="0s"` and add `keyTimes`? No. Negative begin is fine. If concerned, we can set `begin="0s"` and use `from="-300 0"` but then all clouds start off-screen. The requirement doesn't say they must be visible on load, just "at least 3 clouds drifting slowly across the sky". They will drift in. But it might look empty initially. To ensure visible on load, we can use negative begin. I'll keep negative begin.
+
+- The horse tail: path `M -85 -110 Q -120 -120 -110 -80 Q -105 -60 -95 -70`. This is a stroke with width 8. It might look like a tail. Good.
+
+- The cow's udder: `ellipse cx="-40" cy="-18" rx="20" ry="12"`. Body bottom at y=-20. So udder is slightly below body, might overlap legs? Legs at x=-75,-40,40,75. Udder at x=-40, y=-18, rx=20, ry=12. It will overlap the leg at x=-40? The leg at x=-40 is from y=-50 to 0. Udder is drawn after body, so it will cover part of the leg. That's fine, but might obscure the leg. However, the leg at x=-40 is still visible below y=-8? Udder bottom at y=-18-12=-30? Actually ellipse cy=-18, ry=12, bottom at -6? Wait cy=-18, ry=12 => y from -30 to -6. The leg at x=-40 from y=-50 to 0. The udder covers y=-30 to -6, so the leg is covered in that region. The visible part of leg is from y=-6 to 0 (6px) plus from y=-50 to -30 (20px) but body covers down to -25.2. So leg visible from -25.2 to -6 (19.2px) and -6 to 0 (6px) but udder covers -30 to -6, so actually leg visible from -25.2 to -30? That's impossible. Let's analyze: Body covers y up to -25.2. Udder covers y from -30 to -6. So the leg at x=-40 is covered by body from top down to -25.2, then covered by udder from -30 to -6. So the leg is only visible from -25.2 to -30? That's a 5px gap? Actually body covers from top down to -25.2. Udder covers from -30 to -6. So the leg is visible from -25.2 down to -30? No, body covers down to -25.2 (meaning y > -25.2 is covered? Wait, body ellipse center y=-70, ry=50, bottom at y=-20. So body covers y from -120 to -20. At x=-40, body bottom is -25.2, so body covers y from -120 to -25.2. That means y < -25.2 is covered (more negative). The leg extends from y=-50 to 0. So the part of leg from y=-50 to -25.2 is covered by body. The part from -25.2 to 0 is not covered by body. But udder covers y from -30 to -6. So udder covers the leg from -30 to -6. Since -25.2 is between -30 and -6, the leg is covered by udder from -30 to -6. So the leg is visible only from -25.2 to -30? Actually -25.2 is greater than -30 (less negative). The leg from -25.2 to 0: udder covers -30 to -6, which includes -25.2 to -6. So the leg is covered from -25.2 to -6 by udder. Then visible from -6 to 0. So only 6px visible. That might make the leg at x=-40 look short. But we need exactly 4 legs visible. The leg at x=-40 might be partially obscured by udder. To avoid this, move the udder to the left, away from the legs. Place udder at x=-20? But leg at x=-40, -75. If udder at x=-20, it might not overlap leg at -40. Let's move udder to x=-20, y=-15. Or better, draw udder after legs but before body? No, udder should be under body. Let's place udder at x=-25, y=-15, rx=15, ry=10. It won't overlap leg at -40 or -75? At x=-40, leg is at x=-40, udder at -25 with rx=15 extends from -40 to -10. It will still overlap leg at -40 at the edge. Maybe move udder to x=-10, between legs? But cow udder is usually near rear. Let's place udder at x=-50, y=-15, rx=15, ry=10. Legs at -75 and -40. Udder at -50 extends -65 to -35, overlapping leg at -40? It will cover part of leg at -40. To ensure all 4 legs visible, we can draw the udder behind the legs? Actually udder is part of body, should be behind legs? No, udder is under the body, legs are below. If we draw udder before legs, legs will be on top of udder. But udder should be visible. We can draw udder after body, but then legs drawn before body? Let's reorder: draw legs first, then body, then udder. The udder will cover the legs if it overlaps. To avoid covering legs, place udder between legs. For example, legs at -75, -40, 40, 75. Place udder at x=0, y=-15? But udder is usually near rear. Let's place udder at x=-15, y=-15, rx=12, ry=8. It won't overlap legs at -40 and 40? At x=-15, rx=12 extends -27 to -3. Legs at -40 and 40 are outside. So no overlap. Good. But udder at x=-15 is under the body center, which is fine. Let's change cow udder to cx="-15" cy="-18" rx="15" ry="10". That should be clear of legs. Actually leg at -40 is at x=-40, udder extends to -30 (cx=-15 -15=-30). So no overlap. Leg at -75 is far. Leg at 40 is far. Good. So udder visible and legs visible.
+
+- Cow head: at x=85, y=-95. Body right edge at x=90, so head overlaps body. Eyes at x=75,95. Nose at x=110. This looks okay. But the head is drawn after body, so it will cover part of body. That's fine.
+
+- Sheep face: at x=70, y=-100. Body circles: one at cx=50 cy=-85 r=35 extends to x=85. So face at x=70 overlaps body. Good. Eyes at x=60,80. Ears at 55,85. Good.
+
+- Pig head: at x=50, y=-65. Body right edge at x=50. Head overlaps body edge. Good.
+
+- Horse neck: path from 70,-110 to 100,-190. Body right edge at x=85. Neck starts at x=70, which is inside body. Good. Head at 110,-190. Mane path from 70,-110 to 100,-190. Good.
+
+- Horse legs: we have hooves at y=-8 to 0. But horse legs are longer, so hooves at bottom. Good.
+
+- Cloud 2 fill #F5F5F5, slightly off-white. Good.
+
+- Trees: tree 1 base at y=600, which is below horizon (520). Tree trunk goes up to y=480 (600-120). Canopy at y=450-500. This is above horizon? Wait, horizon is at y=520. Tree base at y=600 is on grass. Trunk from y=600 up to y=480. So trunk crosses horizon at y=520? That means the trunk is partially in the sky? Actually the tree is drawn after the sky and grass, so it will appear on top. The trunk from y=480 to 600: y=480 is above horizon (520), so the top part of the trunk and canopy are in the sky area. But trees are rooted on grass, their trunk extends upward. That's normal: a tree's trunk goes up into the sky. The base is on grass. So it's fine. The tree is rooted at y=600, which is on grass. The canopy is in the sky area, which is correct for a tree. Good.
+
+- Tree 2 base at y=580, trunk up to y=440, canopy above. Good.
+
+- Grass tufts: we added some paths at y=730-760. They are on grass. Good.
+
+- File size: Let's estimate. The HTML is around 8-10KB. Under 30KB. Good.
+
+- No console errors: SMIL animations should not throw errors. Ensure all tags closed. We have `<svg>` with xmlns. Good.
+
+- No external fonts, no text. Good.
+
+- No emoji. Good.
+
+- Bouncing: The animateTransform on inner group. But note: the inner group has no initial transform. The animateTransform will apply translation. The values are "0 0; 0 -15; 0 0". This will move the group up by 15 units. Since the outer group is at y=720, the feet at y=0 will move to y=-15, so feet at y=705. That's a 15px hop. Good. The duration 0.8s, repeat indefinite. Good.
+
+- Out of phase: begin="0s", "0.2s", "0.4s", "0.6s". Good.
+
+- Clouds: animateTransform from="-300 0" to="1500 0". The cloud shapes have absolute coordinates like cy=120. When translated, they move horizontally. The y remains. Good.
+
+Potential issue: In SMIL, `from` and `to` for `animateTransform` type="translate" should be in the format "x y". We have "from="-300 0" to="1500 0"". That's correct.
+
+Potential issue: `begin="-10s"` might not be supported in all browsers? It is standard SMIL. Chrome, Firefox, Safari support it. Good.
+
+Potential issue: The sky gradient uses `linearGradient` with x1=0 y1=0 x2=0 y2=1. By default, gradientUnits="objectBoundingBox", so it applies to the rect. The rect is 1200x520. The gradient will go from top to bottom. Good.
+
+Potential issue: The grass gradient similarly. Good.
+
+Potential issue: The sun rays: we used lines with transform rotate. The lines are defined with x1=0 y1=-60 x2=0 y2=-90. Then rotate(45) rotates around origin (0,0). Since the group is translated to (950,120), the rays will rotate around the sun center. Good.
+
+Potential issue: The cow's ears: we used ellipses with stroke. Good.
+
+Potential issue: The sheep's eyes: white circles with black pupils. Good.
+
+Potential issue: The pig's ears: triangles. Good.
+
+Potential issue: The horse's ears: triangles. Good.
+
+Potential issue: The horse's mane: we drew a path filled with darker brown. But the mane path might overlap the neck. It's drawn after neck, so it will be on top. Good.
+
+Potential issue: The horse's tail: stroke width 8, might look like a thick line. Good.
+
+Let's double-check the cow's legs. We have 4 legs at x=-75, -40, 40, 75. But the cow body is white, legs white with black hooves. They might blend with body. The hooves are black, so they will be visible. But the legs themselves are white, same as body. They will be visible because they extend below the body. The body bottom is around -20 to -42 depending on x. The legs extend to y=0. So there is a visible white leg segment. To make them more distinct, we could add a thin outline to the legs. But not required. The hooves are black, so you can count 4 black hooves. That clearly shows 4 legs. Good.
+
+Sheep legs are dark, visible. Pig legs are darker pink, visible. Horse legs brown with dark hooves, visible.
+
+One more check: Cow's black patches: we have 3 ellipses. Are they clearly on the body? Yes. But patch at cx=55 cy=-85 rx=15 ry=12: body at x=55, half-height = 50*sqrt(1-(55/90)^2) = 50*0.792 = 39.6. Body bottom at y=-70+39.6=-30.4, top at -109.6. Patch y from -97 to -73, inside. Good. Patch at cx=25 cy=-60 rx=20 ry=15: body half-height at x=25 = 50*sqrt(1-(25/90)^2)=50*0.960=48. Body y range -118 to -22. Patch y -75 to -45, inside. Good. Patch at cx=-40 cy=-80 rx=25 ry=18: body half-height at x=40 = 50*sqrt(1-(40/90)^2)=50*0.896=44.8. Body y range -114.8 to -25.2. Patch y -98 to -62, inside. Good.
+
+Cow's udder: we changed to cx=-15 cy=-18 rx=15 ry=10. Body bottom at x=-15: half-height = 50*sqrt(1-(15/90)^2)=50*0.986=49.3. Body bottom at y=-70+49.3=-20.7. Udder cy=-18, ry=10 => y from -28 to -8. It will overlap body bottom? Body bottom at -20.7, udder top at -28, so udder extends above body bottom? Actually body covers y from -120 to -20.7. Udder from -28 to -8. So the top part of udder (-28 to -20.7) is inside body, bottom part (-20.7 to -8) is below body. That's correct: udder hangs below body. It's drawn after body, so it will cover the body in that region. That's fine. It doesn't overlap legs at x=-40 or -75 because udder x range -30 to 0. Leg at -40 is at x=-40, udder left edge -30, so no overlap. Leg at 40 is far. Leg at -75 far. So all 4 legs visible. Good.
+
+Now, ensure animals are not floating: feet at y=0 relative to their group, and group placed at y=720. The grass extends from 520 to 800. So feet at 720 are on grass. Bounce moves them up to 705, still on grass. Good.
+
+Now, final output should be only the HTML file. No markdown. We'll output the code as is.
+
+Let's write the final HTML. Ensure no extra spaces or comments that could cause issues. We'll include the code.
+
+Check for any missing closing tags. The SVG has defs, rects, g, etc. All closed. The HTML has head, body, svg. Good.
+
+One minor thing: `preserveAspectRatio="xMidYMid slice"` will make the SVG cover the viewport while maintaining aspect ratio, cropping if necessary. But requirement says full-viewport SVG 100vw x 100vh. Using `width="100vw" height="100vh"` in CSS and viewBox with slice might crop. Alternatively, use `preserveAspectRatio="none"` to stretch to fill. But that might distort animals. Better use `preserveAspectRatio="xMidYMid meet"` which fits the entire viewBox within the viewport, possibly leaving empty space. But requirement says full-viewport SVG 100vw x 100vh. We can set `preserveAspectRatio="none"` to stretch, but animals might look squished on different aspect ratios. However, the scene is designed for 1200x800 (3:2). Most screens are 16:9. Using `slice` will crop top/bottom or sides. To ensure the sky and grass cover the viewport, `slice` is good. But the horizon might not be at 65% of viewport if cropped. The requirement says sky covering upper ~65% of viewport. If we use slice, the viewBox is scaled to cover, cropping might change the apparent horizon position. Better to use `preserveAspectRatio="none"` so the viewBox stretches to exactly 100vw x 100vh. Then horizon is exactly at 65% of viewport height. The animals will stretch slightly if aspect ratio differs, but it's acceptable. Let's use `preserveAspectRatio="none"`. The SVG will fill the viewport exactly. The sun will be an ellipse if stretched? Actually with `none`, circles become ellipses if aspect ratio differs. That might make the sun oval. To avoid distortion, we can use `preserveAspectRatio="xMidYMid slice"` which maintains aspect ratio and covers. But then the horizon might not be at 65% of viewport if cropped. The requirement says "covering the upper ~65% of the viewport". It's approximate. Using `slice` is common for full-screen backgrounds. However, if the viewport is very wide, the viewBox might be cropped vertically, so the horizon could be higher or lower. To strictly meet "upper ~65% of the viewport", we should use `preserveAspectRatio="none"`. But then the sun becomes an ellipse. Is that acceptable? The requirement says "A yellow circle". If stretched, it's not a circle. So we need to maintain aspect ratio. We can use `preserveAspectRatio="xMidYMid slice"` and accept that the horizon might not be exactly 65% on all screens, but it will be close. Alternatively, we can use `preserveAspectRatio="xMidYMid meet"` which fits the whole viewBox, leaving letterboxing (empty space) if aspect ratio differs. But requirement says full-viewport SVG, no scrollbars. Letterboxing might show background color. We can set body background to match sky/grass? But then it's not a single SVG covering. Better to use `slice`. The requirement says "covering the upper ~65% of the viewport". With `slice`, if the viewport is wider than 3:2, the viewBox is scaled up to cover width, and height is cropped. The horizon might be at a different percentage. For example, on a 16:9 screen (1.78), the viewBox 3:2 (1.5). To cover width, scale = viewportWidth/1200. Height = 800 * scale. Viewport height = viewportWidth/1.78. The scaled height = 800 * (viewportWidth/1200) = (800/1200)*viewportWidth = 0.6667*viewportWidth. Viewport height = 0.5625*viewportWidth. So scaled height > viewport height, meaning vertical crop. The horizon at y=520 in viewBox becomes y=520*scale. The viewport height is 800*scale? Actually the cropped viewport shows a portion of the viewBox. The visible height in viewBox units is viewportHeight/scale = (viewportWidth/1.78) / (viewportWidth/1200) = 1200/1.78 = 674. So visible viewBox height is 674 out of 800. The crop is centered vertically (xMidYMid). So it crops 63 units from top and bottom. The horizon at 520 remains at 520, but the visible top is at 63, bottom at 737. The horizon's position in the viewport is (520 - 63) / 674 = 457/674 = 67.8%. Close to 65%. Acceptable. On a taller screen (e.g., mobile portrait), it will crop sides. The horizon might be at a different percentage, but still roughly. So `slice` is fine. We'll use `preserveAspectRatio="xMidYMid slice"`. The sun remains a circle because aspect ratio is maintained. Good.
+
+Let's set `svg` CSS: `width:100vw; height:100vh; display:block;` and `body { margin:0; overflow:hidden; }`. Good.
+
+Now, final answer.

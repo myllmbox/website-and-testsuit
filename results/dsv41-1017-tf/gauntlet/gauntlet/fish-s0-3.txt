@@ -1,0 +1,236 @@
+[finish=stop]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Underwater Scene</title>
+<style>
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#062a4a}
+svg#scene{position:fixed;top:0;left:0;width:100vw;height:100vh;display:block}
+.plant{transform-box:fill-box;transform-origin:50% 100%;animation:sway 5s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7fd8f2"/>
+      <stop offset="45%" stop-color="#1e88bd"/>
+      <stop offset="100%" stop-color="#062a4a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="0%" r="85%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0" y="0" width="100%" height="100%" fill="url(#water)"/>
+  <rect x="0" y="0" width="100%" height="60%" fill="url(#glow)"/>
+
+  <path id="floor" fill="#d9c08a"/>
+  <g id="rocks"></g>
+  <g id="plants"></g>
+  <g id="bubbles"></g>
+
+  <!-- Fish 1: large, round, orange, faces right -->
+  <g id="f1">
+    <path d="M -50 0 L -104 -38 L -104 38 Z" fill="#d9631c"/>
+    <ellipse cx="0" cy="0" rx="56" ry="40" fill="#f79433"/>
+    <path d="M -24 -34 Q -6 -72 26 -30 Z" fill="#d9631c"/>
+    <ellipse cx="-8" cy="30" rx="20" ry="9" fill="#e07a24" transform="rotate(-22 -8 30)"/>
+    <circle cx="34" cy="-10" r="8" fill="#ffffff"/>
+    <circle cx="35" cy="-10" r="4" fill="#1b1b1b"/>
+    <path d="M 46 12 q 10 5 14 -4" fill="none" stroke="#a8430e" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Fish 2: small, slender, teal, faces left (flipped at runtime) -->
+  <g id="f2">
+    <path d="M -44 0 L -94 -30 L -94 30 Z" fill="#1b8f9c"/>
+    <ellipse cx="0" cy="0" rx="50" ry="17" fill="#3ed0d8"/>
+    <path d="M -26 -14 Q -6 -46 20 -12 Z" fill="#1b8f9c"/>
+    <ellipse cx="-2" cy="13" rx="15" ry="6" fill="#2bb6c0" transform="rotate(-18 -2 13)"/>
+    <circle cx="30" cy="-5" r="6" fill="#ffffff"/>
+    <circle cx="31" cy="-5" r="3" fill="#0f2b33"/>
+    <path d="M 40 6 q 8 4 11 -3" fill="none" stroke="#12666f" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg>
+
+<script>
+(function () {
+  var NS = 'http://www.w3.org/2000/svg';
+  var svg = document.getElementById('scene');
+  var floorEl = document.getElementById('floor');
+  var rocksEl = document.getElementById('rocks');
+  var plantsEl = document.getElementById('plants');
+  var bubbleLayer = document.getElementById('bubbles');
+  var f1El = document.getElementById('f1');
+  var f2El = document.getElementById('f2');
+
+  var W = 0, H = 0, fy = 0, k = 1;
+  var fish1 = { x: 0, y: 0, speed: 62 };
+  var fish2 = { x: 0, y: 0, speed: 132 };
+  var started = false;
+
+  function el(name, attrs) {
+    var e = document.createElementNS(NS, name);
+    for (var a in attrs) { if (attrs.hasOwnProperty(a)) e.setAttribute(a, attrs[a]); }
+    return e;
+  }
+
+  function strandPath(x, y, h, amp) {
+    return 'M ' + x + ' ' + y +
+      ' C ' + (x - amp) + ' ' + (y - h * 0.33) +
+      ' ' + (x + amp) + ' ' + (y - h * 0.66) +
+      ' ' + (x + amp * 0.5) + ' ' + (y - h);
+  }
+
+  function layout() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    fy = H * 0.88;
+    k = Math.max(0.55, Math.min(1.6, Math.min(W, H) / 800));
+
+    floorEl.setAttribute('d',
+      'M0 ' + H + ' L0 ' + fy +
+      ' C ' + (W * 0.12) + ' ' + (fy - 30) +
+      ' ' + (W * 0.28) + ' ' + (fy + 16) +
+      ' ' + (W * 0.46) + ' ' + (fy - 8) +
+      ' C ' + (W * 0.64) + ' ' + (fy - 34) +
+      ' ' + (W * 0.80) + ' ' + (fy + 12) +
+      ' ' + W + ' ' + (fy - 16) +
+      ' L ' + W + ' ' + H + ' Z');
+
+    // Rocks on the sand
+    rocksEl.innerHTML = '';
+    var rockData = [[0.08, 0.6], [0.20, 0.45], [0.52, 0.7], [0.71, 0.5], [0.90, 0.55]];
+    for (var i = 0; i < rockData.length; i++) {
+      var fx = rockData[i][0], sc = rockData[i][1];
+      var rx = 34 * sc * k, ry = 16 * sc * k;
+      rocksEl.appendChild(el('ellipse', {
+        cx: W * fx, cy: fy + ry * 0.35, rx: rx, ry: ry, fill: '#bda070'
+      }));
+      rocksEl.appendChild(el('ellipse', {
+        cx: W * fx - rx * 0.25, cy: fy - ry * 0.15, rx: rx * 0.6, ry: ry * 0.6, fill: '#cdb083'
+      }));
+    }
+
+    // Seaweed
+    plantsEl.innerHTML = '';
+    var spots = [[0.09, 0.30], [0.33, 0.24], [0.63, 0.33], [0.89, 0.21]];
+    var cols = ['#2f8f57', '#3aa86a', '#1f6b46'];
+    for (var s = 0; s < spots.length; s++) {
+      var g = el('g', { 'class': 'plant' });
+      g.style.animationDuration = (4.5 + s * 0.9).toFixed(1) + 's';
+      g.style.animationDelay = (-s * 1.3).toFixed(1) + 's';
+      var bx = W * spots[s][0];
+      var by = fy + 10;
+      var h = H * spots[s][1];
+      var strands = [
+        [-10 * k, 1.00, 14 * k],
+        [9 * k, 0.78, 11 * k],
+        [0, 0.60, -9 * k]
+      ];
+      for (var j = 0; j < strands.length; j++) {
+        g.appendChild(el('path', {
+          d: strandPath(bx + strands[j][0], by, h * strands[j][1], strands[j][2]),
+          fill: 'none',
+          stroke: cols[j],
+          'stroke-width': Math.max(4, 8 * k),
+          'stroke-linecap': 'round'
+        }));
+      }
+      plantsEl.appendChild(g);
+    }
+
+    if (!started) {
+      fish1.x = W * 0.22;
+      fish2.x = W * 0.72;
+      started = true;
+    }
+  }
+
+  // ---------- Bubbles ----------
+  var bubbles = [];
+  var BUBBLE_COUNT = 10;
+
+  function respawn(b, initial) {
+    var r = 3 + Math.random() * 9;
+    b.r = r;
+    b.x = W * (0.05 + Math.random() * 0.9);
+    b.y = initial ? (fy - Math.random() * H * 0.8) : (fy - Math.random() * 25);
+    b.sp = 100 - r * 4.5 + Math.random() * 12;
+    b.ph = Math.random() * Math.PI * 2;
+    b.ring.setAttribute('r', r);
+    b.ring.setAttribute('stroke-width', Math.max(1, r * 0.14));
+    b.hi.setAttribute('cx', -r * 0.3);
+    b.hi.setAttribute('cy', -r * 0.35);
+    b.hi.setAttribute('r', Math.max(1, r * 0.22));
+    b.el.setAttribute('transform', 'translate(' + b.x + ',' + b.y + ')');
+  }
+
+  function createBubble(initial) {
+    var g = el('g', {});
+    var ring = el('circle', {
+      fill: '#bfeaff', 'fill-opacity': 0.16,
+      stroke: '#e8f9ff', 'stroke-opacity': 0.8, 'stroke-width': 1.3
+    });
+    var hi = el('circle', { fill: '#ffffff', 'fill-opacity': 0.9 });
+    g.appendChild(ring);
+    g.appendChild(hi);
+    bubbleLayer.appendChild(g);
+    var b = { el: g, ring: ring, hi: hi };
+    respawn(b, initial);
+    bubbles.push(b);
+  }
+
+  for (var bi = 0; bi < BUBBLE_COUNT; bi++) createBubble(true);
+
+  // ---------- Animation ----------
+  var last = performance.now();
+  var t = 0;
+
+  function frame(now) {
+    var dt = (now - last) / 1000;
+    last = now;
+    if (dt > 0.05) dt = 0.05;
+    if (dt < 0) dt = 0;
+    t += dt;
+
+    // Fish 1 (big, slow, swims right)
+    var m1 = 130 * k;
+    fish1.x += fish1.speed * dt;
+    if (fish1.x > W + m1) fish1.x = -m1;
+    fish1.y = H * 0.36 + Math.sin(t * 0.7) * 16;
+    f1El.setAttribute('transform',
+      'translate(' + fish1.x + ',' + fish1.y + ') scale(' + k + ')');
+
+    // Fish 2 (small, fast, swims left -> flipped)
+    var m2 = 110 * k;
+    fish2.x -= fish2.speed * dt;
+    if (fish2.x < -m2) fish2.x = W + m2;
+    fish2.y = H * 0.62 + Math.sin(t * 0.55 + 1.4) * 14;
+    var s2 = k * 0.6;
+    f2El.setAttribute('transform',
+      'translate(' + fish2.x + ',' + fish2.y + ') scale(' + (-s2) + ',' + s2 + ')');
+
+    // Bubbles
+    for (var i = 0; i < bubbles.length; i++) {
+      var b = bubbles[i];
+      b.y -= b.sp * dt;
+      if (b.y < -b.r - 12) respawn(b, false);
+      var ox = Math.sin(t * 1.6 + b.ph) * 4;
+      b.el.setAttribute('transform', 'translate(' + (b.x + ox) + ',' + b.y + ')');
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', layout);
+  layout();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

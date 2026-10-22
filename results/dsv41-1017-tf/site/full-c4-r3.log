@@ -1,0 +1,50 @@
+· model detected: DeepSeek-V4.1-Flash-1017
+# test  http://100.89.129.80:8007  model=DeepSeek-V4.1-Flash-1017  c=4  window=warmup 30s + 300s measured (or first stream to finish)  thinking=off  max_tokens=20000  prompt=full
+  t=  10s  run= 4 wait= 0  gen  101.2 tok/s  per-stream  25.3  steps   0.0/s  acc 0.00  kv  0.3%  (not steady)
+  t=  20s  run= 4 wait= 0  gen  157.2 tok/s  per-stream  39.3  steps   0.0/s  acc 0.00  kv  0.5%  (not steady)
+  t=  30s  run= 4 wait= 0  gen  166.3 tok/s  per-stream  41.6  steps   0.0/s  acc 0.00  kv  0.6%
+  t=  40s  run= 4 wait= 0  gen  160.5 tok/s  per-stream  40.1  steps   0.0/s  acc 0.00  kv  0.8%
+  t=  50s  run= 4 wait= 0  gen  158.3 tok/s  per-stream  39.6  steps   0.0/s  acc 0.00  kv  0.9%
+  t=  60s  run= 4 wait= 0  gen  157.7 tok/s  per-stream  39.4  steps   0.0/s  acc 0.00  kv  1.1%
+  t=  70s  run= 4 wait= 0  gen  157.8 tok/s  per-stream  39.4  steps   0.0/s  acc 0.00  kv  1.2%
+  t=  80s  run= 4 wait= 0  gen  158.7 tok/s  per-stream  39.7  steps   0.0/s  acc 0.00  kv  1.4%
+  t=  90s  run= 4 wait= 0  gen  164.0 tok/s  per-stream  41.0  steps   0.0/s  acc 0.00  kv  1.5%
+  t= 100s  run= 4 wait= 0  gen  156.7 tok/s  per-stream  39.2  steps   0.0/s  acc 0.00  kv  1.7%
+  t= 110s  run= 4 wait= 0  gen  156.0 tok/s  per-stream  39.0  steps   0.0/s  acc 0.00  kv  1.8%
+  t= 120s  run= 4 wait= 0  gen  159.4 tok/s  per-stream  39.8  steps   0.0/s  acc 0.00  kv  2.0%
+  t= 130s  run= 4 wait= 0  gen  157.0 tok/s  per-stream  39.3  steps   0.0/s  acc 0.00  kv  2.1%
+  t= 140s  run= 4 wait= 0  gen  142.1 tok/s  per-stream  35.5  steps   0.0/s  acc 0.00  kv  2.3%
+  t= 150s  run= 4 wait= 0  gen  155.9 tok/s  per-stream  39.0  steps   0.0/s  acc 0.00  kv  2.4%
+  t= 160s  run= 4 wait= 0  gen  160.5 tok/s  per-stream  40.1  steps   0.0/s  acc 0.00  kv  2.6%
+  t= 170s  run= 4 wait= 0  gen  154.5 tok/s  per-stream  38.6  steps   0.0/s  acc 0.00  kv  2.7%
+  t= 180s  run= 4 wait= 0  gen  151.6 tok/s  per-stream  37.9  steps   0.0/s  acc 0.00  kv  2.9%
+  t= 190s  run= 4 wait= 0  gen  151.5 tok/s  per-stream  37.9  steps   0.0/s  acc 0.00  kv  3.0%
+  t= 200s  run= 4 wait= 0  gen  151.2 tok/s  per-stream  37.8  steps   0.0/s  acc 0.00  kv  3.2%
+  t= 210s  run= 4 wait= 0  gen  159.3 tok/s  per-stream  39.8  steps   0.0/s  acc 0.00  kv  3.3%
+  t= 220s  run= 4 wait= 0  gen  158.5 tok/s  per-stream  39.6  steps   0.0/s  acc 0.00  kv  3.5%
+  t= 230s  run= 4 wait= 0  gen  160.3 tok/s  per-stream  40.1  steps   0.0/s  acc 0.00  kv  3.6%
+  t= 240s  run= 4 wait= 0  gen  154.7 tok/s  per-stream  38.7  steps   0.0/s  acc 0.00  kv  3.8%
+  t= 250s  run= 4 wait= 0  gen  151.2 tok/s  per-stream  37.8  steps   0.0/s  acc 0.00  kv  3.9%
+  t= 260s  run= 4 wait= 0  gen  146.9 tok/s  per-stream  36.7  steps   0.0/s  acc 0.00  kv  4.0%
+  t= 270s  run= 4 wait= 0  gen  144.8 tok/s  per-stream  36.2  steps   0.0/s  acc 0.00  kv  4.2%
+  t= 280s  run= 4 wait= 0  gen  142.2 tok/s  per-stream  35.5  steps   0.0/s  acc 0.00  kv  4.3%
+  t= 290s  run= 4 wait= 0  gen  155.0 tok/s  per-stream  38.7  steps   0.0/s  acc 0.00  kv  4.5%
+  t= 300s  run= 4 wait= 0  gen  139.8 tok/s  per-stream  34.9  steps   0.0/s  acc 0.00  kv  4.6%
+  t= 310s  run= 4 wait= 0  gen  136.4 tok/s  per-stream  34.1  steps   0.0/s  acc 0.00  kv  4.7%
+  t= 320s  run= 4 wait= 0  gen  138.6 tok/s  per-stream  34.7  steps   0.0/s  acc 0.00  kv  4.9%
+· cap reached at 330s (warmup 30 + 300 measured) — window ends here; aborting the streams
+· window over — aborting the remaining streams
+
+# watched 04:04:01 → 04:09:32 (331 s); steady part 04:04:31 → 04:09:21 (300 s, 30 samples)
+# summary (steady = after warmup, all 4 running, zero prefill in the sample):
+  samples 30/32 steady · requests 4 ok, 0 failed, 0 hit max_tokens, 4 aborted by cap · avg 0 tok / 330 s per request
+  gen tok/s   avg (min–max): 153.6 (136.4–166.3)
+  per-stream  avg (min–max): 38.4 (34.1–41.6)
+  steps/s     —
+  acc len     avg (min–max): —
+  running     avg (min–max): 4.0 (4.0–4.0)   kv% 2.8 (0.6–4.9)
+  ttft s      avg (min–max): 1.72 (0.62–2.76)   (first token after send, 4 prompts of 0 tok fired together = queue + prefill)
+
+# reports.md row:
+| 2026-10-22 04:09 | | 4 | full thinking off (steady 300s of 331s watched) | 154 (136–166) | — | — | | per-stream 38 (34–42); ttft 1.72 (0.62–2.76) s; test.py |
+· saved /private/tmp/myllmbox/bench/results/DeepSeek-V4.1-Flash-1017--dsv41-1017-tf/20261022-001633-site/full-c4-r3.json
