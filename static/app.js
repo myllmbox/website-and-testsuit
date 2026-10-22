@@ -147,7 +147,7 @@ function vrow(label, visA, ptsA, visB, ptsB) {
 
 function section(title, rule, a, b, max, body) {
   return `<section><div class="sec-head"><h2>${esc(title)}</h2>
-    <span class="score">${pts(a)} vs ${pts(b)} · of ${max}</span></div>${body}</section>`;
+    <span class="score">${max ? `${pts(a)} vs ${pts(b)} · of ${max}` : 'judging pending · not scored'}</span></div>${body}</section>`;
 }
 
 /* ---------- blocks ---------- */
@@ -187,8 +187,8 @@ function pageVis(m, test, run, p) {
 
 function qualityBlock(A, B, rows) {
   const html = rows.map((r) => vrow(`<a class="plink" href="prompts/${r.test}.txt" data-prompt="${r.test}" title="Show the ${r.test} prompt"><b>${r.test}</b></a> · run ${r.run}`,
-    pageVis(A, r.test, r.run, r.pa), ptsBox(r.a, r.b, 1, 'a'),
-    pageVis(B, r.test, r.run, r.pb), ptsBox(r.b, r.a, 1, 'b'))).join('');
+    pageVis(A, r.test, r.run, r.pa), ptsBox(r.a, r.b, 1, 'a', !r.pending),
+    pageVis(B, r.test, r.run, r.pb), ptsBox(r.b, r.a, 1, 'b', !r.pending))).join('');
   return { a: sum(rows, 'a'), b: sum(rows, 'b'), max: rows.filter((r) => !r.pending).length, html };
 }
 
@@ -262,13 +262,14 @@ function render(report, ia, ib) {
     </div>
     <div class="total">
       ${logo(A, 'a')}<div class="side a"><span class="name">${esc(A.name)}</span><span class="meta">${esc(A.model)} · ${esc(A.stack)}${by(A)}</span></div>
-      <div class="mid"><div class="scoreline"><span class="${big(ta, tb)}">${pts(ta)}</span><span class="vs">vs</span><span class="${big(tb, ta)}">${pts(tb)}</span><span class="pc ${big(ta, tb)}">${(100 * ta / tmax).toFixed(1)} %</span><span></span><span class="pc ${big(tb, ta)}">${(100 * tb / tmax).toFixed(1)} %</span></div>of ${tmax} points</div>
+      <div class="mid"><div class="scoreline"><span class="${big(ta, tb)}">${pts(ta)}</span><span class="vs">vs</span><span class="${big(tb, ta)}">${pts(tb)}</span><span class="pc ${big(ta, tb)}">${(100 * ta / tmax).toFixed(1)} %</span><span></span><span class="pc ${big(tb, ta)}">${(100 * tb / tmax).toFixed(1)} %</span></div>of ${tmax} points${qual.max ? '' : ' · quality judging pending'}</div>
       <div class="side b"><span class="name">${esc(B.name)}</span><span class="meta">${esc(B.model)} · ${esc(B.stack)}${by(B)}</span></div>${logo(B, 'b')}
       ${links(A, 'a')}${links(B, 'b')}
     </div>
     <div class="names" aria-hidden="true"><span class="a">${esc(A.name)}</span><span></span><span class="divider"></span><span></span><span class="b">${esc(B.name)}</span></div>
     <div class="subtotals"><div class="st-head"><span class="a">${esc(A.name)}</span><span></span><span class="b">${esc(B.name)}</span></div>${blocks.map(([k, b]) => { const w = Math.abs(b.a - b.b) < 1e-9 ? ['', ''] : b.a > b.b ? ['win', 'lose'] : ['lose', 'win'];
       const mark = (c) => (c === 'lose' ? '<i class="mark no" aria-label="behind">✗</i>' : '<i class="mark yes" aria-label="ahead or level">✓</i>');
+      if (!b.max) return `<div class="st-row"><span></span><span class="a">—</span><span class="k">${k}<small>judging pending</small></span><span class="b">—</span><span></span></div>`;
       return `<div class="st-row">${mark(w[0])}<span class="a ${w[0]}">${pts(b.a)}</span><span class="k">${k}<small>of ${b.max}</small></span><span class="b ${w[1]}">${pts(b.b)}</span>${mark(w[1])}</div>`; }).join('')}</div>
     ${section('Spec sheet', 'max context · KV pool vs 3 × context · seats vs 8', spec.a, spec.b, spec.max, spec.html)}
     ${section('Gauntlet speed', 'tok/s while thinking and while writing the code, the best 10 s window, and the average over the whole run', gaunt.a, gaunt.b, gaunt.max, gaunt.html)}
