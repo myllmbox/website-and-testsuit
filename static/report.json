@@ -5109,11 +5109,12 @@
     ],
     "fish": [
      {
-      "verdict": "pending",
+      "verdict": "anomaly",
       "tokens": {
        "thinking": 10793,
        "code": 2126
-      }
+      },
+      "note": "one element off: the fish swims tail-first (tail on the leading end)"
      },
      {
       "verdict": "pending",
@@ -5144,11 +5145,12 @@
       }
      },
      {
-      "verdict": "pending",
+      "verdict": "anomaly",
       "tokens": {
        "thinking": 17146,
        "code": 2833
-      }
+      },
+      "note": "one element off: the fish swims tail-first (tail on the leading end)"
      }
     ]
    },
