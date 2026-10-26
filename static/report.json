@@ -4252,7 +4252,7 @@
     "code_tps": 74.5,
     "peak_tps": 86.7,
     "avg_tps": 44.3,
-    "runs": 6,
+    "runs": 12,
     "avg_thinking_tokens": 46094,
     "avg_code_tokens": 5090
    },
