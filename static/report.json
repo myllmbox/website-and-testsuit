@@ -4319,7 +4319,8 @@
        "thinking": 25703,
        "code": 3840
       },
-      "verdict": "clean"
+      "verdict": "anomaly",
+      "note": "sand drawn black (its gradient fill never reaches the path)"
      },
      {
       "tokens": {
