@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Underwater SVG Scene</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0c3a5f}
+  #scene{display:block;width:100vw;height:100vh}
+  .sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway var(--d,6s) ease-in-out infinite alternate}
+  @keyframes sway{from{transform:rotate(-4deg)}to{transform:rotate(4deg)}}
+  .wag{transform-box:fill-box;transform-origin:100% 50%;animation:wag var(--d,1s) ease-in-out infinite}
+  @keyframes wag{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+  .flut{transform-box:fill-box;transform-origin:100% 0%;animation:flut var(--d,.85s) ease-in-out infinite alternate}
+  @keyframes flut{from{transform:rotate(-12deg)}to{transform:rotate(14deg)}}
+  .ray{animation:ray var(--d,8s) ease-in-out infinite alternate}
+  @keyframes ray{from{opacity:.3}to{opacity:.85}}
+  .speck{animation:drift var(--d,16s) linear infinite}
+  @keyframes drift{0%{transform:translate(0,0);opacity:0}12%{opacity:.55}80%{opacity:.35}100%{transform:translate(-46px,-430px);opacity:0}}
+  @media (prefers-reduced-motion:reduce){.sway,.wag,.flut,.ray,.speck{animation:none}}
+</style>
+</head>
+<body>
+<svg id="scene" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8fd8e8"/><stop offset=".45" stop-color="#3f9cc4"/><stop offset="1" stop-color="#0c3a5f"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e7c48c"/><stop offset="1" stop-color="#8a5f33"/>
+    </linearGradient>
+    <linearGradient id="bodyA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffb35c"/><stop offset="1" stop-color="#df6f1e"/>
+    </linearGradient>
+    <linearGradient id="bodyB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5fd0c5"/><stop offset="1" stop-color="#158087"/>
+    </linearGradient>
+    <linearGradient id="weedG" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#1c6b3f"/><stop offset="1" stop-color="#3fae63"/>
+    </linearGradient>
+    <linearGradient id="rayG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".32"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="clipA"><ellipse rx="66" ry="48"/></clipPath>
+    <path id="blade" d="M-7 0C-18-40 14-80-4-122C-8-136 0-146 5-136C16-92-10-44 7 0Z"/>
+  </defs>
+
+  <rect width="1200" height="700" fill="url(#water)"/>
+
+  <!-- soft light shafts -->
+  <polygon class="ray" style="--d:8s" points="250,-300 360,-300 620,560 440,560" fill="url(#rayG)"/>
+  <polygon class="ray" style="--d:11s;animation-delay:-4s" points="560,-300 650,-300 890,560 750,560" fill="url(#rayG)"/>
+  <polygon class="ray" style="--d:9s;animation-delay:-2s" points="905,-300 1015,-300 1170,560 1010,560" fill="url(#rayG)"/>
+
+  <!-- drifting particles -->
+  <g fill="#dff3ff">
+    <circle class="speck" style="--d:15s" cx="380" cy="480" r="1.6"/>
+    <circle class="speck" style="--d:19s;animation-delay:-6s" cx="520" cy="555" r="1.2"/>
+    <circle class="speck" style="--d:13s;animation-delay:-3s" cx="645" cy="430" r="1.8"/>
+    <circle class="speck" style="--d:21s;animation-delay:-11s" cx="735" cy="540" r="1.3"/>
+    <circle class="speck" style="--d:17s;animation-delay:-8s" cx="845" cy="470" r="1.5"/>
+    <circle class="speck" style="--d:14s;animation-delay:-5s" cx="455" cy="350" r="1.1"/>
+    <circle class="speck" style="--d:20s;animation-delay:-14s" cx="595" cy="600" r="1.4"/>
+  </g>
+
+  <!-- seafloor -->
+  <g>
+    <path d="M0 630Q120 606 260 622T520 616T780 628T1040 614T1200 626V700H0Z" fill="url(#sand)"/>
+    <ellipse cx="180" cy="652" rx="46" ry="20" fill="#7c6046"/>
+    <ellipse cx="214" cy="660" rx="30" ry="15" fill="#96794f"/>
+    <ellipse cx="958" cy="648" rx="52" ry="22" fill="#6e573f"/>
+    <ellipse cx="1006" cy="658" rx="28" ry="13" fill="#8f7350"/>
+    <ellipse cx="560" cy="664" rx="24" ry="11" fill="#9c8262"/>
+    <circle cx="360" cy="670" r="6" fill="#a98a5f"/>
+    <circle cx="383" cy="673" r="4" fill="#8a6f4a"/>
+    <circle cx="702" cy="671" r="5" fill="#a98a5f"/>
+    <circle cx="1122" cy="669" r="6" fill="#8a6f4a"/>
+  </g>
+
+  <!-- seaweed clumps -->
+  <g>
+    <g transform="translate(148 660)"><g class="sway" style="--d:5.8s"><use href="#blade" fill="url(#weedG)"/></g></g>
+    <g transform="translate(172 662) scale(-.62 .78)"><g class="sway" style="--d:7.2s;animation-delay:-2.4s"><use href="#blade" fill="#2c8a52"/></g></g>
+    <g transform="translate(126 662) scale(.6 .9)"><g class="sway" style="--d:6.4s;animation-delay:-1.2s"><use href="#blade" fill="#37a05e"/></g></g>
+    <g transform="translate(470 658) scale(1.05)"><g class="sway" style="--d:6.8s;animation-delay:-3s"><use href="#blade" fill="url(#weedG)"/></g></g>
+    <g transform="translate(492 660) scale(-.7 .8)"><g class="sway" style="--d:5.2s;animation-delay:-1.8s"><use href="#blade" fill="#2c8a52"/></g></g>
+    <g transform="translate(788 660) scale(1.2)"><g class="sway" style="--d:6s;animation-delay:-2.2s"><use href="#blade" fill="url(#weedG)"/></g></g>
+    <g transform="translate(812 662) scale(-.75 .85)"><g class="sway" style="--d:7.6s;animation-delay:-4s"><use href="#blade" fill="#37a05e"/></g></g>
+    <g transform="translate(764 662) scale(.62)"><g class="sway" style="--d:5.6s;animation-delay:-.9s"><use href="#blade" fill="#2c8a52"/></g></g>
+    <g transform="translate(1076 660) scale(.95)"><g class="sway" style="--d:6.6s;animation-delay:-2.8s"><use href="#blade" fill="url(#weedG)"/></g></g>
+    <g transform="translate(1098 662) scale(-.6 .75)"><g class="sway" style="--d:8s;animation-delay:-5s"><use href="#blade" fill="#2c8a52"/></g></g>
+  </g>
+
+  <g id="bubbles"></g>
+
+  <!-- fish A: round, short, orange with pale bands, swims right -->
+  <g id="fishA">
+    <g class="wag" style="--d:1.15s">
+      <path d="M-56 0Q-78-6-100-30L-100 30Q-78 6-56 0Z" fill="#d4691c"/>
+    </g>
+    <path d="M-30-38Q-2-84 32-42Q0-52-30-38Z" fill="#d4691c"/>
+    <ellipse rx="66" ry="48" fill="url(#bodyA)"/>
+    <g clip-path="url(#clipA)" stroke="#fdf3e3" stroke-width="13" stroke-linecap="round" fill="none" opacity=".92">
+      <path d="M-34-46Q-26-22-34 2Q-40 24-32 46"/>
+      <path d="M2-50Q10-24 2 2Q-4 26 4 50"/>
+      <path d="M38-44Q32-20 38 4Q42 24 36 46"/>
+    </g>
+    <g class="flut" style="--d:.9s">
+      <path d="M-4 4Q-34 16-30 42Q-6 34 0 12Z" fill="#c85f16"/>
+    </g>
+    <circle cx="36" cy="-16" r="11" fill="#ffffff"/>
+    <circle cx="39" cy="-16" r="5" fill="#20242c"/>
+    <circle cx="40.5" cy="-18.5" r="1.6" fill="#ffffff"/>
+    <path d="M58 8Q66 13 57 18" stroke="#8a4410" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- fish B: long, slender, teal, swims left -->
+  <g id="fishB">
+    <g class="wag" style="--d:.62s">
+      <path d="M-82 0Q-108-6-132-30Q-118 0-132 30Q-108 6-82 0Z" fill="#0f6b70"/>
+    </g>
+    <path d="M-62-18Q-18-52 36-20Q-14-28-62-18Z" fill="#12838a"/>
+    <ellipse rx="96" ry="27" fill="url(#bodyB)"/>
+    <ellipse cx="-6" cy="11" rx="78" ry="11" fill="#c9f2ea" opacity=".38"/>
+    <path d="M-58 14Q-42 44-20 18Q-38 24-58 14Z" fill="#0f6b70"/>
+    <path d="M28-4Q18 12 28 26" stroke="#0d5f66" stroke-width="2.2" fill="none" opacity=".5"/>
+    <g class="flut" style="--d:.72s">
+      <path d="M18 4Q-8 16-2 34Q14 28 22 10Z" fill="#0d6a70"/>
+    </g>
+    <circle cx="58" cy="-8" r="7" fill="#ffffff"/>
+    <circle cx="60" cy="-8" r="3.3" fill="#1b2430"/>
+    <circle cx="61.2" cy="-9.6" r="1.1" fill="#ffffff"/>
+    <path d="M85 3Q91 7 84 11" stroke="#0a4f55" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>
+
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  var svg=document.getElementById('scene');
+  var layer=document.getElementById('bubbles');
+  var B={l:0,r:1200,t:0};
+  var bubbles=[];
+
+  function bounds(){
+    var s=Math.max(innerWidth/1200,innerHeight/700);
+    B.l=(1200-innerWidth/s)/2;
+    B.r=(1200+innerWidth/s)/2;
+    B.t=700-innerHeight/s;
+    for(var i=0;i<bubbles.length;i++){
+      bubbles[i].x0=Math.max(B.l+30,Math.min(bubbles[i].x0,B.r-30));
+    }
+  }
+
+  var fish=[
+    {el:document.getElementById('fishA'),x:0,  y0:300,dir:1, sp:70, amp:11,w:.9,  ph:1.3},
+    {el:document.getElementById('fishB'),x:0,  y0:465,dir:-1,sp:135,amp:15,w:1.25,ph:4.1}
+  ];
+  bounds();
+  fish[0].x=B.l+170;
+  fish[1].x=B.r-210;
+
+  function mkBubble(x,y,r,once){
+    var g=document.createElementNS(NS,'g');
+    var c=document.createElementNS(NS,'circle');
+    c.setAttribute('r',r);
+    c.setAttribute('fill','rgba(224,244,255,0.13)');
+    c.setAttribute('stroke','rgba(236,250,255,0.75)');
+    c.setAttribute('stroke-width','1.4');
+    var h=document.createElementNS(NS,'circle');
+    h.setAttribute('cx',(-r*.35).toFixed(2));
+    h.setAttribute('cy',(-r*.38).toFixed(2));
+    h.setAttribute('r',Math.max(1.1,r*.22).toFixed(2));
+    h.setAttribute('fill','rgba(255,255,255,0.85)');
+    g.appendChild(c);g.appendChild(h);layer.appendChild(g);
+    return {g:g,x0:x,y:Math.max(y,B.t+50),r:r,sp:30+(14-r)*5,amp:5+Math.random()*9,ph:Math.random()*6.28,fq:.7+Math.random()*1.1,once:once};
+  }
+
+  for(var i=0;i<8;i++){
+    var r=4+Math.random()*7.5;
+    bubbles.push(mkBubble(B.l+((i+.5)/8)*(B.r-B.l)+(Math.random()*60-30),380+Math.random()*265,r,false));
+  }
+
+  function respawn(d){
+    d.y=632+Math.random()*28;
+    d.x0=B.l+30+Math.random()*(B.r-B.l-60);
+  }
+
+  function release(x,y){
+    for(var k=0;k<4;k++){
+      bubbles.push(mkBubble(x+(Math.random()*40-20),y+Math.random()*20,3+Math.random()*6,true));
+    }
+  }
+
+  svg.addEventListener('pointerdown',function(e){
+    release(B.l+(e.clientX/innerWidth)*(B.r-B.l),B.t+(e.clientY/innerHeight)*(700-B.t));
+  });
+
+  function update(dt,t){
+    var i,d,c,y,x,f;
+    for(i=0;i<fish.length;i++){
+      f=fish[i];
+      f.x+=f.dir*f.sp*dt;
+      if(f.dir>0){ if(f.x-100>B.r) f.x=B.l-75; }
+      else{ if(f.x+132<B.l) f.x=B.r+100; }
+      c=Math.cos(t*f.w+f.ph);
+      y=Math.max(f.y0+c*f.amp,B.t+80);
+      f.el.setAttribute('transform','translate('+f.x.toFixed(1)+' '+y.toFixed(1)+')'+(f.dir<0?' scale(-1 1)':'')+' rotate('+(-5*c).toFixed(2)+')');
+    }
+    for(i=bubbles.length-1;i>=0;i--){
+      d=bubbles[i];
+      d.y-=d.sp*dt;
+      if(d.y-d.r<B.t){
+        if(d.once){d.g.remove();bubbles.splice(i,1);continue;}
+        respawn(d);
+      }
+      x=d.x0+Math.sin(t*d.fq+d.ph)*d.amp;
+      d.g.setAttribute('transform','translate('+x.toFixed(1)+' '+d.y.toFixed(1)+')');
+    }
+  }
+
+  update(0,0);
+
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    var last=performance.now();
+    var tick=function(now){
+      update(Math.min((now-last)/1000,.05),now/1000);
+      last=now;
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+})();
+</script>
+</body>
+</html>

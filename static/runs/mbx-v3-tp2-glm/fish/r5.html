@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Still Water — an SVG aquarium</title>
+<style>
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0d3a58}
+  svg{display:block;width:100vw;height:100vh}
+  #rays polygon{animation:ray 9s ease-in-out infinite alternate}
+  #rays polygon:nth-of-type(2){animation-delay:-3s}
+  #rays polygon:nth-of-type(3){animation-delay:-6s}
+  @keyframes ray{from{opacity:.04}to{opacity:.11}}
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9bdcef"/>
+      <stop offset=".5" stop-color="#3d9cc6"/>
+      <stop offset="1" stop-color="#0d3a58"/>
+    </linearGradient>
+    <radialGradient id="sun" cx=".5" cy="-.15" r=".9">
+      <stop offset="0" stop-color="#eafcff" stop-opacity=".4"/>
+      <stop offset=".55" stop-color="#eafcff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e6cb9d"/>
+      <stop offset=".08" stop-color="#cfa877"/>
+      <stop offset=".22" stop-color="#a17c50"/>
+      <stop offset="1" stop-color="#6e5335"/>
+    </linearGradient>
+    <linearGradient id="gA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffa254"/>
+      <stop offset=".55" stop-color="#f4772e"/>
+      <stop offset="1" stop-color="#d55a1a"/>
+    </linearGradient>
+    <linearGradient id="gB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#54c9bd"/>
+      <stop offset=".6" stop-color="#2a9a97"/>
+      <stop offset="1" stop-color="#1b6f74"/>
+    </linearGradient>
+    <radialGradient id="bub" cx=".35" cy=".3" r=".8">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".14"/>
+      <stop offset=".7" stop-color="#dff4ff" stop-opacity=".08"/>
+      <stop offset=".92" stop-color="#eaf8ff" stop-opacity=".4"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".7"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+    <clipPath id="cA"><ellipse rx="62" ry="44"/></clipPath>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#water)"/>
+  <rect width="100%" height="100%" fill="url(#sun)"/>
+
+  <g id="rays" filter="url(#soft)" fill="#c8f2ff">
+    <polygon points="180,-20 340,-20 230,660 50,660"/>
+    <polygon points="620,-20 790,-20 960,660 740,660"/>
+    <polygon points="1140,-20 1290,-20 1460,660 1280,660"/>
+  </g>
+
+  <g id="floor">
+    <path id="sandP" fill="url(#sand)"/>
+  </g>
+
+  <g id="snow" fill="#d9f1f8" opacity=".45"></g>
+  <g id="bubbles"></g>
+
+  <!-- Fish A: large round coral fish, swims right -->
+  <g id="fishA">
+    <g id="tailA"><path d="M-46 0 L-96 -33 Q-89 0 -96 33 Z" fill="#d55a1a"/></g>
+    <path d="M-40 -32 Q-2 -92 34 -36 Q-2 -48 -40 -32 Z" fill="#d55a1a"/>
+    <ellipse rx="62" ry="44" fill="url(#gA)"/>
+    <g clip-path="url(#cA)" fill="#fbf3e2" opacity=".9">
+      <path d="M-46 -50 L-30 -50 Q-36 0 -30 50 L-46 50 Q-52 0 -46 -50 Z"/>
+      <path d="M-2 -50 L14 -50 Q8 0 14 50 L-2 50 Q-8 0 -2 -50 Z"/>
+    </g>
+    <path id="finA" d="M4 6 Q-22 16 -30 36 Q-6 30 10 14 Z" fill="#c8541a" opacity=".92"/>
+    <circle cx="38" cy="-11" r="10" fill="#ffffff"/>
+    <circle cx="41" cy="-11" r="4.6" fill="#22303a"/>
+    <circle cx="42.8" cy="-13.2" r="1.6" fill="#ffffff"/>
+    <path d="M56 8 Q49 16 40 14" stroke="#a34413" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Fish B: small slender teal fish, swims left -->
+  <g id="fishB">
+    <g id="tailB"><path d="M-60 0 L-104 -24 Q-95 0 -104 24 Z" fill="#175c63"/></g>
+    <path d="M-38 -12 Q-4 -36 32 -11 Q-4 -17 -38 -12 Z" fill="#175c63"/>
+    <path d="M-26 13 Q-8 32 8 12 Z" fill="#175c63"/>
+    <ellipse rx="70" ry="19" fill="url(#gB)"/>
+    <path d="M-58 4 Q0 -6 62 -2" stroke="#a7e6df" stroke-width="3" fill="none" opacity=".55" stroke-linecap="round"/>
+    <path id="finB" d="M2 3 Q-15 9 -20 21 Q-4 17 8 8 Z" fill="#14525a" opacity=".92"/>
+    <circle cx="46" cy="-5" r="6.5" fill="#ffffff"/>
+    <circle cx="48" cy="-5" r="3" fill="#22303a"/>
+    <circle cx="49.3" cy="-6.5" r="1.1" fill="#ffffff"/>
+    <path d="M64 3 Q58 8 51 7" stroke="#0f4a52" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>
+
+<script>
+(function(){
+'use strict';
+var NS='http://www.w3.org/2000/svg';
+function $(id){return document.getElementById(id);}
+function el(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
+function R(v){return Math.round(v*10)/10;}
+
+var W=innerWidth,H=innerHeight,floorTop=H*.87,t=0;
+var floor=$('floor'),sandP=$('sandP'),rays=$('rays');
+
+function sandPath(w){
+  return 'M0 5 Q '+R(w*.14)+' 1 '+R(w*.28)+' 6 Q '+R(w*.42)+' 11 '+R(w*.56)+
+         ' 5 Q '+R(w*.7)+' 1 '+R(w*.82)+' 6 Q '+R(w*.92)+' 10 '+w+
+         ' 5 L '+w+' 640 L 0 640 Z';
+}
+
+/* Rocks (bubble vents sit beside them) */
+var rock1=el('g',{},floor);
+el('ellipse',{cx:0,cy:12,rx:74,ry:10,fill:'#4c3d31',opacity:.3},rock1);
+el('path',{d:'M-68 14 Q-62 -26 -26 -42 Q10 -54 40 -26 Q58 -10 62 14 Z',fill:'#6d5949'},rock1);
+el('ellipse',{cx:14,cy:2,rx:34,ry:15,fill:'#5a4839',opacity:.55},rock1);
+el('path',{d:'M-52 4 Q-46 -20 -18 -32 Q-2 -36 12 -30 Q-12 -26 -32 -8 Q-46 3 -52 4 Z',fill:'#8a7663',opacity:.8},rock1);
+
+var rock2=el('g',{},floor);
+el('ellipse',{cx:0,cy:10,rx:60,ry:9,fill:'#4c3d31',opacity:.3},rock2);
+el('path',{d:'M-54 12 Q-48 -16 -20 -32 Q12 -42 36 -18 Q50 -4 52 12 Z',fill:'#7a6553'},rock2);
+el('ellipse',{cx:10,cy:2,rx:26,ry:12,fill:'#63503f',opacity:.5},rock2);
+
+/* Bushy plant: stack of overlapping ellipses */
+var bush=el('g',{},floor);
+el('ellipse',{cx:-20,cy:-16,rx:18,ry:12,fill:'#26784a'},bush);
+el('ellipse',{cx:18,cy:-18,rx:16,ry:11,fill:'#359a5e'},bush);
+el('ellipse',{cx:0,cy:-10,rx:26,ry:15,fill:'#2f8f57'},bush);
+
+/* Pebbles */
+var pebbleData=[[.05,10,14,6,'#a8845f'],[.3,8,10,5,'#8f6f4e'],[.46,12,16,7,'#b5936a'],
+                [.66,9,9,5,'#8a6b4a'],[.8,11,12,6,'#a8845f'],[.9,7,8,4,'#c19a6f']];
+var pebbles=pebbleData.map(function(p){
+  return {fx:p[0],e:el('ellipse',{cx:0,cy:p[1],rx:p[2],ry:p[3],fill:p[4]},floor)};
+});
+
+/* Wavy kelp blades */
+function bladePath(h,w,l){
+  return 'M0 0 C '+(-w)+' '+R(-h*.3)+' '+R(w*1.15)+' '+R(-h*.55)+' '+R(-w*.4)+' '+R(-h*.82)+
+         ' Q '+R(-w*.7)+' '+R(-h*.93)+' '+l+' '+(-h)+' L '+(l+4)+' '+(-h+5)+
+         ' C '+R(w*.45)+' '+R(-h*.78)+' '+R(-w*1.15)+' '+R(-h*.5)+' '+R(w*.6)+' '+R(-h*.24)+
+         ' Q '+R(w*.9)+' '+R(-h*.08)+' '+w+' 0 Z';
+}
+var bladeData=[[.085,150,9,4,'#2e8a52',5,.65,0],[.12,205,11,9,'#237343',6,.5,1.8],
+               [.655,170,10,6,'#2e8a52',5,.75,3.4],[.69,120,8,3,'#3aa062',7,.9,5],
+               [.93,185,10,7,'#237343',5,.6,2.6]];
+var blades=bladeData.map(function(b){
+  return {fx:b[0],amp:b[5],sp:b[6],ph:b[7],x:0,
+          g:el('path',{d:bladePath(b[1],b[2],b[3]),fill:b[4]},floor)};
+});
+
+/* Marine snow */
+var snow=[];
+for(var i=0;i<12;i++){
+  snow.push({fx:Math.random(),y:Math.random()*H,sp:5+Math.random()*9,ph:Math.random()*6.28,
+             e:el('circle',{r:(.8+Math.random()*1.2).toFixed(2)},$('snow'))});
+}
+
+/* Bubbles: anchored streams near the rocks plus a mid-floor seep */
+var anchors=[.19,.215,.235,.5,.71,.735,.75];
+var bubbles=anchors.map(function(a){
+  var r=3+Math.random()*7;
+  var g=el('g',{},$('bubbles'));
+  el('circle',{r:10,fill:'url(#bub)'},g);
+  el('circle',{cx:-3.4,cy:-3.8,r:2.6,fill:'#ffffff',opacity:.8},g);
+  return {fx:a,r:r,sp:20+150/r,y:floorTop-Math.random()*floorTop*.7,
+          wa:6+Math.random()*14,wf:.8+Math.random()*1.2,ph:Math.random()*6.28,g:g};
+});
+
+/* Fish: A large and round (slow), B small and slender (fast) */
+var fishes=[
+ {g:$('fishA'),tail:$('tailA'),fin:$('finA'),x:W*.25,dir:1,sp:55,s:1,byf:.40,
+  bobA:14,bobF:.8,ph:0,pk:.35,wagF:5.5,wagA:10,piv:'-46 0',fAmp:9,fPh:1.3,fPiv:'4 6',by:0},
+ {g:$('fishB'),tail:$('tailB'),fin:$('finB'),x:W*.7,dir:-1,sp:125,s:.8,byf:.60,
+  bobA:10,bobF:1.7,ph:2.1,pk:.25,wagF:11,wagA:13,piv:'-60 0',fAmp:11,fPh:.6,fPiv:'2 3',by:0}
+];
+
+function resize(){
+  W=innerWidth;H=innerHeight;floorTop=H*.87;
+  floor.setAttribute('transform','translate(0 '+floorTop.toFixed(1)+')');
+  sandP.setAttribute('d',sandPath(W));
+  rays.setAttribute('transform','scale('+(W/1600).toFixed(4)+' '+(H/900).toFixed(4)+')');
+  fishes.forEach(function(f){f.by=f.byf*H;});
+  blades.forEach(function(b){b.x=b.fx*W;});
+  pebbles.forEach(function(p){p.e.setAttribute('cx',R(p.fx*W));});
+  rock1.setAttribute('transform','translate('+R(W*.2)+' 0)');
+  rock2.setAttribute('transform','translate('+R(W*.72)+' 0)');
+  bush.setAttribute('transform','translate('+R(W*.42)+' 6)');
+}
+addEventListener('resize',resize);
+resize();
+
+var last=performance.now();
+function frame(now){
+  var dt=Math.min((now-last)/1000,.05);last=now;t+=dt;
+
+  for(var i=0;i<fishes.length;i++){
+    var f=fishes[i];
+    f.x+=f.dir*f.sp*dt;
+    if(f.dir>0&&f.x>W+180)f.x=-180;
+    else if(f.dir<0&&f.x<-180)f.x=W+180;
+    var y=f.by+f.bobA*Math.sin(f.bobF*t+f.ph);
+    var pitch=f.dir*f.pk*f.bobA*f.bobF*Math.cos(f.bobF*t+f.ph);
+    var sq=1+.02*Math.sin(f.wagF*2*t);
+    f.g.setAttribute('transform','translate('+f.x.toFixed(1)+' '+y.toFixed(1)+') rotate('+
+      pitch.toFixed(2)+') scale('+(f.dir*sq*f.s).toFixed(3)+' '+f.s+')');
+    f.tail.setAttribute('transform','rotate('+(f.wagA*Math.sin(f.wagF*t+f.ph*2)).toFixed(2)+' '+f.piv+')');
+    f.fin.setAttribute('transform','rotate('+(f.fAmp*Math.sin(f.wagF*t+f.fPh)).toFixed(2)+' '+f.fPiv+')');
+  }
+
+  for(var j=0;j<bubbles.length;j++){
+    var b=bubbles[j];
+    b.y-=b.sp*dt;
+    if(b.y<-24){b.y=floorTop-4-Math.random()*26;b.r=3+Math.random()*7;b.sp=20+150/b.r;}
+    b.g.setAttribute('transform','translate('+(b.fx*W+Math.sin(t*b.wf+b.ph)*b.wa).toFixed(1)+
+      ' '+b.y.toFixed(1)+') scale('+(b.r/10).toFixed(3)+')');
+  }
+
+  for(var k=0;k<snow.length;k++){
+    var s=snow[k];
+    s.y+=s.sp*dt;
+    if(s.y>H+8){s.y=-8;s.fx=Math.random();}
+    s.e.setAttribute('transform','translate('+(s.fx*W+Math.sin(t*.4+s.ph)*12).toFixed(1)+' '+s.y.toFixed(1)+')');
+  }
+
+  for(var m=0;m<blades.length;m++){
+    var bl=blades[m];
+    bl.g.setAttribute('transform','translate('+bl.x.toFixed(1)+' 7) rotate('+
+      (bl.amp*Math.sin(t*bl.sp+bl.ph)).toFixed(2)+')');
+  }
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

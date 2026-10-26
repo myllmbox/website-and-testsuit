@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quiet Reef</title>
+<style>
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#0c3a66}
+  #scene{display:block;width:100vw;height:100vh}
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8fd3e8"/>
+      <stop offset="0.45" stop-color="#3a92c2"/>
+      <stop offset="1" stop-color="#0c3a66"/>
+    </linearGradient>
+    <linearGradient id="sandG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e6c893"/>
+      <stop offset="1" stop-color="#a97f4e"/>
+    </linearGradient>
+    <radialGradient id="sun">
+      <stop offset="0" stop-color="#eefaff" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#eefaff" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="bodyA"><ellipse cx="0" cy="0" rx="58" ry="40"/></clipPath>
+  </defs>
+
+  <rect id="bg" x="0" y="0" fill="url(#water)"/>
+  <ellipse id="sunGlow" fill="url(#sun)"/>
+  <g id="rays"></g>
+
+  <!-- seaweed blades injected here by JS -->
+  <g id="plants"></g>
+
+  <!-- Fish A: large, round-bodied, warm orange with pale bands; faces right -->
+  <g id="fishA">
+    <g id="tailA"><path d="M-40 0L-88 -30Q-97 0 -88 30Z" fill="#e0762a"/></g>
+    <path d="M-28 -30Q-6 -66 24 -36Q-2 -38 -28 -30Z" fill="#e0762a"/>
+    <ellipse cx="0" cy="0" rx="58" ry="40" fill="#f5913e" stroke="#d9731f" stroke-width="2.5"/>
+    <g clip-path="url(#bodyA)">
+      <rect x="-38" y="-44" width="10" height="88" fill="#fdf3e3" opacity="0.95"/>
+      <rect x="-12" y="-44" width="15" height="88" fill="#fdf3e3" opacity="0.95"/>
+      <rect x="16" y="-44" width="12" height="88" fill="#fdf3e3" opacity="0.95"/>
+    </g>
+    <g id="finA"><path d="M0 0Q22 10 14 44Q-6 20 0 0Z" fill="#e0762a"/></g>
+    <circle cx="38" cy="-13" r="9" fill="#ffffff"/>
+    <circle cx="40" cy="-13" r="4.5" fill="#1c2b38"/>
+    <circle cx="41.5" cy="-15" r="1.7" fill="#ffffff"/>
+    <path d="M52 3Q59 8.5 51 13" fill="none" stroke="#8a4d15" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Fish B: small, long and slender, teal with a lateral stripe; faces left -->
+  <g id="fishB">
+    <g id="tailB"><path d="M-28 0L-58 -18Q-64 0 -58 18Z" fill="#2d8f89"/></g>
+    <path d="M-14 -10Q2 -26 16 -9Q0 -12 -14 -10Z" fill="#2d8f89"/>
+    <ellipse cx="0" cy="0" rx="34" ry="12" fill="#46b9ae" stroke="#2d8f89" stroke-width="2"/>
+    <path d="M-26 2Q-2 6 26 -3" fill="none" stroke="#c9efe8" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+    <g id="finB"><path d="M0 0Q15 6 10 19Q-4 10 0 0Z" fill="#2d8f89"/></g>
+    <circle cx="25" cy="-4" r="5.5" fill="#ffffff"/>
+    <circle cx="26.5" cy="-4" r="2.8" fill="#14232b"/>
+    <circle cx="27.4" cy="-5.4" r="1" fill="#ffffff"/>
+    <path d="M30 0Q35 4 28.5 6" fill="none" stroke="#1e6b66" stroke-width="2.2" stroke-linecap="round"/>
+  </g>
+
+  <g id="bubbles"></g>
+  <g id="floorG"></g>
+</svg>
+
+<script>
+'use strict';
+(function(){
+var NS='http://www.w3.org/2000/svg';
+function $(id){return document.getElementById(id);}
+var svg=$('scene'),bg=$('bg'),sunGlow=$('sunGlow'),rays=$('rays'),
+    plants=$('plants'),bubLayer=$('bubbles'),floorG=$('floorG'),
+    finA=$('finA'),tailA=$('tailA'),finB=$('finB'),tailB=$('tailB');
+var W=0,H=0,floorY=0,s=1,bs=1;
+
+function el(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
+
+/* Fish: dir +1 swims right, -1 swims left; speeds deliberately far apart */
+var fish=[
+ {g:$('fishA'),dir:1, sp:62, byf:0.40,bob:13,bf:1.1,ph:0,  x:null,xf:0.30,m:118},
+ {g:$('fishB'),dir:-1,sp:135,byf:0.62,bob:9, bf:2.0,ph:2.4,x:null,xf:0.72,m:82}
+];
+
+/* Swaying seaweed blades (green wavy paths, more motion toward the tip) */
+var weeds=[
+ {fx:0.115,hf:0.30,w:13,c:'#2f7d4c',ph:0,  sp:0.70,amp:26,seg:13,op:0.95},
+ {fx:0.155,hf:0.21,w:9, c:'#3f9d63',ph:1.7,sp:0.95,amp:20,seg:11,op:0.90},
+ {fx:0.865,hf:0.26,w:12,c:'#2a704a',ph:3.1,sp:0.60,amp:24,seg:12,op:0.95},
+ {fx:0.905,hf:0.34,w:9, c:'#46a86a',ph:4.4,sp:0.85,amp:28,seg:14,op:0.90}
+];
+weeds.forEach(function(w){
+ w.g=el('g',{opacity:w.op},plants);
+ w.p=el('path',{fill:'none',stroke:w.c,'stroke-width':w.w,'stroke-linecap':'round'},w.g);
+});
+
+/* Bubbles: smaller ones rise faster; 4 vent from a fixed spot, rest wander */
+var bubbles=[];
+for(var i=0;i<9;i++){
+ var g=el('g',{},bubLayer);
+ el('circle',{cx:0,cy:0,r:10,fill:'#dff3ff','fill-opacity':0.15,stroke:'#ffffff','stroke-opacity':0.65,'stroke-width':1.3},g);
+ el('circle',{cx:-3.4,cy:-3.8,r:2.6,fill:'#ffffff','fill-opacity':0.85},g);
+ bubbles.push({g:g,r:5,x0:0,y:0,sp:0,wa:0,wf:0,ph:0,vent:i<4});
+}
+function resetBubble(b,init){
+ b.r=b.vent?4+Math.random()*7:3+Math.random()*9;
+ b.x0=b.vent?W*0.655+(Math.random()*60-30):30+Math.random()*(W-60);
+ b.y=init?Math.random()*H:floorY+16+Math.random()*22;
+ b.sp=(30+(13-b.r)*2.4+Math.random()*14)*bs;
+ b.wa=6+Math.random()*14;b.wf=0.6+Math.random()*1.2;b.ph=Math.random()*6.283;
+}
+
+function star(cx,cy,R,r,n,rot){
+ var d='';
+ for(var i=0;i<2*n;i++){
+  var rad=(i%2?r:R),a=rot+i*Math.PI/n;
+  d+=(i?'L':'M')+(cx+rad*Math.cos(a)).toFixed(1)+' '+(cy+rad*Math.sin(a)).toFixed(1);
+ }
+ return d+'Z';
+}
+
+function buildStatic(){
+ floorY=H*0.875; /* seafloor occupies the bottom ~12.5% */
+ rays.innerHTML='';floorG.innerHTML='';
+ sunGlow.setAttribute('cx',W*0.5);sunGlow.setAttribute('cy',-H*0.12);
+ sunGlow.setAttribute('rx',W*0.55);sunGlow.setAttribute('ry',H*0.4);
+ /* faint surface light shafts, gently pulsing */
+ [[0.20,50,0.05,8],[0.47,72,0.038,10],[0.76,44,0.055,7]].forEach(function(r,i){
+  var x=r[0]*W,sh=W*0.07,t=r[1];
+  var p=el('polygon',{points:(x-t)+',-40 '+(x+t)+',-40 '+(x+t*2.2+sh)+','+(H+20)+' '+(x-t*2.2+sh)+','+(H+20),fill:'#eef9ff',opacity:r[2]},rays);
+  el('animate',{attributeName:'opacity',values:(r[2]*0.5)+';'+(r[2]*1.7)+';'+(r[2]*0.5),dur:r[3]+'s',begin:(-i*2.4)+'s',repeatCount:'indefinite'},p);
+ });
+ /* ellipse-bush plant; its base gets buried by the sand drawn right after */
+ var bush=el('g',{transform:'translate('+(W*0.36)+','+(floorY+8)+')'},floorG);
+ [[0,-10,26,16,'#2f7d4c'],[-22,-16,20,13,'#3f9d63'],[22,-15,19,12,'#357f52'],[-7,-28,16,11,'#46a86a'],[13,-25,14,10,'#2f7d4c']].forEach(function(e){
+  el('ellipse',{cx:e[0],cy:e[1],rx:e[2],ry:e[3],fill:e[4]},bush);
+ });
+ /* undulating sandy floor */
+ el('path',{d:'M0 '+H+'L0 '+(floorY+10)+'Q'+(W*0.18)+' '+(floorY-16)+' '+(W*0.4)+' '+(floorY+2)+'Q'+(W*0.6)+' '+(floorY+18)+' '+(W*0.78)+' '+(floorY-4)+'Q'+(W*0.9)+' '+(floorY-12)+' '+W+' '+floorY+'L'+W+' '+H+'Z',fill:'url(#sandG)'},floorG);
+ /* rocks */
+ el('ellipse',{cx:W*0.565,cy:floorY+10,rx:62,ry:30,fill:'#8a7963'},floorG);
+ el('ellipse',{cx:W*0.615,cy:floorY+16,rx:40,ry:20,fill:'#75634d'},floorG);
+ el('ellipse',{cx:W*0.545,cy:floorY+2,rx:28,ry:11,fill:'#9c8a72',opacity:0.9},floorG);
+ el('ellipse',{cx:W*0.845,cy:floorY+12,rx:34,ry:17,fill:'#8a7963'},floorG);
+ el('ellipse',{cx:W*0.828,cy:floorY+5,rx:15,ry:7,fill:'#9c8a72',opacity:0.9},floorG);
+ /* pebbles */
+ [[0.07,14,5,'#a37e50'],[0.185,9,4,'#8f6a42'],[0.30,12,4.5,'#b28b58'],[0.475,8,3.5,'#8f6a42'],[0.715,13,5,'#a37e50'],[0.945,10,4,'#8f6a42']].forEach(function(p){
+  el('ellipse',{cx:W*p[0],cy:floorY+18+p[0]*26,rx:p[1],ry:p[2],fill:p[3],opacity:0.85},floorG);
+ });
+ /* starfish resting on the sand */
+ el('path',{d:star(W*0.46,floorY+22,15,6.5,5,-Math.PI/2),fill:'#cf6b4b',stroke:'#a84f35','stroke-width':1.5,'stroke-linejoin':'round'},floorG);
+}
+
+function resize(){
+ W=window.innerWidth;H=window.innerHeight;
+ svg.setAttribute('viewBox','0 0 '+W+' '+H);
+ bg.setAttribute('width',W);bg.setAttribute('height',H);
+ s=Math.max(0.55,Math.min(1.2,Math.min(W/1500,H/850)));
+ bs=Math.max(0.6,Math.min(1.3,H/900));
+ buildStatic();
+ fish.forEach(function(f){
+  f.baseY=f.byf*H;
+  if(f.x==null)f.x=W*f.xf;
+  f.x=Math.max(-f.m*s,Math.min(W+f.m*s,f.x));
+ });
+ bubbles.forEach(function(b){resetBubble(b,true);});
+}
+window.addEventListener('resize',resize);
+resize();
+
+var last=performance.now(),T=0;
+function frame(now){
+ var dt=(now-last)/1000;last=now;
+ if(dt<0)dt=0;if(dt>0.1)dt=0.1;
+ T+=dt;
+ /* fish: horizontal cruise + gentle bob + subtle pitch, wrap at edges */
+ fish.forEach(function(f){
+  f.x+=f.dir*f.sp*s*dt;
+  var m=f.m*s;
+  if(f.dir>0&&f.x>W+m)f.x=-m;else if(f.dir<0&&f.x<-m)f.x=W+m;
+  var y=f.baseY+f.bob*s*Math.sin(T*f.bf+f.ph);
+  var pitch=-(Math.atan2(f.bob*f.bf*Math.cos(T*f.bf+f.ph),f.sp)*57.3)*0.6;
+  f.g.setAttribute('transform','translate('+f.x.toFixed(1)+','+y.toFixed(1)+') rotate('+pitch.toFixed(2)+') scale('+(f.dir*s).toFixed(3)+','+s.toFixed(3)+')');
+ });
+ /* fluttering pectoral fins and wagging tails */
+ finA.setAttribute('transform','translate(8,6) rotate('+(9*Math.sin(T*5.2)).toFixed(1)+')');
+ tailA.setAttribute('transform','rotate('+(4*Math.sin(T*3.1)).toFixed(1)+' -42 0)');
+ finB.setAttribute('transform','translate(2,4) rotate('+(11*Math.sin(T*7.3+2)).toFixed(1)+')');
+ tailB.setAttribute('transform','rotate('+(6*Math.sin(T*4.7)).toFixed(1)+' -30 0)');
+ /* bubbles: rise with wobble, respawn at the seafloor after leaving the top */
+ bubbles.forEach(function(b){
+  b.y-=b.sp*dt;
+  if(b.y<-24)resetBubble(b,false);
+  var x=b.x0+b.wa*Math.sin(T*b.wf+b.ph);
+  b.g.setAttribute('transform','translate('+x.toFixed(1)+','+b.y.toFixed(1)+') scale('+(b.r/10).toFixed(3)+')');
+ });
+ /* seaweed sway: traveling wave, amplitude growing toward the tip */
+ weeds.forEach(function(w){
+  var h=w.hf*H,amp=w.amp*Math.min(1,H/900);
+  var d='M0 0';
+  for(var i=1;i<=w.seg;i++){
+   var u=i/w.seg;
+   d+='L'+(amp*u*u*Math.sin(T*w.sp+w.ph+u*2.4)).toFixed(1)+' '+(-h*u).toFixed(1);
+  }
+  w.p.setAttribute('d',d);
+  w.g.setAttribute('transform','translate('+(w.fx*W).toFixed(1)+','+(floorY+14).toFixed(1)+')');
+ });
+ requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
