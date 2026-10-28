@@ -1,8 +1,445 @@
 {
  "title": "Qwen3.8-Flash-Next, GLM-5.3-Flash and DeepSeek-V4.1-Flash on DGX Spark",
- "date": "2026-10-22",
+ "date": "2026-10-28",
  "box": "one DGX Spark (GB10, 128 GB unified memory) · (TP=2) = two Sparks",
  "models": [
+  {
+   "id": "mbx-v54",
+   "name": "My LLM Box v5.4 (TP=1)",
+   "model": "Qwen3.8-Flash-Next FP4-Local",
+   "hf": "https://huggingface.co/nvidia/Qwen3.8-Flash-Next-FP4-Local",
+   "stack": "vLLM 0.32 · MTP 1–9",
+   "image": "myllmbox/qwen38-flash-next-vllm:v5.4",
+   "link": "https://github.com/myllmbox/qwen38-flash-next-recipe",
+   "spec": {
+    "max_context": 409600,
+    "kv_pool": 816096,
+    "kv_dtype": "bf16",
+    "kv_shared": true,
+    "seats": 16,
+    "notes": {
+     "kv_pool": "bf16 sparse-attention KV, shared by all running requests",
+     "model": "one DGX Spark: NVIDIA's FP4-Local weights as shipped"
+    }
+   },
+   "gauntlet": {
+    "thinking_tps": 51.5,
+    "code_tps": 76.2,
+    "peak_tps": 100.3,
+    "avg_tps": 58.3,
+    "runs": 12,
+    "avg_thinking_tokens": 23835,
+    "avg_code_tokens": 12559
+   },
+   "quality": {
+    "pasture": [
+     {
+      "tokens": {
+       "thinking": 37116,
+       "code": 14030
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 20010,
+       "code": 13650
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 37350,
+       "code": 15217
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 12350,
+       "code": 17497
+      },
+      "verdict": "anomaly",
+      "note": "composition error"
+     },
+     {
+      "tokens": {
+       "thinking": 21778,
+       "code": 13986
+      },
+      "verdict": "anomaly",
+      "note": "composition error"
+     },
+     {
+      "tokens": {
+       "thinking": 29997,
+       "code": 15142
+      },
+      "verdict": "fixed",
+      "fix": {
+       "chars": 1,
+       "what": "fill=\"#9C4130\" → fill:\"#9C4130\""
+      },
+      "orig": true
+     }
+    ],
+    "fish": [
+     {
+      "tokens": {
+       "thinking": 29594,
+       "code": 11300
+      },
+      "verdict": "fixed",
+      "fix": {
+       "chars": 1,
+       "what": "txp=0 typ=0 → txp=0,typ=0"
+      },
+      "orig": true
+     },
+     {
+      "tokens": {
+       "thinking": 20765,
+       "code": 9466
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 21054,
+       "code": 10145
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 22127,
+       "code": 10399
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 20585,
+       "code": 8872
+      },
+      "verdict": "broken",
+      "note": "two errors: a property name missing in the fish list stops the script, and the animation loop reads a value that is never set, so the fish stay at 0,0",
+      "fix": {
+       "chars": 13,
+       "what": "tx:26,-86 → tx:26,ty:-86 · sp.g=o.g"
+      },
+      "orig": true
+     },
+     {
+      "tokens": {
+       "thinking": 13295,
+       "code": 11009
+      },
+      "verdict": "clean"
+     }
+    ]
+   },
+   "speed": {
+    "1": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       54.4,
+       56.3,
+       58.8
+      ],
+      "peak": 79.6,
+      "tps": 56.5
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       44.0,
+       43.0,
+       43.9
+      ],
+      "peak": 47.8,
+      "tps": 43.6
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       86.3,
+       82.8,
+       84.2
+      ],
+      "peak": 101.0,
+      "tps": 84.4
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       71.9,
+       76.9,
+       73.8
+      ],
+      "peak": 84.9,
+      "tps": 74.2
+     }
+    },
+    "2": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       89.5,
+       84.7,
+       84.5
+      ],
+      "peak": 125.1,
+      "tps": 86.2
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       69.9,
+       69.1,
+       69.7
+      ],
+      "peak": 75.0,
+      "tps": 69.6
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       125.8,
+       101.7,
+       124.1
+      ],
+      "peak": 141.7,
+      "tps": 117.2
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       123.8,
+       117.4,
+       114.5
+      ],
+      "peak": 128.8,
+      "tps": 118.6
+     }
+    },
+    "4": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       130.9,
+       131.2,
+       124.0
+      ],
+      "peak": 181.4,
+      "tps": 128.7
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       109.9,
+       109.7,
+       109.9
+      ],
+      "peak": 116.0,
+      "tps": 109.8
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       181.5,
+       175.9,
+       172.0
+      ],
+      "peak": 195.4,
+      "tps": 176.5
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       176.3,
+       172.9,
+       173.8
+      ],
+      "peak": 185.3,
+      "tps": 174.3
+     }
+    },
+    "6": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       167.2,
+       169.4,
+       164.9
+      ],
+      "peak": 223.6,
+      "tps": 167.2
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       138.8,
+       138.3,
+       139.9
+      ],
+      "peak": 149.3,
+      "tps": 139.0
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       220.0,
+       217.9,
+       214.2
+      ],
+      "peak": 238.4,
+      "tps": 217.4
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       214.3,
+       212.6,
+       218.5
+      ],
+      "peak": 237.1,
+      "tps": 215.1
+     }
+    },
+    "8": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       202.9,
+       200.8,
+       202.0
+      ],
+      "peak": 248.7,
+      "tps": 201.9
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       162.4,
+       161.6,
+       162.7
+      ],
+      "peak": 171.0,
+      "tps": 162.2
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       243.2,
+       243.2,
+       236.1
+      ],
+      "peak": 297.5,
+      "tps": 240.8
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       245.1,
+       235.0,
+       243.0
+      ],
+      "peak": 260.5,
+      "tps": 241.0
+     }
+    },
+    "12": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       260.0,
+       266.2,
+       262.1
+      ],
+      "peak": 327.5,
+      "tps": 262.8
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       198.9,
+       199.8,
+       200.3
+      ],
+      "peak": 210.8,
+      "tps": 199.7
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       295.7,
+       300.2,
+       291.8
+      ],
+      "peak": 348.0,
+      "tps": 295.9
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       293.8,
+       298.9,
+       296.2
+      ],
+      "peak": 331.6,
+      "tps": 296.3
+     }
+    },
+    "16": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       313.3,
+       307.7,
+       304.8
+      ],
+      "peak": 371.2,
+      "tps": 308.6
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       234.8,
+       234.4,
+       236.1
+      ],
+      "peak": 245.7,
+      "tps": 235.1
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       346.3,
+       340.0,
+       345.8
+      ],
+      "peak": 436.1,
+      "tps": 344.0
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       343.5,
+       337.0,
+       337.9
+      ],
+      "peak": 409.1,
+      "tps": 339.5
+     }
+    }
+   },
+   "logo": "assets/logos/myllmbox.png",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
+  },
   {
    "id": "mbx-v53-tp2",
    "name": "My LLM Box v5.3 (TP=2)",

@@ -1,0 +1,336 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Drift Study / Station VII</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#04121f}
+body{font-family:Futura,"Avenir Next","Century Gothic","Trebuchet MS",sans-serif;color:#dcf0fa;-webkit-font-smoothing:antialiased}
+#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+
+/* ---------- overlay chrome ---------- */
+.hud{position:fixed;inset:0;pointer-events:none}
+.brand{position:absolute;top:clamp(16px,3.2vh,40px);left:clamp(18px,3vw,46px);max-width:min(44ch,58vw);animation:rise 1s cubic-bezier(.2,.8,.2,1) both}
+.eyebrow{font-size:10px;letter-spacing:.42em;text-transform:uppercase;color:#8fc6e2}
+.eyebrow::before{content:"";display:inline-block;width:28px;height:1px;background:#8fc6e2;vertical-align:middle;margin-right:12px}
+h1{margin:.18em 0 .3em;font-size:clamp(40px,6.4vw,78px);font-weight:500;line-height:.86;letter-spacing:.13em;text-transform:uppercase;color:#f2fbff;text-shadow:0 10px 34px rgba(3,22,40,.65)}
+h1 span{display:block;margin-top:.45em;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:400;font-size:clamp(15px,1.6vw,23px);letter-spacing:.02em;text-transform:none;color:#9ed5ec;text-shadow:none}
+.sub{margin:0;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-size:clamp(12.5px,1.1vw,15.5px);line-height:1.65;color:#a5d2e6;max-width:33ch}
+.meta{position:absolute;top:clamp(16px,3.2vh,40px);right:clamp(18px,3vw,46px);text-align:right;font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:#84bcd8;animation:rise 1s .22s cubic-bezier(.2,.8,.2,1) both}
+.meta i{display:block;margin-top:7px;font-style:normal;font-family:Georgia,serif;letter-spacing:.05em;text-transform:none;font-size:clamp(20px,2.4vw,30px);color:#eaf7ff}
+.meta i b{font-size:.5em;letter-spacing:.2em;color:#84bcd8;font-weight:400}
+.meta hr{border:0;height:1px;background:linear-gradient(90deg,transparent,#6fd0e8);margin:12px 0 0 30%}
+.panel{position:absolute;right:clamp(18px,3vw,46px);bottom:clamp(18px,4.5vh,46px);width:min(330px,72vw);padding:15px 15px 11px;
+ background:linear-gradient(180deg,rgba(7,35,58,.82),rgba(3,19,34,.9));border:1px solid rgba(140,205,235,.2);border-left:2px solid #6fd0e8;
+ box-shadow:0 18px 50px rgba(2,14,26,.5);pointer-events:auto;animation:rise 1s .3s cubic-bezier(.2,.8,.2,1) both}
+.row{display:flex;align-items:center;gap:11px;padding:9px 7px;border-top:1px solid rgba(140,205,235,.13);cursor:pointer;transition:background .25s,transform .25s}
+.row:first-of-type{border-top:0}
+.row:hover{background:rgba(110,200,235,.12);transform:translateX(-5px)}
+.sw{width:24px;height:8px;border-radius:99px;flex:0 0 auto;box-shadow:0 0 0 1px rgba(255,255,255,.18) inset}
+.swa{background:linear-gradient(90deg,#ffe3b8,#f5974f 45%,#b94323)}
+.swb{background:linear-gradient(90deg,#d5fff0,#45c7b3 55%,#e9a52a)}
+.row b{flex:1;font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase}
+.row em{font-family:Georgia,serif;font-style:italic;font-size:12.5px;color:#8ecbe4;font-variant-numeric:tabular-nums}
+.meter{height:3px;margin:9px 7px 10px;background:rgba(140,205,235,.16);overflow:hidden}
+#mtr{display:block;height:100%;width:40%;background:linear-gradient(90deg,#2e8f9f,#8fe8f5);transition:width .55s ease}
+.foot{display:flex;justify-content:space-between;padding:0 7px;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#7bb2ce}
+.foot u{text-decoration:none;color:#eaf7ff}
+.hint{position:absolute;left:clamp(18px,3vw,46px);bottom:clamp(18px,4.5vh,46px);font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:#9fd2e8;animation:pulse 3.8s ease-in-out infinite,rise 1s .45s both}
+.hint s{text-decoration:none;color:#f5974f}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:.95}}
+@keyframes sway{from{transform:rotate(-3.6deg)}to{transform:rotate(4.4deg)}}
+@keyframes shim{0%,100%{opacity:.16}50%{opacity:.36}}
+@keyframes wav{to{transform:translateX(-200px)}}
+@keyframes sink{0%{transform:translateY(-40px);opacity:0}14%{opacity:.5}100%{transform:translateY(72px);opacity:0}}
+.kelp{animation-name:sway;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:alternate}
+.ray{animation:shim 9s ease-in-out infinite}
+.w{animation:wav linear infinite}
+.sn{animation-name:sink;animation-timing-function:linear;animation-iteration-count:infinite}
+.fish{cursor:pointer}
+.tag{opacity:0;transition:opacity .35s ease}
+.fish:hover .tag,.fish.hot .tag{opacity:1}
+.fish:hover .flip,.fish.hot .flip{filter:drop-shadow(0 0 7px rgba(170,235,255,.85))}
+.flip{transition:filter .35s ease}
+</style>
+</head>
+<body>
+
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+<defs>
+ <linearGradient id="gWater" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#86dcf2"/><stop offset=".16" stop-color="#42a8d2"/><stop offset=".46" stop-color="#186a9c"/>
+  <stop offset=".76" stop-color="#0a3a63"/><stop offset="1" stop-color="#031c33"/>
+ </linearGradient>
+ <linearGradient id="gSand" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#ecd8a8"/><stop offset=".3" stop-color="#c4a271"/><stop offset=".7" stop-color="#8d6b45"/><stop offset="1" stop-color="#54402c"/>
+ </linearGradient>
+ <linearGradient id="gRay" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#eaf9ff" stop-opacity=".38"/><stop offset="1" stop-color="#eaf9ff" stop-opacity="0"/>
+ </linearGradient>
+ <linearGradient id="bodyA" x1="0" y1="0" x2=".4" y2="1">
+  <stop offset="0" stop-color="#ffe6c2"/><stop offset=".4" stop-color="#f5974f"/><stop offset="1" stop-color="#b23f22"/>
+ </linearGradient>
+ <linearGradient id="finA" x1="0" y1="0" x2=".2" y2="1">
+  <stop offset="0" stop-color="#ffcb93"/><stop offset="1" stop-color="#a53a1d"/>
+ </linearGradient>
+ <linearGradient id="bodyB" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#dbfff2"/><stop offset=".42" stop-color="#48cbb6"/><stop offset="1" stop-color="#0a6478"/>
+ </linearGradient>
+ <linearGradient id="tailB" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#e39a1e"/>
+ </linearGradient>
+ <radialGradient id="gVig" cx=".5" cy=".4" r=".8">
+  <stop offset=".5" stop-color="#001321" stop-opacity="0"/><stop offset="1" stop-color="#000a14" stop-opacity=".6"/>
+ </radialGradient>
+
+ <clipPath id="clipA"><path d="M 74 -2 C 58 -44 10 -62 -30 -52 C -54 -46 -66 -26 -68 -6 C -66 16 -52 40 -22 48 C 16 58 60 34 74 -2 Z"/></clipPath>
+ <clipPath id="clipB"><path d="M 58 0 C 44 -13 8 -19 -20 -15 C -38 -12 -48 -6 -50 0 C -48 7 -36 13 -18 15 C 8 19 44 13 58 0 Z"/></clipPath>
+
+ <!-- SPECIMEN A : deep, round-bodied, coral & cream -->
+ <g id="fA">
+  <g class="tail"><polygon points="-50,0 -128,-44 -118,0 -128,44" fill="url(#finA)"/>
+   <path d="M -58 -5 C -82 -16 -104 -28 -120 -36" fill="none" stroke="#8f3218" stroke-width="2.2" opacity=".45"/>
+   <path d="M -58 7 C -82 18 -102 28 -118 35" fill="none" stroke="#ffe1b4" stroke-width="1.6" opacity=".4"/></g>
+  <path d="M -44 -26 C -30 -66 -6 -88 20 -60 C 4 -44 -12 -32 -22 -24 Z" fill="url(#finA)"/>
+  <path d="M 16 -62 C 40 -86 68 -86 82 -72 C 60 -75 36 -67 20 -55 Z" fill="#ffe6c0" opacity=".7"/>
+  <path d="M 74 -2 C 58 -44 10 -62 -30 -52 C -54 -46 -66 -26 -68 -6 C -66 16 -52 40 -22 48 C 16 58 60 34 74 -2 Z" fill="url(#bodyA)"/>
+  <g clip-path="url(#clipA)">
+   <path d="M 4 -60 C 16 -24 14 26 -2 58" fill="none" stroke="#9e3519" stroke-width="13" opacity=".3"/>
+   <path d="M -28 -58 C -18 -24 -20 24 -34 54" fill="none" stroke="#9e3519" stroke-width="8" opacity=".22"/>
+   <path d="M -70 -8 C -40 -30 20 -34 78 -14" fill="none" stroke="#fff4dd" stroke-width="9" opacity=".22"/>
+  </g>
+  <path d="M 24 -42 C 12 -18 14 22 26 44" fill="none" stroke="#8d3418" stroke-width="2.4" opacity=".5"/>
+  <path d="M 4 6 C -10 32 6 52 32 42 C 20 30 15 18 17 3 Z" fill="#cf5330"/>
+  <path d="M 6 9 C 0 26 8 40 24 38" fill="none" stroke="#8d3418" stroke-width="1.4" opacity=".5"/>
+  <circle cx="46" cy="-18" r="11" fill="#fff9f1"/>
+  <circle cx="48" cy="-17" r="5.4" fill="#132330"/>
+  <circle cx="44.4" cy="-21" r="1.9" fill="#ffffff" opacity=".95"/>
+  <path d="M 62 12 C 68 19 75 16 78 8" fill="none" stroke="#7c2b13" stroke-width="3.2" stroke-linecap="round"/>
+ </g>
+
+ <!-- SPECIMEN B : slender darting, teal & gold -->
+ <g id="fB">
+  <g class="tail"><polygon points="-40,0 -98,-30 -90,0 -98,30" fill="url(#tailB)"/>
+   <path d="M -46 0 C -66 -6 -82 -14 -93 -21" fill="none" stroke="#c47d12" stroke-width="1.6" opacity=".55"/></g>
+  <path d="M -8 -16 C -18 -36 4 -42 17 -23 C 6 -21 -2 -19 -8 -16 Z" fill="url(#tailB)"/>
+  <path d="M 58 0 C 44 -13 8 -19 -20 -15 C -38 -12 -48 -6 -50 0 C -48 7 -36 13 -18 15 C 8 19 44 13 58 0 Z" fill="url(#bodyB)"/>
+  <g clip-path="url(#clipB)">
+   <path d="M -46 -3 C -14 -12 22 -10 52 -2" fill="none" stroke="#093f4d" stroke-width="4.4" opacity=".6"/>
+   <path d="M -32 9 C -6 15 22 14 46 6" fill="none" stroke="#d9fff2" stroke-width="3" opacity=".45"/>
+  </g>
+  <path d="M 5 8 C -1 23 9 29 21 21 C 14 17 10 12 10 5 Z" fill="#0f8f9c"/>
+  <circle cx="40" cy="-5" r="6.6" fill="#f5fffb"/>
+  <circle cx="41.6" cy="-4.4" r="3.2" fill="#0a2330"/>
+  <path d="M 52 4 C 49 8 45 8 41 5.6" fill="none" stroke="#093f4d" stroke-width="1.9" stroke-linecap="round"/>
+ </g>
+</defs>
+
+<rect id="water" x="0" y="0" width="1000" height="600" fill="url(#gWater)"/>
+<g id="rays" pointer-events="none">
+ <polygon class="ray" points="60,-60 160,-60 420,2400 250,2400" fill="url(#gRay)" style="animation-delay:-1s"/>
+ <polygon class="ray" points="260,-60 300,-60 470,2400 380,2400" fill="url(#gRay)" style="animation-delay:-4s;animation-duration:12s"/>
+ <polygon class="ray" points="520,-60 640,-60 900,2400 720,2400" fill="url(#gRay)" style="animation-delay:-2.5s;animation-duration:8s"/>
+ <polygon class="ray" points="760,-60 810,-60 1030,2400 940,2400" fill="url(#gRay)" style="animation-delay:-6s;animation-duration:11s"/>
+</g>
+<g id="surface" pointer-events="none">
+ <path class="w" style="animation-duration:14s" d="M-200 6 Q-100 24 0 6 T200 6 T400 6 T600 6 T800 6 T1000 6 T1200 6 L1200 -20 L-200 -20 Z" fill="rgba(255,255,255,.2)"/>
+ <path class="w" style="animation-duration:23s" d="M-200 16 Q-100 -2 0 16 T200 16 T400 16 T600 16 T800 16 T1000 16 T1200 16 L1200 -20 L-200 -20 Z" fill="rgba(190,240,255,.14)"/>
+ <path class="w" style="animation-duration:31s" d="M-200 30 Q-100 12 0 30 T200 30 T400 30 T600 30 T800 30 T1000 30 T1200 30" fill="none" stroke="rgba(224,250,255,.22)" stroke-width="2"/>
+</g>
+<g id="farG" pointer-events="none"><path id="ridge" fill="#0b3a57" opacity=".55"/></g>
+<g id="midG">
+ <path id="sand" fill="url(#gSand)"/>
+ <path id="sandTop" fill="rgba(255,246,214,.2)"/>
+ <g id="rocks"></g><g id="kelp"></g>
+</g>
+<g id="snowG" pointer-events="none"></g>
+<g id="fishLayer"></g>
+<g id="bubbles" pointer-events="none"></g>
+<rect id="vig" x="0" y="0" width="1000" height="600" fill="url(#gVig)" pointer-events="none"/>
+</svg>
+
+<div class="hud">
+ <div class="brand">
+  <div class="eyebrow">Station VII / Continental Shelf</div>
+  <h1>Drift<span>a field study in two specimens</span></h1>
+  <p class="sub">Tracked through the blue column at the hour when the light still reaches the sand.</p>
+ </div>
+ <div class="meta">Depth<i id="dpt">17.6 <b>fathoms</b></i><hr/>Light<i id="lgt">62 <b>%</b></i></div>
+ <div class="panel" id="panel">
+  <div class="row" data-f="0"><i class="sw swa"></i><b>Scalaris major</b><em id="v0">2.9 kn</em></div>
+  <div class="row" data-f="1"><i class="sw swb"></i><b>Chilops viridis</b><em id="v1">10.7 kn</em></div>
+  <div class="meter"><span id="mtr"></span></div>
+  <div class="foot"><span>Temp <u id="tmp">11.4</u> C</span><span>Drift <u id="drf">0.42</u></span></div>
+ </div>
+ <div class="hint">Click the water <s>/</s> release a plume &nbsp; Hover a specimen <s>/</s> log it</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg",W=1000,H=600,floorY=520;
+var S=document.getElementById("scene"),
+    water=document.getElementById("water"),vig=document.getElementById("vig"),
+    ridge=document.getElementById("ridge"),sand=document.getElementById("sand"),
+    sandTop=document.getElementById("sandTop"),rockG=document.getElementById("rocks"),
+    kelpG=document.getElementById("kelp"),snowG=document.getElementById("snowG"),
+    bubG=document.getElementById("bubbles"),fishG=document.getElementById("fishLayer"),
+    farG=document.getElementById("farG"),rayG=document.getElementById("rays");
+var VENTS=[0.15,0.34,0.62,0.86];
+function fa(x){return floorY+11*Math.sin(x*0.011+1.2)+5*Math.cos(x*0.027);}
+
+/* ---------- kelp ribbon generator ---------- */
+function kl(x,base,h,w,fill,sw,ph,dur){
+ var N=12,a="",b="",i,t,cx,cy,ww;
+ for(i=0;i<=N;i++){t=i/N;cx=x+sw*Math.sin(t*4.6+ph)*t;cy=base-t*h;ww=w*(1-t*.86)+.9;
+  a+=(i?"L":"M")+cx.toFixed(1)+" "+(cy-ww).toFixed(1)+" ";
+  b="L"+cx.toFixed(1)+" "+(cy+ww).toFixed(1)+" "+b;}
+ var s='<g class="kelp" style="animation-duration:'+dur+'s;animation-delay:-'+(ph*2).toFixed(1)+'s;transform-origin:'+x+'px '+base+'px"><path d="'+a+b+'Z" fill="'+fill+'"/>';
+ for(i=1;i<=2;i++){var q=i/3,px=x+sw*Math.sin(q*4.6+ph)*q,py=base-q*h;
+  s+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(w*2.5).toFixed(1)+'" ry="'+(w*.95).toFixed(1)+'" fill="'+fill+'" transform="rotate('+(i%2?26:-22)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';}
+ return s+'</g>';
+}
+
+/* ---------- layout (matches viewport aspect exactly) ---------- */
+function layout(){
+ H=Math.round(1000*innerHeight/Math.max(1,innerWidth));
+ if(H<240)H=240; if(H>2400)H=2400;
+ S.setAttribute("viewBox","0 0 "+W+" "+H);
+ water.setAttribute("height",H); vig.setAttribute("height",H);
+ floorY=H*0.875;
+ var x,d="M0 "+fa(0).toFixed(1),r="M0 "+(fa(0)-34).toFixed(1),u="M0 "+fa(0).toFixed(1),dn="";
+ for(x=0;x<=W;x+=40){
+  d+=" L"+x+" "+fa(x).toFixed(1);
+  r+=" L"+x+" "+(fa(x)-34-15*Math.sin(x*0.007+3)).toFixed(1);
+  u+=" L"+x+" "+fa(x).toFixed(1);
+  dn=" L"+x+" "+(fa(x)+7).toFixed(1)+dn;
+ }
+ sand.setAttribute("d",d+" L"+W+" "+H+" L0 "+H+" Z");
+ ridge.setAttribute("d",r+" L"+W+" "+H+" L0 "+H+" Z");
+ sandTop.setAttribute("d",u+dn+" Z");
+
+ var k="",cols=["#175a3f","#1f6b46","#2b8a5b","#36a069","#1c6a49","#2e8f5f","#227a51"];
+ var list=[[.045,.30,13],[.115,.20,8],[.195,.35,14],[.44,.15,6],[.68,.27,11],[.79,.36,15],[.935,.21,9]];
+ for(var i=0;i<list.length;i++){
+  var px=Math.round(list[i][0]*W),h=list[i][1]*H,w=list[i][2];
+  k+=kl(px,fa(px)+9,h,w,cols[i%cols.length],16+((i*7)%12),i*1.7,(5.4+i*0.9));
+ }
+ for(var j=0;j<5;j++){var tx=Math.round((0.25+j*0.15)*W);k+=kl(tx,fa(tx)+7,H*0.06,3.2,"#4fb37a",6,j*2.3,4.2+j*0.5);}
+ var rk="";
+ for(var m=0;m<8;m++){
+  var rx=(m*163+55)%W,rr=16+((m*37)%30),ry=fa(rx)+7;
+  rk+='<path d="M'+(rx-rr)+' '+ry+' Q'+(rx-rr*0.55)+' '+(ry-rr*1.15)+' '+(rx+rr*0.1)+' '+(ry-rr*1.3)+' Q'+(rx+rr*0.75)+' '+(ry-rr)+' '+(rx+rr)+' '+ry+' Z" fill="'+(m%2?"#4c4237":"#5d4c3b")+'"/>';
+  rk+='<path d="M'+(rx-rr)+' '+ry+' Q'+(rx-rr*0.5)+' '+(ry-rr*0.4)+' '+(rx+rr)+' '+ry+' Z" fill="#3a3129" opacity=".5"/>';
+ }
+ rockG.innerHTML=rk; kelpG.innerHTML=k;
+
+ var sn="";
+ for(var n=0;n<20;n++){var sx=Math.random()*W,sy=Math.random()*H;
+  sn+='<circle class="sn" cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="'+(0.7+Math.random()*1.6).toFixed(2)+'" fill="rgba(226,248,255,.55)" style="animation-duration:'+(9+Math.random()*13).toFixed(1)+'s;animation-delay:-'+(Math.random()*12).toFixed(1)+'s"/>';}
+ snowG.innerHTML=sn;
+}
+
+/* ---------- bubbles ---------- */
+var bub=[];
+function shape(b){
+ var r=b.r;
+ b.g.innerHTML='<circle r="'+r.toFixed(1)+'" fill="rgba(206,240,255,.16)" stroke="rgba(255,255,255,.58)" stroke-width=".8"/>'+
+  '<circle cx="'+(-r*.3).toFixed(1)+'" cy="'+(-r*.34).toFixed(1)+'" r="'+(r*.24).toFixed(1)+'" fill="rgba(255,255,255,.8)"/>';
+}
+function seed(b){
+ var vx=VENTS[(Math.random()*VENTS.length)|0]*W+(Math.random()-.5)*34;
+ b.x=vx;b.y=fa(vx)-2;b.r=1.6+Math.random()*Math.random()*9.2;b.v=.78+Math.random()*.55;b.ph=Math.random()*6.28;b.am=1.5+Math.random()*4.5;shape(b);
+}
+function addBub(x,y,r,tmp){
+ var g=document.createElementNS(NS,"g"),b={g:g,x:x,y:y,r:r,v:.8+Math.random()*.5,ph:Math.random()*6.28,am:2+Math.random()*5,tmp:!!tmp};
+ bubG.appendChild(g);shape(b);bub.push(b);
+}
+for(var i=0;i<18;i++){
+ var g0=document.createElementNS(NS,"g"),b0={g:g0,x:VENTS[i%4]*W+(Math.random()-.5)*34,y:Math.random()*H,r:1.6+Math.random()*Math.random()*9,v:.8+Math.random()*.5,ph:Math.random()*6.28,am:2+Math.random()*5,tmp:false};
+ bubG.appendChild(g0);shape(b0);bub.push(b0);
+}
+
+/* ---------- fish ---------- */
+var specs=[
+ {tpl:"fA",x:180,yf:.44,s:1,dir:1,sp:26,bob:.02,bs:.55,wig:1.1,ph:0,tx:34,ty:-166},
+ {tpl:"fB",x:760,yf:.68,s:.62,dir:-1,sp:97,bob:.035,bs:1.5,wig:2.6,ph:2.1,tx:26,ty:-86}
+];
+function makeFish(sp){
+ var g=document.createElementNS(NS,"g");g.setAttribute("class","fish");
+ var f=document.createElementNS(NS,"g");f.setAttribute("class","flip");
+ f.appendChild(document.getElementById(sp.tpl).cloneNode(true));
+ var t=document.createElementNS(NS,"g");t.setAttribute("class","tag");t.setAttribute("pointer-events","none");
+ t.innerHTML='<circle cx="6" cy="-8" r="2.6" fill="#bfeaff"/><path d="M6 -8 L'+(sp.tx+4)+' '+(sp.ty+24)+'" stroke="rgba(160,222,248,.65)" stroke-width="1"/>'+
+  '<rect x="'+sp.tx+'" y="'+sp.ty+'" width="212" height="27" fill="rgba(5,28,47,.78)" stroke="rgba(150,215,240,.4)"/>'+
+  '<text x="'+(sp.tx+11)+'" y="'+(sp.ty+18)+'" fill="#d6f0fd" font-size="11" letter-spacing="2.4" font-family="Futura,Avenir Next,Trebuchet MS,sans-serif">'+
+  (sp.tpl==="fA"?"SPECIMEN A / SCALARIS MAJOR":"SPECIMEN B / CHILOPS VIRIDIS")+'</text>';
+ g.appendChild(f);g.appendChild(t);fishG.appendChild(g);
+ return {g:g,f:f,tail:f.querySelector(".tail")};
+}
+specs.forEach(function(sp){var o=makeFish(sp);sp.el=o.g;sp.g=o.g;sp.flip=o.f;sp.tailEl=o.tail;});
+
+/* ---------- interaction ---------- */
+var mx=0,my=0,px=0,py=0;
+addEventListener("mousemove",function(e){mx=e.clientX/Math.max(1,innerWidth)-.5;my=e.clientY/Math.max(1,innerHeight)-.5;});
+addEventListener("click",function(e){
+ if(e.target.closest&&e.target.closest(".panel"))return;
+ var wx=e.clientX/Math.max(1,innerWidth)*W, wy=e.clientY/Math.max(1,innerHeight)*H;
+ for(var i=0;i<7;i++)addBub(wx+(Math.random()-.5)*28,wy+(Math.random()-.5)*20,1.6+Math.random()*4.4,true);
+});
+var rows=document.querySelectorAll(".row");
+for(var r0=0;r0<rows.length;r0++){(function(row){
+ var idx=+row.getAttribute("data-f");
+ row.addEventListener("mouseenter",function(){specs[idx].el.classList.add("hot");});
+ row.addEventListener("mouseleave",function(){specs[idx].el.classList.remove("hot");});
+})(rows[r0]);}
+
+/* ---------- loop ---------- */
+var last=performance.now();
+function tick(now){
+ var dt=Math.min(.05,(now-last)/1000);last=now;var t=now/1000;
+ px+=(mx-px)*.05;py+=(my-py)*.05;
+ farG.setAttribute("transform","translate("+(px*-16).toFixed(1)+" "+(py*-8).toFixed(1)+")");
+ rayG.setAttribute("transform","translate("+(px*24).toFixed(1)+" 0)");
+ fishG.setAttribute("transform","translate("+(px*9).toFixed(1)+" "+(py*5).toFixed(1)+")");
+
+ for(var i=bub.length-1;i>=0;i--){var b=bub[i];
+  b.y-=(20+150/b.r)*b.v*dt;
+  if(b.y<-b.r*2){ if(b.tmp){b.g.parentNode.removeChild(b.g);bub.splice(i,1);continue;} seed(b); }
+  var bx=b.x+Math.sin(b.y*.03+b.ph)*b.am;
+  b.g.setAttribute("transform","translate("+bx.toFixed(1)+" "+b.y.toFixed(1)+")");
+ }
+ for(var j=0;j<specs.length;j++){var f=specs[j];
+  f.x+=f.dir*f.sp*dt;
+  if(f.dir>0&&f.x>W+250)f.x=-250; else if(f.dir<0&&f.x<-250)f.x=W+250;
+  var y=H*f.yf+Math.sin(t*f.bs+f.ph)*H*f.bob;
+  f.g.setAttribute("transform","translate("+f.x.toFixed(1)+" "+y.toFixed(1)+")");
+  f.flip.setAttribute("transform","scale("+(f.dir*f.s)+" "+f.s+") rotate("+(Math.sin(t*1.6+f.ph)*2.3).toFixed(2)+")");
+  f.tailEl.setAttribute("transform","rotate("+(Math.sin(t*f.wig*4+f.ph)*13).toFixed(1)+" -44 0)");
+ }
+ requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+
+/* ---------- readouts ---------- */
+var v0=document.getElementById("v0"),v1=document.getElementById("v1"),mtr=document.getElementById("mtr"),
+    tmp=document.getElementById("tmp"),lgt=document.getElementById("lgt"),dpt=document.getElementById("dpt"),drf=document.getElementById("drf");
+setInterval(function(){var n=Date.now();
+ v0.textContent=(specs[0].sp/9).toFixed(1)+" kn";
+ v1.textContent=(specs[1].sp/9).toFixed(1)+" kn";
+ mtr.style.width=(34+30*Math.sin(n/2600)).toFixed(1)+"%";
+ tmp.textContent=(11.3+.6*Math.sin(n/5200)).toFixed(1);
+ lgt.innerHTML=Math.round(58+9*Math.sin(n/4300))+" <b>%</b>";
+ dpt.innerHTML=(17.4+1.3*Math.sin(n/7100)).toFixed(1)+" <b>fathoms</b>";
+ drf.textContent=(0.4+.18*Math.sin(n/3300)).toFixed(2);
+},420);
+
+addEventListener("resize",layout);
+layout();
+})();
+</script>
+</body>
+</html>

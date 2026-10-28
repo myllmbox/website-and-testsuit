@@ -1,0 +1,297 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Slow Water · Pelagic Survey 07</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#04121f;color:#dff1fb;-webkit-font-smoothing:antialiased;
+font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Courier New",monospace}
+#sea{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+#shade{opacity:0;transition:opacity .9s ease;pointer-events:none}
+.ray{transform-box:fill-box;transform-origin:50% 0;animation:shimmer 11s ease-in-out infinite}
+@keyframes shimmer{0%,100%{opacity:.13;transform:scaleX(.95)}50%{opacity:.44;transform:scaleX(1.07)}}
+.kelp{transform-box:fill-box;transform-origin:50% 100%;animation:sway 7s ease-in-out infinite}
+.kelp.b{animation-name:sway2}
+@keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(5deg)}}
+@keyframes sway2{0%,100%{transform:rotate(6.5deg)}50%{transform:rotate(-5deg)}}
+.tail{transform-box:fill-box;transform-origin:100% 50%;animation:wag .5s ease-in-out infinite}
+@keyframes wag{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}
+.pec{transform-box:fill-box;transform-origin:18% 6%;animation:fin .85s ease-in-out infinite}
+@keyframes fin{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(11deg)}}
+.fish{cursor:pointer;filter:drop-shadow(0 8px 14px rgba(0,16,30,.5));transition:filter .35s}
+.fish.on{filter:drop-shadow(0 0 20px rgba(255,198,124,.9)) drop-shadow(0 6px 12px rgba(0,20,34,.4))}
+#tag{transition:opacity .25s}
+.card{position:fixed;left:24px;top:22px;width:322px;padding:16px 18px 14px;pointer-events:none;
+background:linear-gradient(180deg,rgba(6,33,55,.88),rgba(4,20,35,.6));border-left:3px solid #ffb066;
+border-radius:2px 14px 14px 2px;box-shadow:0 20px 54px rgba(0,8,18,.55)}
+.kick{font-size:9.5px;letter-spacing:.3em;color:#7fd0e8;text-transform:uppercase}
+h1{margin:.14em 0 .34em;font-family:Georgia,"Iowan Old Style","Times New Roman",serif;font-style:italic;font-weight:400;
+font-size:clamp(28px,4.2vw,50px);line-height:.92;color:#f4fbff;letter-spacing:-.015em}
+h1 b{font-style:normal;font-weight:700;color:#ffb066}
+.sub{margin:0 0 12px;font-size:11px;line-height:1.6;color:#9dc6da;max-width:26em}
+.sp{display:flex;gap:11px;align-items:center;margin:5px -8px;padding:7px 8px;border-radius:7px;pointer-events:auto;cursor:pointer;
+transition:background .25s,transform .25s;border-left:2px solid transparent}
+.sp:hover{background:rgba(126,222,240,.13);transform:translateX(5px);border-left-color:#6ee7d0}
+.sp svg{width:56px;height:38px;flex:none;background:rgba(255,255,255,.06);border-radius:5px}
+.nm{font-family:Georgia,serif;font-style:italic;font-size:15.5px;color:#f0faff;line-height:1.15}
+.mt{font-size:9.5px;letter-spacing:.16em;color:#7fb6cd;text-transform:uppercase;margin-top:3px}
+.tel{position:fixed;left:24px;bottom:20px;display:grid;gap:8px;font-size:10.5px;pointer-events:none}
+.row{display:grid;grid-template-columns:84px 66px 108px;gap:9px;align-items:center}
+.lab{color:#79aec7;letter-spacing:.18em}
+.val{color:#ffd9a8;text-align:right;letter-spacing:.05em}
+.bar{height:4px;background:rgba(255,255,255,.13);border-radius:3px;overflow:hidden}
+.bar b{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,#4fd8c4,#ffb066);transition:width .5s ease}
+.ctrl{position:fixed;right:24px;bottom:20px;display:flex;gap:8px;align-items:flex-end}
+button{font:inherit;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#dff1fb;cursor:pointer;padding:11px 15px;
+background:rgba(9,42,68,.8);border:1px solid rgba(126,222,240,.28);border-radius:2px;transition:.22s}
+button:hover{background:#ffb066;color:#08202f;border-color:#ffb066;transform:translateY(-3px);box-shadow:0 10px 22px rgba(255,176,102,.26)}
+button.on{background:#6ee7d0;color:#062430;border-color:#6ee7d0}
+.hint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);font-size:9.5px;letter-spacing:.24em;color:rgba(190,229,244,.55);
+text-transform:uppercase;pointer-events:none;white-space:nowrap}
+@media (max-width:760px){.card{width:min(88vw,300px)}.tel,.hint{display:none}}
+@media (prefers-reduced-motion:reduce){.kelp,.ray,.pec,.tail{animation:none}}
+</style>
+</head>
+<body>
+<svg id="sea" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#a9e8f6"/><stop offset=".13" stop-color="#5cc0e0"/><stop offset=".37" stop-color="#1f83b5"/>
+<stop offset=".64" stop-color="#0d4e7d"/><stop offset=".85" stop-color="#07304f"/><stop offset="1" stop-color="#041a2c"/>
+</linearGradient>
+<linearGradient id="sand" x1="0" y1="0" x2=".1" y2="1">
+<stop offset="0" stop-color="#ecd6a2"/><stop offset=".4" stop-color="#c9a56a"/><stop offset="1" stop-color="#6f5330"/>
+</linearGradient>
+<linearGradient id="rock" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#728690"/><stop offset="1" stop-color="#25333f"/></linearGradient>
+<linearGradient id="ray" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eaf9ff" stop-opacity=".55"/><stop offset="1" stop-color="#eaf9ff" stop-opacity="0"/></linearGradient>
+<linearGradient id="bodyA" x1="0" y1="0" x2=".2" y2="1"><stop offset="0" stop-color="#ffc47c"/><stop offset=".5" stop-color="#ef7a2c"/><stop offset="1" stop-color="#b3451a"/></linearGradient>
+<linearGradient id="finA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff9e4d"/><stop offset="1" stop-color="#bc4716"/></linearGradient>
+<linearGradient id="bodyB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6fbf4"/><stop offset=".45" stop-color="#5fc6c1"/><stop offset="1" stop-color="#186d7c"/></linearGradient>
+<radialGradient id="bub" cx=".34" cy=".28" r=".78">
+<stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".4" stop-color="#d6f2ff" stop-opacity=".22"/>
+<stop offset=".85" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#fff" stop-opacity=".55"/>
+</radialGradient>
+<radialGradient id="vig" cx=".5" cy=".4" r=".82"><stop offset=".5" stop-color="#00101c" stop-opacity="0"/><stop offset="1" stop-color="#00101c" stop-opacity=".62"/></radialGradient>
+<clipPath id="clipA"><ellipse cx="0" cy="0" rx="92" ry="62"/></clipPath>
+<clipPath id="clipB"><path d="M-64 0Q-48 -21 4 -22Q54 -20 80 -1Q54 19 4 21Q-48 21 -64 0Z"/></clipPath>
+</defs>
+<rect id="water" fill="url(#water)"/>
+<g id="surf"></g>
+<g id="rays"></g>
+<g id="far"></g>
+<g id="drift"></g>
+<g id="plants"></g>
+<g id="floor"></g>
+<g id="bubB"></g>
+<g id="fish">
+<g id="fishA" class="fish">
+<g class="tail"><path d="M-74 0 L-150 -56 Q-124 0 -150 56 Z" fill="url(#finA)"/><path d="M-112 -32 Q-98 0 -112 32" stroke="#9c3a10" stroke-width="3" fill="none" opacity=".45"/></g>
+<path d="M-34 -50 Q6 -112 62 -56 Q16 -64 -34 -50 Z" fill="url(#finA)"/>
+<path d="M-46 44 Q-16 78 22 48 Q-12 60 -46 44 Z" fill="#c04a17" opacity=".85"/>
+<ellipse cx="0" cy="0" rx="92" ry="62" fill="url(#bodyA)"/>
+<g clip-path="url(#clipA)">
+<path d="M-44 -68 q14 68 0 136" stroke="#c0501c" stroke-width="13" fill="none" opacity=".4"/>
+<path d="M2 -70 q14 70 0 140" stroke="#c0501c" stroke-width="13" fill="none" opacity=".33"/>
+<path d="M46 -62 q12 62 0 124" stroke="#c0501c" stroke-width="12" fill="none" opacity=".26"/>
+<ellipse cx="-8" cy="40" rx="72" ry="26" fill="#ffdbab" opacity=".3"/>
+</g>
+<path d="M54 -4 q-20 34 -48 42" stroke="#a8410f" stroke-width="4" fill="none" opacity=".4"/>
+<path class="pec" d="M12 4 Q-14 50 36 42 Q38 18 12 4 Z" fill="url(#finA)"/>
+<circle cx="56" cy="-16" r="14" fill="#fffdf6"/><circle cx="59" cy="-15" r="6.5" fill="#16212b"/><circle cx="54.5" cy="-20" r="2.3" fill="#fff"/>
+<path d="M84 12 q-16 21 -38 14" stroke="#8f3a12" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+</g>
+<g id="fishB" class="fish">
+<g class="tail"><path d="M-56 0 L-106 -33 Q-84 0 -106 33 Z" fill="#f2c14e"/><path d="M-84 -18 Q-74 0 -84 18" stroke="#b7861d" stroke-width="2.4" fill="none" opacity=".6"/></g>
+<path d="M-14 -18 L14 -45 L34 -15 Z" fill="#2f8f9c"/>
+<path d="M-64 0Q-48 -21 4 -22Q54 -20 80 -1Q54 19 4 21Q-48 21 -64 0Z" fill="url(#bodyB)"/>
+<g clip-path="url(#clipB)">
+<path d="M-30 -26 q7 26 0 52" stroke="#0f5866" stroke-width="6.5" fill="none" opacity=".5"/>
+<path d="M-2 -28 q7 28 0 56" stroke="#0f5866" stroke-width="6.5" fill="none" opacity=".42"/>
+<path d="M26 -26 q6 26 0 52" stroke="#0f5866" stroke-width="6" fill="none" opacity=".32"/>
+<path d="M-52 1 L66 -3" stroke="#0d4552" stroke-width="2.4" opacity=".35"/>
+<ellipse cx="0" cy="14" rx="56" ry="9" fill="#f4feff" opacity=".25"/>
+</g>
+<path class="pec" d="M10 5 Q-6 30 24 25 Q28 12 10 5 Z" fill="#2f8f9c"/>
+<circle cx="54" cy="-7" r="8.6" fill="#fffdf6"/><circle cx="56" cy="-6.4" r="4" fill="#16212b"/><circle cx="51.6" cy="-9.8" r="1.5" fill="#fff"/>
+<path d="M76 3 L59 8" stroke="#0d4552" stroke-width="3" stroke-linecap="round"/>
+</g>
+</g>
+<g id="bubF"></g>
+<g id="fg"></g>
+<rect id="vig" fill="url(#vig)" pointer-events="none"/>
+<rect id="shade" fill="#02141f" pointer-events="none"/>
+<g id="tag" opacity="0" pointer-events="none">
+<rect id="tagR" x="0" y="-32" width="160" height="25" rx="3" fill="rgba(4,24,40,.88)" stroke="#ffb066" stroke-opacity=".55"/>
+<text id="tagT" x="9" y="-14" fill="#ffdcb8" font-size="11" font-family="ui-monospace,monospace" letter-spacing="1.6">SPECIMEN</text>
+</g>
+</svg>
+
+<div class="card">
+<div class="kick">Station 07 · pelagic transect · 04:12</div>
+<h1>The Slow <b>Water</b></h1>
+<p class="sub">Two residents of the inner shelf, logged on a single descending frame. Hover a specimen to flag it; hover the water to release air.</p>
+<div class="sp" data-f="0"><svg viewBox="-165 -120 330 240"><path d="M-74 0L-150 -56Q-124 0-150 56Z" fill="#e2662a"/><ellipse rx="92" ry="62" fill="#ef7a2c"/><path d="M-34 -50Q6 -112 62 -56Q16 -64-34-50Z" fill="#c04a17"/><circle cx="56" cy="-16" r="14" fill="#fff"/><circle cx="59" cy="-15" r="6.5" fill="#16212b"/><path d="M84 12q-16 21-38 14" stroke="#8f3a12" stroke-width="6" fill="none"/></svg><div><div class="nm">Copper Boarfish</div><div class="mt">large · round · 0.9 kn</div></div></div>
+<div class="sp" data-f="1"><svg viewBox="-115 -50 230 100"><path d="M-56 0L-106 -33Q-84 0-106 33Z" fill="#f2c14e"/><path d="M-64 0Q-48-21 4-22Q54-20 80-1Q54 19 4 21Q-48 21-64 0Z" fill="#3fa8ad"/><path d="M-14-18L14-45L34-15Z" fill="#2f8f9c"/><circle cx="54" cy="-7" r="8.6" fill="#fff"/><circle cx="56" cy="-6.4" r="4" fill="#16212b"/><path d="M76 3L59 8" stroke="#0d4552" stroke-width="4"/></svg><div><div class="nm">Gilthead Darter</div><div class="mt">small · slender · 3.4 kn</div></div></div>
+</div>
+
+<div class="tel">
+<div class="row"><span class="lab">DEPTH</span><span class="val" id="vD">–</span><i class="bar"><b id="bD"></b></i></div>
+<div class="row"><span class="lab">TEMP</span><span class="val" id="vT">–</span><i class="bar"><b id="bT"></b></i></div>
+<div class="row"><span class="lab">SALINITY</span><span class="val" id="vS">–</span><i class="bar"><b id="bS"></b></i></div>
+<div class="row"><span class="lab">TAIL-BEAT</span><span class="val" id="vB">–</span><i class="bar"><b id="bB"></b></i></div>
+<div class="row"><span class="lab">AIR FLUX</span><span class="val" id="vA">–</span><i class="bar"><b id="bA"></b></i></div>
+</div>
+
+<div class="hint">click water · release air &nbsp;/&nbsp; space · feed</div>
+
+<div class="ctrl">
+<button id="bFeed">Feed</button>
+<button id="bCur">Current</button>
+<button id="bLight">Dusk</button>
+</div>
+
+<script>
+var NS="http://www.w3.org/2000/svg",$=function(i){return document.getElementById(i)},
+svg=$("sea"),el=function(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e},
+rnd=function(a,b){return a+Math.random()*(b-a)},
+cl=function(v,a,b){return v<a?a:v>b?b:v};
+var W=0,H=0,floorY=0,vents=[],bs=[],S={frenzy:0,px:0,py:0,cx:0,cy:0};
+
+function topPath(off,amp,ph){var d="",n=26,i,x,y;for(i=0;i<=n;i++){x=W*i/n;y=floorY+off+Math.sin(i*.52+ph)*amp+Math.sin(i*.19+ph*2)*amp*.7;d+=(i?" L":"M")+x.toFixed(1)+" "+y.toFixed(1);}return d+(" L"+W+" "+H+" L0 "+H+" Z");}
+
+function surface(){var g=$("surf");g.textContent="";for(var i=0;i<2;i++){var amp=4+i*6,yc=7+i*11,d="M0 "+yc,x;
+for(x=0;x<=2*W;x+=16)d+=" L"+x+" "+(yc+Math.sin(x/(W/6)*Math.PI*2)*amp).toFixed(1);
+d+=" L"+(2*W)+" 0 L0 0 Z";var p=el("path",{d:d,fill:i?"rgba(186,238,255,.10)":"rgba(255,255,255,.15)"},g);
+p.animate([{transform:"translateX(0)"},{transform:"translateX("+(-W)+"px)"}],{duration:26000+i*17000,iterations:Infinity,easing:"linear"});}}
+
+function rays(){var g=$("rays");g.textContent="";for(var i=0;i<6;i++){var x=rnd(-.06,1.06)*W,w=rnd(26,98),lean=rnd(H*.09,H*.32),len=H*rnd(.6,1.05);
+el("polygon",{points:x.toFixed(0)+",-30 "+(x+w).toFixed(0)+",-30 "+(x+w+lean).toFixed(0)+","+len.toFixed(0)+" "+(x+lean).toFixed(0)+","+len.toFixed(0),fill:"url(#ray)","class":"ray"},g).style.animationDuration=rnd(7,16).toFixed(1)+"s";}}
+
+function far(){var g=$("far");g.textContent="";for(var i=0;i<5;i++){var x=rnd(-.04,1.04)*W,w=rnd(W*.14,W*.32),h=rnd(H*.05,H*.15),y=floorY+rnd(0,16);
+el("path",{d:"M"+(x-w/2)+" "+y+" Q"+(x-w/6)+" "+(y-h)+" "+(x+w/8)+" "+(y-h*.72)+" Q"+(x+w/2)+" "+(y-h*.5)+" "+(x+w*.62)+" "+y+" Z",fill:"#0a3454",opacity:.5},g);}
+for(i=0;i<11;i++){var kx=rnd(0,W),kh=rnd(30,115);
+el("path",{d:"M"+kx.toFixed(0)+" "+(floorY+6)+" q"+rnd(-22,22).toFixed(0)+" "+(-kh/2)+" "+rnd(-34,34).toFixed(0)+" "+(-kh),stroke:"#0e4c6d","stroke-width":rnd(2,5).toFixed(1),fill:"none",opacity:.45,"stroke-linecap":"round"},g);}}
+
+function drift(){var g=$("drift");g.textContent="";for(var i=0;i<44;i++){var o=rnd(.08,.4),c=el("circle",{cx:rnd(0,W).toFixed(1),cy:rnd(H*.08,H*.95).toFixed(1),r:rnd(.6,2.1).toFixed(2),fill:"#d3f0ff",opacity:o},g);
+c.animate([{transform:"translate(0,0)",opacity:o},{transform:"translate("+rnd(-34,34).toFixed(0)+"px,"+rnd(-70,-20).toFixed(0)+"px)",opacity:o*.35},{transform:"translate("+rnd(-70,70).toFixed(0)+"px,"+rnd(-130,-40).toFixed(0)+"px)",opacity:o}],{duration:rnd(16000,34000),iterations:Infinity,direction:"alternate",easing:"ease-in-out"});}}
+
+function seafloor(){var g=$("floor");g.textContent="";
+el("path",{d:topPath(-26,17,.6),fill:"#22323e",opacity:.95},g);
+el("path",{d:topPath(0,12,2.1),fill:"url(#sand)"},g);
+el("path",{d:topPath(2,12,2.1).split(" L"+W)[0],stroke:"#f5e4b6","stroke-width":3,fill:"none",opacity:.3},g);
+var i,x;for(i=0;i<7;i++){x=rnd(0,W);var rx=rnd(26,66),ry=rnd(12,26);
+el("ellipse",{cx:x.toFixed(1),cy:(floorY+rnd(4,16)).toFixed(1),rx:rx.toFixed(1),ry:ry.toFixed(1),fill:"url(#rock)",transform:"rotate("+rnd(-14,14).toFixed(1)+" "+x.toFixed(0)+" "+floorY.toFixed(0)+")"},g);
+el("path",{d:"M"+(x-rx*.7)+" "+(floorY-ry*.25)+" q"+rx*.6+" "+(-ry*.85)+" "+(rx*1.3)+" "+(ry*.1),stroke:"#9fb3bd","stroke-width":2.5,fill:"none",opacity:.3},g);}
+for(i=0;i<20;i++)el("ellipse",{cx:rnd(0,W).toFixed(1),cy:(floorY+rnd(10,40)).toFixed(1),rx:rnd(3,9).toFixed(1),ry:rnd(1.6,4).toFixed(1),fill:"#b8975e",opacity:rnd(.5,.85).toFixed(2)},g);
+vents=[];for(i=0;i<5;i++){x=W*(i+.5)/5+rnd(-W*.04,W*.04);vents.push(x);
+el("path",{d:"M"+(x-24).toFixed(1)+" "+(floorY+10)+" q24 "+(-24)+" 48 0 z",fill:"#7a5c33",opacity:.95},g);
+el("ellipse",{cx:x.toFixed(1),cy:(floorY+2).toFixed(1),rx:7,ry:3,fill:"#3a2a15",opacity:.75},g);}}
+
+function blade(g,x,col,w,h,amp,ph,cls){var N=13,L=[],R=[],i,t,y,off,ww;
+for(i=0;i<=N;i++){t=i/N;y=(floorY+9)-h*t;off=Math.sin(t*3.1+ph)*amp*t;ww=w*(1-t)*(1-t)+1.2;
+L.push((x+off-ww).toFixed(1)+" "+y.toFixed(1));R.push((x+off+ww).toFixed(1)+" "+y.toFixed(1));}
+el("path",{d:"M"+L.join(" L")+" L"+R.reverse().join(" L")+" Z",fill:col},g);
+var k=Math.floor(h/42);for(i=1;i<=k;i++){t=i/(k+1);y=(floorY+9)-h*t;off=Math.sin(t*3.1+ph)*amp*t;var s=i%2?1:-1;
+el("ellipse",{cx:(x+off+s*12).toFixed(1),cy:y.toFixed(1),rx:14,ry:5.5,fill:col,transform:"rotate("+(s*30)+" "+(x+off).toFixed(1)+" "+y.toFixed(1)+")"},g);}}
+
+function plants(){var g=$("plants");g.textContent="";var cols=["#2f8a53","#1e6a45","#3ea063","#165231","#2c7b4c"];
+for(var i=0;i<9;i++){var x=rnd(-20,W+20),grp=el("g",{"class":Math.random()<.5?"kelp":"kelp b"},g);
+grp.style.animationDuration=rnd(5,10).toFixed(1)+"s";grp.style.animationDelay=rnd(-8,0).toFixed(1)+"s";
+blade(grp,x,cols[i%cols.length],rnd(5,9),rnd(H*.11,H*.3),rnd(10,26),rnd(0,6.28));}
+for(i=0;i<3;i++){var bx=rnd(30,W-30),bg=el("g",{"class":"kelp b"},g),base=floorY+6;
+bg.style.animationDuration=rnd(6,11).toFixed(1)+"s";bg.style.animationDelay=rnd(-6,0).toFixed(1)+"s";
+el("path",{d:"M"+bx+" "+base+" q"+rnd(-8,8)+" "+(-rnd(24,40))+" "+rnd(-16,16)+" "+(-rnd(34,52)),stroke:"#1d5e3c","stroke-width":4,fill:"none","stroke-linecap":"round"},bg);
+for(var j=0;j<Math.floor(rnd(6,10));j++)el("ellipse",{cx:(bx+rnd(-22,22)).toFixed(1),cy:(base-rnd(6,50)).toFixed(1),rx:rnd(9,17).toFixed(1),ry:rnd(4,8).toFixed(1),fill:cols[j%cols.length],opacity:.92,transform:"rotate("+rnd(-45,45).toFixed(0)+" "+bx+" "+(base-22)+")"},bg);}}
+
+function fg(){var g=$("fg");g.textContent="";var xs=[W*.04,W*.9,W*.55];
+for(var i=0;i<3;i++){if(W<620&&i===2)continue;var grp=el("g",{"class":"kelp b",opacity:.9},g);
+grp.style.animationDuration=rnd(6,11).toFixed(1)+"s";grp.style.animationDelay=rnd(-5,0).toFixed(1)+"s";
+blade(grp,xs[i]+rnd(-40,40),"#04241d",rnd(9,15),rnd(H*.22,H*.4),rnd(24,44),rnd(0,6.28));}
+el("path",{d:"M-10 "+(H+10)+" L-10 "+(H*.9)+" Q"+(W*.07)+" "+(H*.74)+" "+(W*.16)+" "+(H+10)+" Z",fill:"#031c1a",opacity:.85},g);
+el("path",{d:"M"+(W+10)+" "+(H+10)+" L"+(W+10)+" "+(H*.88)+" Q"+(W*.9)+" "+(H*.72)+" "+(W*.78)+" "+(H+10)+" Z",fill:"#031c1a",opacity:.8},g);}
+
+function mkB(front){var e=el("circle",{r:1,fill:"url(#bub)",stroke:"rgba(255,255,255,.45)","stroke-width":.7,opacity:0},front?$("bubF"):$("bubB"));return{e:e,front:front,mode:"loop",pop:0,x:0,y:0,x0:0,r:2,v:30,ax:8,wf:1,ph:0};}
+function resetB(b){var v=vents[Math.floor(Math.random()*vents.length)];b.mode="loop";b.pop=0;
+b.x=b.x0=v+rnd(-20,20);b.y=floorY+rnd(-2,12);b.r=b.front?rnd(3,8.5):rnd(1.4,4.6);b.v=19+95/(b.r+1.6);
+b.ax=rnd(4,16);b.wf=rnd(.6,1.7);b.ph=rnd(0,6.28);b.e.setAttribute("opacity",0);}
+function burst(x,y,n){for(var i=0;i<n;i++){var b=bs[Math.floor(Math.random()*bs.length)];b.mode="burst";b.pop=0;
+b.x=b.x0=x+rnd(-18,18);b.y=y+rnd(-14,14);b.r=rnd(1.4,6.5);b.v=rnd(50,115);b.ax=rnd(6,20);b.wf=rnd(1,2.4);b.ph=rnd(0,6.28);}}
+
+var fish=[{el:$("fishA"),s:1.2,dir:1,spd:34,yf:.40,bob:16,bf:.5,ph:0,n:"COPPER BOARFISH · 41 CM",hs:1},
+          {el:$("fishB"),s:.55,dir:-1,spd:132,yf:.66,bob:34,bf:1.6,ph:2.1,n:"GILthead DARTER · 17 CM",hs:1}];
+function setWags(){var boost=S.frenzy>0?3.1:1;fish.forEach(function(f){f.tail=f.el.querySelector(".tail");
+f.tail.style.animationDuration=cl(58/(f.spd*boost),.16,1.2).toFixed(2)+"s";
+f.el.querySelector(".pec").style.animationDuration=cl(95/(f.spd*boost),.3,1.6).toFixed(2)+"s";});}
+
+function build(){W=innerWidth;H=innerHeight;svg.setAttribute("viewBox","0 0 "+W+" "+H);floorY=H*.875;
+["water","vig","shade"].forEach(function(id){var e=$(id);e.setAttribute("width",W);e.setAttribute("height",H);});
+surface();rays();far();drift();plants();seafloor();fg();
+bs.length=0;$("bubB").textContent="";$("bubF").textContent="";
+for(var i=0;i<18;i++){var b=mkB(false);resetB(b);b.y=rnd(0,H);bs.push(b);}
+for(i=0;i<12;i++){b=mkB(true);resetB(b);b.y=rnd(0,H);bs.push(b);}
+fish.forEach(function(f){f.x=cl(f.x||rnd(0,W),-200,W+200);});setWags();}
+
+var tag=$("tag"),tagR=$("tagR"),tagT=$("tagT");
+fish.forEach(function(f,i){f.el.addEventListener("pointerenter",function(){f.hov=true;tagT.textContent=f.n;tagR.setAttribute("width",(tagT.getComputedTextLength()||90)+18);});
+f.el.addEventListener("pointerleave",function(){f.hov=false;});});
+Array.prototype.forEach.call(document.querySelectorAll(".sp"),function(li){var f=fish[+li.dataset.f];
+li.addEventListener("pointerenter",function(){f.hov=true;f.el.classList.add("on");tagT.textContent=f.n;tagR.setAttribute("width",(tagT.getComputedTextLength()||90)+18);});
+li.addEventListener("pointerleave",function(){f.hov=false;f.el.classList.remove("on");});
+li.addEventListener("click",function(){burst(f.x,f.y,9);S.frenzy=Math.max(S.frenzy,2);setWags();});});
+
+$("bFeed").onclick=function(){S.frenzy=4.5;setWags();var f=fish[0];burst(f.x+f.dir*70*f.s,f.y,11);burst(fish[1].x,fish[1].y,7);};
+$("bCur").onclick=function(){fish.forEach(function(f){f.dir*=-1;});};
+$("bLight").onclick=function(){this.classList.toggle("on");var d=this.classList.contains("on");
+$("shade").style.opacity=d?.5:0;$("rays").style.opacity=d?.3:1;};
+addEventListener("keydown",function(e){if(e.code==="Space"){e.preventDefault();$("bFeed").click();}});
+svg.addEventListener("pointerdown",function(e){burst(e.clientX,e.clientY,9);});
+addEventListener("pointermove",function(e){S.px=(e.clientX/W-.5)*2;S.py=(e.clientY/H-.5)*2;});
+addEventListener("resize",build);
+
+function setv(id,bid,v,p){$(id).textContent=v;$(bid).style.width=(p*100).toFixed(0)+"%";}
+var last=0,T=0,tel=0;
+function frame(now){var dt=Math.min(.05,(now-last)/1000||0);last=now;T+=dt;
+var vs=cl(Math.min(W/1500,H/850),.5,1.25),boost=S.frenzy>0?3.1:1,was=S.frenzy>0;
+if(was){S.frenzy-=dt;if(S.frenzy<=0)setWags();}
+S.cx+=(S.px-S.cx)*Math.min(1,dt*3);S.cy+=(S.py-S.cy)*Math.min(1,dt*3);
+$("far").setAttribute("transform","translate("+(S.cx*-7).toFixed(1)+" "+(S.cy*-3).toFixed(1)+")");
+$("rays").setAttribute("transform","translate("+(S.cx*5).toFixed(1)+" 0)");
+$("drift").setAttribute("transform","translate("+(S.cx*18).toFixed(1)+" "+(S.cy*8).toFixed(1)+")");
+$("plants").setAttribute("transform","translate("+(S.cx*13).toFixed(1)+" 0)");
+$("fish").setAttribute("transform","translate("+(S.cx*9).toFixed(1)+" "+(S.cy*4).toFixed(1)+")");
+$("fg").setAttribute("transform","translate("+(S.cx*34).toFixed(1)+" "+(S.cy*10).toFixed(1)+")");
+var hov=null;
+fish.forEach(function(f){var v=f.spd*boost;f.x+=f.dir*v*dt;var m=200*f.s*vs;
+if(f.dir>0&&f.x>W+m)f.x=-m;else if(f.dir<0&&f.x<-m)f.x=W+m;
+var y=H*f.yf+Math.sin(T*f.bf+f.ph)*f.bob;
+f.hs+=((f.hov?1.07:1)-f.hs)*Math.min(1,dt*7);
+var sc=f.s*vs*f.hs;
+f.el.setAttribute("transform","translate("+f.x.toFixed(1)+" "+y.toFixed(1)+") scale("+(f.dir*sc).toFixed(3)+" "+sc.toFixed(3)+")");
+if(f.hov)hov={x:f.x,y:y,sc:sc};
+if(S.frenzy>0&&Math.random()<dt*3)burst(f.x+f.dir*80*sc,y+rnd(-6,6),1);});
+if(hov){tag.setAttribute("opacity",1);tag.setAttribute("transform","translate("+(hov.x-60*hov.sc).toFixed(1)+" "+(hov.y-92*hov.sc).toFixed(1)+")");}
+else tag.setAttribute("opacity",0);
+for(var i=0;i<bs.length;i++){var b=bs[i];
+if(b.pop>0){b.pop+=dt*3.2;b.r+=dt*9;b.e.setAttribute("r",b.r.toFixed(1));b.e.setAttribute("opacity",Math.max(0,1-b.pop).toFixed(2));
+if(b.pop>=1)resetB(b);continue;}
+b.y-=b.v*dt;b.x0+=Math.sin(T*.3)*4*dt;b.x=b.x0+Math.sin(T*b.wf+b.ph)*b.ax;
+if(b.r<(b.front?9:5))b.r+=dt*.4;
+var o=1;if(b.y<H*.1)o=Math.max(0,b.y/(H*.1));if(b.y>H-6)o*=.5;
+b.e.setAttribute("cx",b.x.toFixed(1));b.e.setAttribute("cy",b.y.toFixed(1));b.e.setAttribute("r",b.r.toFixed(1));b.e.setAttribute("opacity",(o*.92).toFixed(2));
+if(b.y<7)b.pop=.01;}
+tel+=dt;if(tel>.2){tel=0;
+setv("vD","bD",(128.4+Math.sin(T*.12)*3.4).toFixed(1)+" m",.55+Math.sin(T*.12)*.12);
+setv("vT","bT",(11.6+Math.sin(T*.07)*1.5).toFixed(1)+" C",.38+Math.sin(T*.07)*.2);
+setv("vS","bS",(34.8+Math.sin(T*.05+1)*.6).toFixed(1)+" psu",.72+Math.sin(T*.05+1)*.08);
+var hb=1/(cl(58/(fish[0].spd*boost),.16,1.2));setv("vB","bB",hb.toFixed(1)+" Hz",cl(hb/2.4,0,1));
+var air=bs.filter(function(b){return b.y<floorY-4&&b.pop===0}).length;setv("vA","bA",air+" /s",cl(air/28,0,1));}
+requestAnimationFrame(frame);}
+
+build();requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -1,0 +1,485 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Pasture — Field Plate No. 07</title>
+<style>
+:root{--ink:#152419;--ink2:#3f574a;--paper:#fbf7ec;--barn:#b4462f;--gold:#c98a1e;
+--disp:"Hoefler Text","Iowan Old Style","Playfair Display",Georgia,"Times New Roman",serif;
+--body:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,sans-serif;--sway:7s}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:#bfe3f2;font-family:var(--body);color:var(--ink);-webkit-font-smoothing:antialiased;user-select:none}
+#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+#world,#world *{pointer-events:none}
+#grass,#animals .animal,#front g.fl{pointer-events:auto}
+#front g.fl{cursor:pointer}
+#vig{mix-blend-mode:multiply}
+
+@keyframes hop{0%{transform:translateY(0) scale(1,1);animation-timing-function:cubic-bezier(.25,.65,.4,1)}
+8%{transform:translateY(-2px) scale(1.04,.95)}
+32%{transform:translateY(-20px) scale(.97,1.04);animation-timing-function:cubic-bezier(.55,0,.75,.35)}
+56%{transform:translateY(0) scale(1.05,.94)}
+64%,100%{transform:translateY(0) scale(1,1)}}
+@keyframes shade{0%{transform:scale(1);opacity:.26}8%{transform:scale(1.07);opacity:.3}
+32%{transform:scale(.72);opacity:.1}56%,100%{transform:scale(1);opacity:.26}}
+@keyframes spook{0%{transform:translateY(0)}22%{transform:translateY(-42px) rotate(-3deg)}
+48%{transform:translateY(0) rotate(1.5deg)}70%{transform:translateY(-11px)}100%{transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.92}50%{transform:scale(1.09);opacity:1}}
+@keyframes sway{0%,100%{transform:rotate(-1.15deg)}50%{transform:rotate(1.15deg)}}
+@keyframes flap{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.28)}}
+@keyframes bf{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.32)}}
+@keyframes puff{from{opacity:.8;transform:translate(0,0) scale(.35)}to{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.5)}}
+@keyframes rip{from{opacity:.55;transform:scale(.4)}to{opacity:0;transform:scale(1.5)}}
+@keyframes nod{0%,100%{transform:rotate(0)}50%{transform:rotate(-2.5deg)}}
+
+.animal{transition:opacity .35s ease}
+body.dim .animal{opacity:.24}
+body.dim .animal.focus{opacity:1}
+.hop{transform-origin:0 0;animation:hop var(--d,.8s) linear infinite;animation-delay:var(--p,0s)}
+.shadow{fill:#12331a;transform-origin:0 0;animation:shade var(--d,.8s) linear infinite;animation-delay:var(--p,0s)}
+.animal.spook .hop{animation:spook .72s cubic-bezier(.3,.8,.4,1)}
+.hoverable{transform-origin:0 0;transition:transform .28s cubic-bezier(.3,.9,.3,1)}
+.animal.hov .hoverable{transform:scale(1.045)}
+.animal.hov .usewrap{filter:drop-shadow(0 6px 10px rgba(20,60,30,.35))}
+.ring{fill:none;stroke:var(--barn);stroke-width:3;stroke-dasharray:10 11;opacity:0;
+transform-box:fill-box;transform-origin:center;transition:opacity .3s}
+.animal.focus .ring{opacity:.85;animation:spin 14s linear infinite}
+.tag{opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s}
+.animal.hov .tag{opacity:1;transform:none}
+.tag rect{fill:#fffdf6;stroke:#152419;stroke-width:1.4}
+.tag text{font:700 13px var(--body);fill:#152419;letter-spacing:.08em}
+.cap{font:700 10.5px var(--body);letter-spacing:.3em;fill:rgba(21,36,25,.55);transition:opacity .3s}
+body.nocaps .cap{opacity:0}
+.bub{opacity:0;transform:translateY(8px);transition:opacity .22s,transform .22s}
+.bub.show{opacity:1;transform:none}
+.bub rect{fill:#fffdf6;stroke:#152419;stroke-width:1.5}
+.bub path.tail{fill:#fffdf6;stroke:#152419;stroke-width:1.5;stroke-linejoin:round}
+.bub text{font:italic 700 15px var(--disp);fill:var(--barn);text-anchor:middle}
+.puff{opacity:0;animation:puff .74s ease-out both}
+.rip{fill:none;stroke:#2a5a24;stroke-width:2.4;opacity:0;animation:rip .8s ease-out both;transform-box:fill-box;transform-origin:center}
+#rays{transform-origin:0 0;animation:spin 110s linear infinite}
+.halo{transform-origin:0 0;animation:pulse 7s ease-in-out infinite}
+.sway{transform-origin:0 0;animation:sway var(--sway) ease-in-out infinite}
+.wing{transform-box:fill-box;transform-origin:center;animation:bf .16s ease-in-out infinite}
+.bird path{animation:flap .55s ease-in-out infinite}
+#front g.fl{transform-box:fill-box;transform-origin:50% 100%;animation:nod 4.4s ease-in-out infinite;transition:transform .25s}
+#front g.fl:hover{transform:scale(1.4) rotate(-6deg)}
+
+.plate{position:fixed;left:28px;top:24px;z-index:6;max-width:min(50vw,460px);pointer-events:none}
+.eyebrow{font-size:10px;letter-spacing:.34em;text-transform:uppercase;font-weight:700;color:#0d2a1c;opacity:.8}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(46px,7vw,96px);line-height:.84;letter-spacing:-.035em;margin:.16em 0 .14em;text-shadow:0 2px 0 rgba(255,255,255,.4)}
+h1 span{display:block;font:700 .13em/1 var(--body);letter-spacing:.46em;text-transform:uppercase;color:var(--barn);margin-bottom:.7em}
+.rule{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.rule i{height:4px;width:56px;background:var(--barn)}
+.rule b{flex:1;height:1px;background:rgba(21,36,25,.35);max-width:180px}
+.lede{font-size:12.5px;line-height:1.6;max-width:330px;color:var(--ink2)}
+.lede em{font-style:normal;font-weight:700;color:var(--ink);border-bottom:1.5px solid var(--gold)}
+
+.roster{position:fixed;left:28px;top:288px;z-index:6;display:flex;flex-direction:column;gap:7px}
+.row{display:flex;align-items:center;gap:12px;padding:7px 15px 7px 8px;border:1px solid rgba(21,36,25,.18);
+background:rgba(251,247,236,.93);cursor:pointer;font:inherit;color:inherit;text-align:left;border-radius:2px 14px 14px 2px;
+box-shadow:0 10px 22px -18px rgba(8,32,18,.9);transition:.24s cubic-bezier(.3,.85,.4,1)}
+.row:hover,.row.on{transform:translateX(8px);background:#fff;border-color:var(--barn)}
+.row i{font-style:normal;font:700 9px var(--body);letter-spacing:.14em;color:var(--barn);width:14px}
+.thumb{height:38px;width:56px;flex:none;overflow:visible}
+.nm{font-family:var(--disp);font-size:19px;font-weight:700;letter-spacing:-.01em}
+.mt{font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);display:block;margin-top:1px}
+.row .go{margin-left:auto;font-size:15px;color:var(--barn);opacity:0;transform:translateX(-6px);transition:.24s}
+.row:hover .go,.row.on .go{opacity:1;transform:none}
+
+.panel{position:fixed;right:24px;bottom:22px;z-index:6;display:flex;align-items:center;gap:14px;padding:11px 15px;
+background:rgba(251,247,236,.94);border:1px solid rgba(21,36,25,.18);border-radius:3px 3px 12px 12px;box-shadow:0 14px 30px -20px rgba(8,32,18,.95)}
+.panel label{font-size:9px;letter-spacing:.26em;text-transform:uppercase;font-weight:700;color:var(--ink2);display:flex;align-items:center;gap:9px}
+.panel input{width:104px;accent-color:var(--barn)}
+.panel button{font:700 9px var(--body);letter-spacing:.22em;text-transform:uppercase;padding:8px 11px;border:1px solid rgba(21,36,25,.25);
+background:#fff;color:var(--ink);cursor:pointer;border-radius:2px;transition:.2s}
+.panel button:hover{background:var(--ink);color:var(--paper)}
+.panel button.on{background:var(--barn);border-color:var(--barn);color:#fff}
+.foot{position:fixed;right:26px;top:24px;z-index:6;text-align:right;font-size:9.5px;letter-spacing:.26em;text-transform:uppercase;font-weight:700;color:#0d2a1c;pointer-events:none}
+.foot span{display:block;margin-top:5px;color:var(--barn);letter-spacing:.16em}
+@media (max-width:760px){.plate{max-width:74vw}.roster{top:auto;bottom:96px;flex-direction:row;flex-wrap:wrap;max-width:92vw}
+.row{padding:5px 10px}.row .mt,.row i{display:none}.thumb{width:44px;height:30px}.lede{display:none}}
+@media (prefers-reduced-motion:reduce){.hop,.shadow,.halo,#rays,.sway,.wing,.bird path{animation:none!important}}
+</style>
+</head>
+<body>
+
+<svg id="scene" preserveAspectRatio="xMidYMid slice" role="img"
+ aria-label="A pasture at mid-morning: sun with rotating rays, drifting clouds, swaying trees, and a horse, cow, sheep and pig bouncing in the grass.">
+<defs>
+<linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1">
+ <stop offset="0" stop-color="#4aa6de"/><stop offset=".38" stop-color="#8fcdea"/>
+ <stop offset=".72" stop-color="#c9e8f6"/><stop offset="1" stop-color="#f2fbfd"/></linearGradient>
+<linearGradient id="gHaze" x1="0" y1="0" x2="0" y2="1">
+ <stop offset="0" stop-color="#ffffff" stop-opacity="0"/><stop offset="1" stop-color="#ffffff" stop-opacity=".8"/></linearGradient>
+<linearGradient id="gGrass" x1="0" y1="0" x2="0" y2="1">
+ <stop offset="0" stop-color="#82bd5b"/><stop offset=".22" stop-color="#66a949"/>
+ <stop offset=".62" stop-color="#4f8f3c"/><stop offset="1" stop-color="#3a7630"/></linearGradient>
+<radialGradient id="gSun"><stop offset="0" stop-color="#fffde3"/><stop offset=".55" stop-color="#ffdf62"/><stop offset="1" stop-color="#ffc535"/></radialGradient>
+<radialGradient id="gGlow"><stop offset="0" stop-color="rgba(255,244,178,.95)"/><stop offset=".42" stop-color="rgba(255,226,132,.42)"/><stop offset="1" stop-color="rgba(255,220,120,0)"/></radialGradient>
+<radialGradient id="gVig" cx=".5" cy=".5" r=".74"><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#153a22" stop-opacity=".35"/></radialGradient>
+
+<g id="a-cow">
+ <g fill="#e6dbc4"><rect x="-44" y="-58" width="12" height="58" rx="5"/><rect x="18" y="-58" width="12" height="58" rx="5"/></g>
+ <g fill="#463d34"><rect x="-45" y="-9" width="14" height="9" rx="3"/><rect x="17" y="-9" width="14" height="9" rx="3"/></g>
+ <path d="M-62 -92C-78 -80 -76 -58 -68 -44" fill="none" stroke="#e6dbc4" stroke-width="6" stroke-linecap="round"/>
+ <ellipse cx="-68" cy="-40" rx="6" ry="9" fill="#33302c"/>
+ <path id="cowBody" d="M-64 -72C-64 -96 -46 -105 -16 -105C14 -105 34 -100 44 -88C52 -78 50 -60 38 -54C22 -46 -34 -46 -50 -52C-60 -56 -64 -63 -64 -72Z" fill="#fbf4e4"/>
+ <g clip-path="url(#clipCow)" fill="#33302c">
+  <ellipse cx="16" cy="-92" rx="20" ry="14" transform="rotate(-8 16 -92)"/>
+  <ellipse cx="-24" cy="-95" rx="15" ry="10"/><ellipse cx="-56" cy="-68" rx="14" ry="18"/><circle cx="-4" cy="-60" r="8"/></g>
+ <ellipse cx="-24" cy="-50" rx="13" ry="9" fill="#f0a3b4"/>
+ <rect x="-29" y="-46" width="4.5" height="9" rx="2.2" fill="#e08fa2"/><rect x="-20" y="-46" width="4.5" height="9" rx="2.2" fill="#e08fa2"/>
+ <g fill="#fbf4e4"><rect x="-28" y="-58" width="13" height="58" rx="5"/><rect x="34" y="-58" width="13" height="58" rx="5"/></g>
+ <g fill="#463d34"><rect x="-29" y="-9" width="15" height="9" rx="3"/><rect x="33" y="-9" width="15" height="9" rx="3"/></g>
+ <g transform="translate(50,-96) rotate(8)">
+  <ellipse cx="4" cy="-15" rx="9" ry="5" fill="#e6dbc4" transform="rotate(-10 4 -15)"/>
+  <path d="M-6 -13c-2 -8 -7 -10 -11 -10" fill="none" stroke="#e9dbb6" stroke-width="5" stroke-linecap="round"/>
+  <path d="M6 -16c1 -8 6 -11 11 -11" fill="none" stroke="#e9dbb6" stroke-width="5" stroke-linecap="round"/>
+  <ellipse cx="0" cy="0" rx="20" ry="16" fill="#fbf4e4"/>
+  <ellipse cx="-10" cy="-8" rx="8" ry="6.5" fill="#33302c"/>
+  <ellipse cx="14" cy="6" rx="11" ry="8.5" fill="#f0a3b4"/>
+  <ellipse cx="11" cy="5" rx="2" ry="2.6" fill="#a9616f"/><ellipse cx="18" cy="6" rx="2" ry="2.6" fill="#a9616f"/>
+  <circle cx="-1" cy="-3" r="3.4" fill="#2b2724"/><circle cx="11" cy="-7" r="3.1" fill="#2b2724"/>
+  <circle cx="0" cy="-4" r="1.2" fill="#fff"/><circle cx="12" cy="-8" r="1.1" fill="#fff"/>
+  <ellipse cx="-17" cy="-3" rx="10" ry="6" fill="#f6ead7" transform="rotate(-26 -17 -3)"/>
+  <ellipse cx="-17" cy="-3" rx="5" ry="3" fill="#eba9b6" transform="rotate(-26 -17 -3)"/></g>
+</g>
+
+<g id="a-sheep">
+ <g fill="#3d424a"><rect x="-32" y="-32" width="8" height="32" rx="4"/><rect x="12" y="-32" width="8" height="32" rx="4"/></g>
+ <g fill="#4b515a"><rect x="-20" y="-32" width="9" height="32" rx="4"/><rect x="24" y="-32" width="9" height="32" rx="4"/></g>
+ <g fill="#22262c"><rect x="-33" y="-6" width="10" height="6" rx="2"/><rect x="11" y="-6" width="10" height="6" rx="2"/><rect x="-21" y="-6" width="11" height="6" rx="2"/><rect x="23" y="-6" width="11" height="6" rx="2"/></g>
+ <circle cx="-50" cy="-40" r="9" fill="#f2efe6"/>
+ <g fill="#fdfbf5"><ellipse cx="-6" cy="-46" rx="46" ry="21"/>
+  <circle cx="-36" cy="-50" r="18"/><circle cx="-14" cy="-58" r="21"/><circle cx="10" cy="-56" r="19"/><circle cx="30" cy="-46" r="16"/>
+  <circle cx="-40" cy="-34" r="14"/><circle cx="-18" cy="-31" r="16"/><circle cx="4" cy="-30" r="15"/><circle cx="24" cy="-32" r="13"/></g>
+ <g fill="#eae6da" opacity=".8"><circle cx="-30" cy="-30" r="10"/><circle cx="-6" cy="-28" r="11"/><circle cx="16" cy="-29" r="9"/></g>
+ <g transform="translate(44,-60) rotate(-6)">
+  <ellipse cx="2" cy="-13" rx="11" ry="5.5" fill="#3f444b" transform="rotate(-12 2 -13)"/>
+  <ellipse cx="0" cy="0" rx="15" ry="13" fill="#4a5058"/>
+  <ellipse cx="9" cy="5" rx="9" ry="7" fill="#5b626c"/>
+  <circle cx="6" cy="4" r="1.5" fill="#22262c"/><circle cx="12" cy="5" r="1.5" fill="#22262c"/>
+  <ellipse cx="-13" cy="-2" rx="11" ry="6" fill="#454b53" transform="rotate(22 -13 -2)"/>
+  <ellipse cx="-13" cy="-2" rx="6" ry="3" fill="#6c737e" transform="rotate(22 -13 -2)"/>
+  <circle cx="-1" cy="-3" r="4.2" fill="#fff"/><circle cx="11" cy="-4" r="3.8" fill="#fff"/>
+  <circle cx="-1" cy="-2.5" r="2.4" fill="#191d22"/><circle cx="11" cy="-3.5" r="2.2" fill="#191d22"/>
+  <g fill="#fdfbf5"><circle cx="-3" cy="-19" r="8"/><circle cx="8" cy="-21" r="6.5"/><circle cx="-13" cy="-16" r="6"/></g></g>
+</g>
+
+<g id="a-pig">
+ <g fill="#e8899c"><rect x="-30" y="-24" width="9" height="26" rx="4"/><rect x="12" y="-24" width="9" height="26" rx="4"/></g>
+ <g fill="#f4a9b9"><rect x="-19" y="-24" width="10" height="26" rx="4"/><rect x="23" y="-24" width="10" height="26" rx="4"/></g>
+ <g fill="#6f3f4c"><rect x="-31" y="-5" width="11" height="5" rx="2"/><rect x="11" y="-5" width="11" height="5" rx="2"/><rect x="-20" y="-5" width="12" height="5" rx="2"/><rect x="22" y="-5" width="12" height="5" rx="2"/></g>
+ <path d="M-44 -46c-13 -5 -18 5 -9 11c7 5 13 -2 7 -7" fill="none" stroke="#eb93a6" stroke-width="5" stroke-linecap="round"/>
+ <ellipse cx="-2" cy="-38" rx="45" ry="24" fill="#f4a9b9"/>
+ <ellipse cx="-6" cy="-29" rx="34" ry="12" fill="#eb93a6" opacity=".5"/>
+ <ellipse cx="-20" cy="-52" rx="13" ry="7" fill="#f9c0cb" opacity=".75"/>
+ <g transform="translate(34,-44)">
+  <path d="M-2 -12L-10 -31L12 -19Z" fill="#e8899c"/><path d="M16 -14L28 -29L31 -10Z" fill="#eb93a6"/>
+  <circle cx="6" cy="0" r="20" fill="#f4a9b9"/>
+  <path d="M-1 -13L-7 -27L9 -19Z" fill="#d9788d" opacity=".5"/>
+  <ellipse cx="21" cy="4" rx="11.5" ry="9.5" fill="#e9788f"/>
+  <ellipse cx="18" cy="3" rx="2.4" ry="3.4" fill="#a44a5f"/><ellipse cx="25" cy="4" rx="2.4" ry="3.4" fill="#a44a5f"/>
+  <circle cx="2" cy="-6" r="3" fill="#3a2530"/><circle cx="15" cy="-8" r="2.8" fill="#3a2530"/>
+  <circle cx="3" cy="-7" r="1.1" fill="#fff"/><circle cx="16" cy="-9" r="1" fill="#fff"/>
+  <circle cx="12" cy="6" r="4.6" fill="#e06a86" opacity=".3"/></g>
+</g>
+
+<g id="a-horse">
+ <path d="M-66 -118C-92 -110 -102 -80 -94 -50C-88 -72 -76 -92 -60 -104Z" fill="#4a2d17"/>
+ <g fill="#7a4c28"><rect x="-58" y="-80" width="12" height="80" rx="5"/><rect x="26" y="-80" width="12" height="80" rx="5"/></g>
+ <g fill="#3b2414"><rect x="-59" y="-26" width="14" height="26" rx="4"/><rect x="25" y="-26" width="14" height="26" rx="4"/></g>
+ <circle cx="-44" cy="-98" r="29" fill="#8f5c31"/><ellipse cx="-6" cy="-94" rx="60" ry="27" fill="#8f5c31"/><circle cx="34" cy="-90" r="26" fill="#8f5c31"/>
+ <path d="M-40 -68C-16 -60 16 -62 34 -70" fill="none" stroke="#7a4c28" stroke-width="4" opacity=".55"/>
+ <ellipse cx="-14" cy="-116" rx="34" ry="9" fill="#a06d3f" opacity=".55"/>
+ <path d="M22 -116C40 -122 54 -134 62 -150L86 -132C72 -116 58 -102 40 -90Z" fill="#8f5c31"/>
+ <path d="M20 -118C38 -124 52 -136 60 -152C66 -146 72 -140 78 -136C64 -128 50 -112 38 -98C30 -104 24 -112 20 -118Z" fill="#4a2d17"/>
+ <g fill="#8f5c31"><rect x="-44" y="-80" width="13" height="80" rx="5"/><rect x="40" y="-80" width="13" height="80" rx="5"/></g>
+ <g fill="#3b2414"><rect x="-45" y="-26" width="15" height="26" rx="4"/><rect x="39" y="-26" width="15" height="26" rx="4"/></g>
+ <g fill="#241708"><rect x="-46" y="-8" width="17" height="8" rx="3"/><rect x="38" y="-8" width="17" height="8" rx="3"/><rect x="-60" y="-8" width="16" height="8" rx="3"/><rect x="24" y="-8" width="16" height="8" rx="3"/></g>
+ <g transform="translate(70,-134) rotate(-38)">
+  <path d="M-2 -8L-6 -25L10 -12Z" fill="#7a4c28"/><path d="M-1 -11L-3 -21L7 -13Z" fill="#4a2d17"/>
+  <path d="M12 -10L16 -27L25 -12Z" fill="#8f5c31"/><path d="M13 -13L15 -22L22 -13Z" fill="#4a2d17"/>
+  <ellipse cx="14" cy="0" rx="25" ry="13" fill="#8f5c31"/>
+  <ellipse cx="34" cy="3" rx="11" ry="9.5" fill="#5d3a1f"/>
+  <circle cx="38" cy="3" r="2.6" fill="#241708"/>
+  <path d="M22 9c5 1 10 0 13 -3" fill="none" stroke="#3b2414" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="8" cy="-3" r="3.4" fill="#241a12"/><circle cx="19" cy="-6" r="3" fill="#241a12"/>
+  <circle cx="9" cy="-4" r="1.2" fill="#fff"/><circle cx="20" cy="-7" r="1.1" fill="#fff"/>
+  <path d="M-4 -8C-14 -14 -20 -6 -22 3C-14 -2 -8 0 -4 4Z" fill="#4a2d17"/></g>
+</g>
+<clipPath id="clipCow"><use href="#cowBody"/></clipPath>
+</defs>
+
+<g id="world">
+ <rect id="sky" fill="url(#gSky)"/>
+ <rect id="haze" fill="url(#gHaze)"/>
+ <g id="skyL">
+  <g id="sun"><circle class="halo" r="132" fill="url(#gGlow)"/><g id="rays"></g><circle r="46" fill="url(#gSun)"/></g>
+  <g id="clouds"></g><g id="birds"></g>
+ </g>
+ <path id="hillA" fill="#8cc39a"/><path id="hillB" fill="#7ab288"/>
+ <rect id="grass" fill="url(#gGrass)"/>
+ <g id="stripes"></g><g id="ridge"></g><g id="trees"></g><g id="fence"></g>
+ <g id="back"></g><g id="animals"></g><g id="front"></g>
+ <rect id="vig" fill="url(#gVig)"/>
+</g>
+</svg>
+
+<header class="plate">
+ <p class="eyebrow">Field plate No. 07 &middot; Wexbridge Commons</p>
+ <h1><span>the</span>Pasture</h1>
+ <div class="rule"><i></i><b></b></div>
+ <p class="lede">Three acres of ryegrass, four neighbours, all caught <em>mid-bounce</em>. Hover a specimen to identify it, click one to startle it, click the grass to sow a wildflower.</p>
+</header>
+<nav class="roster" id="roster" aria-label="Species roster"></nav>
+<div class="panel">
+ <label>wind<input id="wind" type="range" min="0" max="200" value="90" aria-label="wind"></label>
+ <button id="pause">pause</button>
+ <button id="caps" class="on">captions</button>
+</div>
+<div class="foot" id="foot">—</div>
+
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg",V=1600;
+var $=function(i){return document.getElementById(i)};
+var svg=$("scene"),world=$("world");
+function mk(t,a,p){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);(p||world).appendChild(e);return e}
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+var sd=987654321%2147483647;
+function rnd(){sd=(sd*16807)%2147483647;return sd/2147483647}
+function reseed(s){sd=s}
+
+var sky=$("sky"),haze=$("haze"),grass=$("grass"),stripes=$("stripes"),ridge=$("ridge"),
+    trees=$("trees"),fence=$("fence"),back=$("back"),front=$("front"),
+    cloudsL=$("clouds"),birdsL=$("birds"),skyL=$("skyL"),vig=$("vig"),sun=$("sun");
+
+var VBH=900,vw,vh,L,R,T,B,HZ,GB,gs=1,wind=.9,paused=false;
+
+/* sun rays */
+(function(){var r=$("rays"),i;
+ for(i=0;i<12;i++){mk("line",{x1:0,y1:-59,x2:0,y2:-89,stroke:"#ffd75e","stroke-width":8,"stroke-linecap":"round",transform:"rotate("+i*30+")",opacity:.9},r)}
+ for(i=0;i<6;i++){mk("path",{d:"M-9 -96 L0 -190 L9 -96 Z",fill:"#ffe27a",opacity:.18,transform:"rotate("+i*60+")"},r)}
+})();
+
+/* clouds */
+var cloudShape='<ellipse cx="4" cy="15" rx="58" ry="12" fill="#dceaf5"/><ellipse cx="-34" cy="6" rx="30" ry="19" fill="#fff"/>'+
+'<ellipse cx="0" cy="-9" rx="36" ry="25" fill="#fff"/><ellipse cx="31" cy="2" rx="29" ry="19" fill="#fff"/>'+
+'<ellipse cx="57" cy="12" rx="20" ry="13" fill="#fdfefe"/><ellipse cx="-58" cy="13" rx="21" ry="12" fill="#fdfefe"/>';
+var clouds=[];
+(function(){for(var i=0;i<5;i++){var g=mk("g",{id:"cl"+i});g.innerHTML=cloudShape;
+ clouds.push({g:g,nx:rnd(),ny:.05+rnd()*.26,s:.62+rnd()*.75,sp:.55+rnd()*.9})}})();
+
+/* birds */
+var birds=[];
+(function(){for(var i=0;i<3;i++){var g=mk("g",{});
+ g.innerHTML='<path d="M-10 0Q0 -9 0 0Q0 -9 10 0" fill="none" stroke="#31505c" stroke-width="2.6" stroke-linecap="round"/>';
+ birds.push({g:g,nx:rnd(),ny:.09+rnd()*.12,sp:.9+rnd()*.8})}})();
+
+/* pollen */
+var seeds=[];
+(function(){for(var i=0;i<12;i++){var g=mk("g",{});
+ g.innerHTML='<circle r="2.6" fill="#fff" opacity=".85"/><path d="M0 0l-5 -4M0 0l-6 2M0 0l-3 5" stroke="#fff" stroke-width="1.1" opacity=".55"/>';
+ seeds.push({g:g,nx:rnd(),ny:.42+rnd()*.55,sp:.45+rnd()*.7,ph:rnd()*6.28})}})();
+
+/* butterflies */
+var bfly=[];
+(function(){var cols=["#f2a71b","#e7d8c1"];for(var i=0;i<2;i++){var g=mk("g",{});
+ g.innerHTML='<ellipse cx="0" cy="0" rx="2.4" ry="7.5" fill="#3d3226"/>'+
+ '<g class="wing"><ellipse cx="-8" cy="-3" rx="8.5" ry="6.5" fill="'+cols[i]+'" opacity=".95"/></g>'+
+ '<g class="wing"><ellipse cx="8" cy="-3" rx="8.5" ry="6.5" fill="'+cols[i]+'" opacity=".95"/></g>'+
+ '<g class="wing"><ellipse cx="-6" cy="5" rx="6" ry="4.5" fill="'+cols[i]+'" opacity=".8"/></g>'+
+ '<g class="wing"><ellipse cx="6" cy="5" rx="6" ry="4.5" fill="'+cols[i]+'" opacity=".8"/></g>';
+ bfly.push({g:g,ph:rnd()*6.28,sp:.22+rnd()*.14})}})();
+
+/* animals */
+var ROWS=[{v:.32,ks:.85},{v:.80,ks:1}];
+var AN=[
+ {id:"a-sheep",n:"Sheep",lat:"Ovis aries",t:.11,row:0,dur:.72,ph:-.21,rx:62,h:85,snd:"Baa",vb:"-63 -89 130 95"},
+ {id:"a-horse",n:"Horse",lat:"Equus caballus",t:.365,row:1,dur:.94,ph:-.47,rx:104,h:164,snd:"Neigh",vb:"-106 -168 214 174"},
+ {id:"a-cow",n:"Cow",lat:"Bos taurus",t:.625,row:1,dur:.82,ph:-.09,rx:80,h:131,snd:"Moo",vb:"-82 -134 168 140"},
+ {id:"a-pig",n:"Pig",lat:"Sus scrofa",t:.875,row:0,dur:.66,ph:-.33,rx:62,h:74,snd:"Oink",vb:"-61 -78 130 84"}];
+var animalsL=$("animals");
+AN.forEach(function(a){
+ var g=document.createElementNS(NS,"g");
+ g.setAttribute("class","animal");
+ g.style.setProperty("--d",a.dur+"s");g.style.setProperty("--p",a.ph+"s");
+ g.innerHTML='<ellipse class="shadow" rx="'+a.rx+'" ry="'+Math.max(6,a.h*.09)+'"></ellipse>'+
+  '<ellipse class="ring" rx="'+(a.rx+14)+'" ry="'+Math.max(10,a.h*.19)+'" cy="-6"></ellipse>'+
+  '<g class="hoverable"><g class="hop usewrap"><use href="#'+a.id+'"></use></g></g>'+
+  '<g class="tag"><rect></rect><text text-anchor="middle" y="-4"></text></g>'+
+  '<g class="bub"><rect x="-33" y="-25" width="66" height="30" rx="10"></rect>'+
+   '<path class="tail" d="M-7 4l7 11l7-11z"></path><text y="-4" text-anchor="middle">'+a.snd+'</text></g>'+
+  '<text class="cap" y="26" text-anchor="middle">'+a.n.toUpperCase()+'</text>';
+ animalsL.appendChild(g);a.g=g;
+ a.tag=g.querySelector(".tag");a.bub=g.querySelector(".bub");
+ a.tag.setAttribute("transform","translate(0,"+(-a.h-16)+")");
+ a.bub.setAttribute("transform","translate(0,"+(-a.h-46)+")");
+ var tx=g.querySelector(".tag text"),tr=g.querySelector(".tag rect");
+ tx.textContent=a.n.toUpperCase()+" \u00B7 "+a.lat;
+ requestAnimationFrame(function(){var b=tx.getBBox();
+  tr.setAttribute("x",b.x-11);tr.setAttribute("y",b.y-6);
+  tr.setAttribute("width",b.width+22);tr.setAttribute("height",b.height+12)});
+ g.addEventListener("click",function(e){e.stopPropagation();startle(a)});
+ g.addEventListener("mouseenter",function(){g.classList.add("hov")});
+ g.addEventListener("mouseleave",function(){g.classList.remove("hov")});
+});
+
+/* roster */
+var roster=$("roster");
+roster.innerHTML=AN.map(function(a,i){return '<button class="row" data-i="'+i+'"><i>0'+(i+1)+'</i>'+
+ '<svg class="thumb" viewBox="'+a.vb+'" preserveAspectRatio="xMidYMid meet"><use href="#'+a.id+'"></use></svg>'+
+ '<span><span class="nm">'+a.n+'</span><span class="mt">'+a.lat+'</span></span><span class="go">&#8594;</span></button>'}).join("");
+Array.prototype.forEach.call(roster.children,function(row){
+ var i=+row.getAttribute("data-i");
+ var on=function(){document.body.classList.add("dim");row.classList.add("on");
+  AN.forEach(function(a,j){a.g.classList.toggle("focus",j===i)})};
+ var off=function(){document.body.classList.remove("dim");row.classList.remove("on");
+  AN.forEach(function(a){a.g.classList.remove("focus")})};
+ row.addEventListener("mouseenter",on);row.addEventListener("focus",on);
+ row.addEventListener("mouseleave",off);row.addEventListener("blur",off);
+ row.addEventListener("click",function(){on();startle(AN[i]);setTimeout(off,1400)});
+});
+
+var PAL=["#3f8534","#4a9440","#57a349","#6ab355","#7cbd62"];
+var FC=["#fff6f0","#ffd9e2","#ffe9a8","#f7b8cf","#ffffff","#f3a6bd"];
+function tuft(x,y,s,c,w){return '<path d="M0 0C-2 -6 -6 -9 -8 -12M0 0C0 -8 1 -11 1 -16M0 0C3 -6 7 -9 9 -11" transform="translate('+x.toFixed(1)+','+y.toFixed(1)+') scale('+s.toFixed(2)+')" stroke="'+c+'" stroke-width="'+w+'" fill="none" stroke-linecap="round"/>'}
+function flower(x,y,s,fc){return '<g transform="translate('+x.toFixed(1)+','+y.toFixed(1)+') scale('+s.toFixed(2)+')"><g class="fl" style="animation-delay:'+(-rnd()*4).toFixed(2)+'s">'+
+ '<path d="M0 1L1 -13" stroke="#3f8534" stroke-width="2.2" stroke-linecap="round"/>'+
+ '<circle cx="1" cy="-15" r="4.8" fill="'+fc+'"/><circle cx="1" cy="-15" r="1.9" fill="#e9a52b"/></g></g>'}
+
+function ridgePath(y,amp,freq,ph){var d="M"+(L-80)+" "+(y+Math.sin((L-80)*freq+ph)*amp).toFixed(1),x;
+ for(x=L-40;x<=R+80;x+=26){d+="L"+x.toFixed(1)+" "+(y+Math.sin(x*freq+ph)*amp+Math.sin(x*.031+ph*2)*amp*.4).toFixed(1)}
+ return d}
+
+function treeSVG(x,y,s,i){return '<g transform="translate('+x.toFixed(1)+','+y.toFixed(1)+') scale('+s.toFixed(3)+')">'+
+ '<ellipse cx="4" cy="2" rx="34" ry="9" fill="#2f6a29" opacity=".35"/>'+
+ '<g class="sway" style="animation-delay:'+(-i*1.7).toFixed(1)+'s">'+
+ '<path d="M-11 0L-6 -76L6 -76L11 0Z" fill="#7a5236"/>'+
+ '<path d="M-4 -22c-1 -14 1 -30 3 -44" stroke="#5f3f28" stroke-width="2.4" fill="none" opacity=".7"/>'+
+ '<path d="M-5 -52l-17 -14 3 -4 17 12z" fill="#6b4530"/><path d="M5 -62l16 -12 -2 -4 -17 10z" fill="#6b4530"/>'+
+ '<circle cx="-30" cy="-84" r="30" fill="#3f8540"/><circle cx="32" cy="-86" r="32" fill="#3f8540"/>'+
+ '<circle cx="0" cy="-110" r="40" fill="#4c9b47"/><circle cx="-18" cy="-68" r="25" fill="#4c9b47"/>'+
+ '<circle cx="20" cy="-70" r="23" fill="#4c9b47"/><circle cx="-8" cy="-130" r="26" fill="#5cae52"/>'+
+ '<circle cx="27" cy="-106" r="21" fill="#57a84f"/><circle cx="-34" cy="-104" r="17" fill="#57a84f"/>'+
+ '<circle cx="-16" cy="-140" r="10" fill="#71bf5f" opacity=".85"/>'+
+ '<circle cx="16" cy="-122" r="8" fill="#71bf5f" opacity=".7"/></g></g>'}
+
+function layout(){
+ var w=innerWidth,h=innerHeight;
+ VBH=clamp(V*h/w,560,1080);
+ svg.setAttribute("viewBox","0 0 "+V+" "+VBH);
+ var sc=Math.max(w/V,h/VBH);
+ vw=w/sc;vh=h/sc;L=V/2-vw/2;R=V/2+vw/2;T=VBH/2-vh/2;B=VBH/2+vh/2;
+ HZ=T+vh*.65;GB=B-HZ;gs=clamp(Math.min(vw/1520,vh/840),.5,1.12);
+ function st(e,a){for(var k in a)e.setAttribute(k,a[k])}
+ st(sky,{x:L-90,y:T-90,width:vw+180,height:(HZ-T)+92});
+ st(haze,{x:L-90,y:HZ-vh*.15,width:vw+180,height:vh*.15+4});
+ st(grass,{x:L-90,y:HZ,width:vw+180,height:GB+180});
+ st(vig,{x:L-90,y:T-90,width:vw+180,height:vh+180});
+ var k=clamp(vh*.072,30,74)/46;
+ sun.setAttribute("transform","translate("+(R-vw*.13).toFixed(1)+","+(T+vh*.175).toFixed(1)+") scale("+k.toFixed(3)+")");
+ st($("hillA"),{d:ridgePath(HZ-2,vh*.055,.0045,1.1)+"L"+(R+90)+" "+(HZ+30)+"L"+(L-90)+" "+(HZ+30)+"Z"});
+ st($("hillB"),{d:ridgePath(HZ+2,vh*.03,.0075,3.4)+"L"+(R+90)+" "+(HZ+30)+"L"+(L-90)+" "+(HZ+30)+"Z"});
+ var s="",i;
+ for(i=0;i<7;i++){var yy=HZ+GB*(.08+i*.14);
+  s+='<ellipse cx="'+(L+vw*(.1+rnd()*.8)).toFixed(0)+'" cy="'+yy.toFixed(0)+'" rx="'+(vw*.2).toFixed(0)+'" ry="'+(GB*.05).toFixed(0)+'" fill="#8ec96a" opacity="'+(.05+rnd()*.05).toFixed(2)+'"/>'}
+ stripes.innerHTML=s;
+ ridge.innerHTML='<path d="'+ridgePath(HZ-1,3.2,.02,.3)+'L'+(R+90)+' '+(HZ+9)+'L'+(L-90)+' '+(HZ+9)+'Z" fill="#548f3a"/>'+
+  '<path d="'+ridgePath(HZ-3,4,.012,2.2)+'" fill="none" stroke="#69a84a" stroke-width="4" opacity=".8"/>';
+ var tp=[[.015,1.12],[.47,.78],[.985,1.0]],ts="";
+ for(i=0;i<tp.length;i++){ts+=treeSVG(L+vw*tp[i][0],HZ+GB*.10,gs*clamp(vh/900,.55,1.15)*tp[i][1],i)}
+ trees.innerHTML=ts;
+ var fy=HZ+GB*.20,fh=34*gs,f="";
+ for(i=0;i<=vw/72;i++){var px2=L+i*72;
+  f+='<rect x="'+(px2-3).toFixed(1)+'" y="'+(fy-fh).toFixed(1)+'" width="6" height="'+fh.toFixed(1)+'" rx="2" fill="#8a6a45"/>'}
+ f+='<rect x="'+L+'" y="'+(fy-fh*.78).toFixed(1)+'" width="'+vw+'" height="5" fill="#96754d" opacity=".9"/>'+
+    '<rect x="'+L+'" y="'+(fy-fh*.4).toFixed(1)+'" width="'+vw+'" height="5" fill="#96754d" opacity=".9"/>';
+ fence.innerHTML=f;
+ reseed(4242);
+ var b="",fr="";
+ for(i=0;i<96;i++){
+  var u=rnd(),v=Math.pow(rnd(),1.3),x=L+u*vw,y=HZ+v*GB+.5,s2=(.42+v*1.0)*gs;
+  var c=PAL[Math.min(PAL.length-1,(v*PAL.length)|0)];
+  if(rnd()<.2){fr+=flower(x,y,s2,FC[(rnd()*FC.length)|0])}
+  else{var p=tuft(x,y,s2,c,(1.6+v*1.6).toFixed(1));
+   if(v>.72)b+=p;else fr+=p}}
+ back.innerHTML=b;front.innerHTML=fr;
+ AN.forEach(function(a){var r=ROWS[a.row];
+  a.s=gs*r.ks;
+  a.g.setAttribute("transform","translate("+(L+vw*a.t).toFixed(1)+","+(HZ+GB*r.v).toFixed(1)+") scale("+a.s.toFixed(3)+")")});
+}
+
+var mx=0,my=0,pxm=0,pym=0;
+addEventListener("pointermove",function(e){mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2});
+function tick(dt,t){
+ pxm+=(mx-pxm)*.06;pym+=(my-pym)*.06;
+ skyL.setAttribute("transform","translate("+(-pxm*16).toFixed(2)+","+(-pym*8).toFixed(2)+")");
+ clouds.forEach(function(c){if(!paused)c.nx+=c.sp*wind*.02*dt;
+  if(c.nx>1.18)c.nx=-.18;
+  var x=L-vw*.2+c.nx*vw*1.4,y=T+vh*c.ny,s=c.s*clamp(vw/1500,.6,1.15);
+  c.g.setAttribute("transform","translate("+x.toFixed(1)+","+y.toFixed(1)+") scale("+s.toFixed(3)+")")});
+ birds.forEach(function(b){if(!paused)b.nx+=b.sp*wind*.035*dt;
+  if(b.nx>1.12)b.nx=-.12;
+  var x=L-vw*.1+b.nx*vw*1.25,y=T+vh*b.ny+Math.sin(t*.9+b.nx*9)*7;
+  b.g.setAttribute("transform","translate("+x.toFixed(1)+","+y.toFixed(1)+") scale("+clamp(vw/1500,.6,1).toFixed(2)+")")});
+ seeds.forEach(function(s){if(!paused)s.nx+=s.sp*wind*.03*dt;
+  if(s.nx>1.08)s.nx=-.08;
+  var x=L+s.nx*vw,y=HZ+GB*s.ny+Math.sin(t*1.4+s.ph)*10;
+  s.g.setAttribute("transform","translate("+x.toFixed(1)+","+y.toFixed(1)+") rotate("+(Math.sin(t+s.ph)*18).toFixed(1)+") scale("+(.7+.5*gs).toFixed(2)+")")});
+ bfly.forEach(function(bf){var t2=t*bf.sp+bf.ph;
+  var x=L+vw*(.5+.36*Math.sin(t2)),y=HZ+GB*(.6+.26*Math.sin(t2*2.7));
+  bf.g.setAttribute("transform","translate("+x.toFixed(1)+","+y.toFixed(1)+") rotate("+(Math.sin(t2)*12).toFixed(1)+") scale("+(.9*gs+.2).toFixed(2)+")")});
+}
+var last=0;
+function frame(ts){var t=ts/1000,dt=Math.min(.05,t-last||0);last=t;tick(dt,t);requestAnimationFrame(frame)}
+
+function toLocal(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())}
+svg.addEventListener("click",function(e){
+ var p=toLocal(e);if(p.y<HZ+3||p.x<L||p.x>R)return;
+ front.insertAdjacentHTML("beforeend",flower(p.x,p.y,clamp((p.y-HZ)/GB,.3,1)*1.15*gs,FC[(rnd()*FC.length)|0]));
+});
+
+function startle(a){
+ if(!a.g.parentNode)return;
+ for(var i=0;i<6;i++){
+  var c=document.createElementNS(NS,"circle");
+  c.setAttribute("class","puff");c.setAttribute("cx",((rnd()*2-1)*a.rx*.85).toFixed(1));
+  c.setAttribute("cy",-2);c.setAttribute("r",(3+rnd()*4).toFixed(1));c.setAttribute("fill","#dccfab");
+  c.style.setProperty("--dx",((rnd()*2-1)*28).toFixed(0)+"px");
+  c.style.setProperty("--dy",(-8-rnd()*24).toFixed(0)+"px");
+  c.style.animationDelay=(i*32)+"ms";
+  a.g.appendChild(c);setTimeout(function(n){return function(){n.remove()}}(c),820);
+ }
+ var r=document.createElementNS(NS,"ellipse");
+ r.setAttribute("class","rip");r.setAttribute("rx",a.rx*.9);r.setAttribute("ry",a.rx*.24);r.setAttribute("cy","-1");
+ a.g.appendChild(r);setTimeout(function(){r.remove()},900);
+ a.g.classList.add("spook");a.bub.classList.add("show");
+ clearTimeout(a.t);a.t=setTimeout(function(){a.g.classList.remove("spook");a.bub.classList.remove("show")},1350);
+}
+
+var foot=$("foot"),wIn=$("wind");
+function upd(){var kmh=Math.round(wind*11);
+ foot.textContent="Meadow time "+new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})+" \u00B7 breeze "+kmh+" km/h";
+ document.documentElement.style.setProperty("--sway",(clamp(9.5-wind*4.2,2.2,20)).toFixed(1)+"s")}
+wIn.addEventListener("input",function(){wind=+wIn.value/100;upd()});
+$("pause").addEventListener("click",function(){paused=!paused;this.classList.toggle("on",paused);
+ this.textContent=paused?"resume":"pause";world.style.animationPlayState=paused?"paused":"";
+ document.querySelectorAll(".hop,.shadow,.sway,.halo,#rays,.wing,.bird path,.fl").forEach(function(n){n.style.animationPlayState=paused?"paused":"running"})});
+$("caps").addEventListener("click",function(){document.body.classList.toggle("nocaps");this.classList.toggle("on")});
+
+addEventListener("resize",layout);
+layout();upd();setInterval(upd,20000);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
