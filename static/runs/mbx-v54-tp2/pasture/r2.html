@@ -1,0 +1,300 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Pasture — four bouncing friends</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:linear-gradient(#59b3e2 0 65%,#71b856 65% 100%)}
+#scene{display:block;width:100vw;height:100vh;cursor:crosshair}
+text{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+
+/* ---------- animals ---------- */
+.hop{transform-box:fill-box;transform-origin:50% 100%;animation-name:hop;animation-iteration-count:infinite;animation-timing-function:cubic-bezier(.34,.72,.4,1)}
+@keyframes hop{0%,100%{transform:translateY(0) scale(1,1)}9%{transform:translateY(4px) scale(1.05,.93)}42%{transform:translateY(-19px) scale(.965,1.07)}72%{transform:translateY(3px) scale(1.045,.955)}}
+.shade{transform-box:fill-box;transform-origin:50% 50%;animation-name:shade;animation-iteration-count:infinite;animation-timing-function:ease-in-out}
+@keyframes shade{0%,100%{transform:scale(1);opacity:.26}9%{transform:scale(1.09);opacity:.3}42%{transform:scale(.78);opacity:.12}72%{transform:scale(1.05);opacity:.28}}
+.animal{cursor:pointer;transition:filter .3s ease}
+.animal:hover{filter:drop-shadow(0 7px 9px rgba(16,52,28,.4)) brightness(1.05)}
+.animal .tag{opacity:0;transform:translateY(8px);transition:opacity .28s ease,transform .28s cubic-bezier(.2,1.4,.4,1);pointer-events:none}
+.animal:hover .tag,.animal.spook .tag{opacity:1;transform:translateY(0)}
+.animal.spook .hop{animation-name:big;animation-duration:.74s;animation-iteration-count:1}
+@keyframes big{0%{transform:translateY(0) scale(1,1)}18%{transform:translateY(7px) scale(1.13,.85)}52%{transform:translateY(-48px) scale(.93,1.13)}78%{transform:translateY(3px) scale(1.08,.93)}100%{transform:translateY(0) scale(1,1)}}
+.dust{opacity:0;transform-box:fill-box;transform-origin:50% 100%}
+.animal.spook .dust{animation:dust .72s ease-out}
+.animal.spook .d2{animation-delay:.13s}
+@keyframes dust{0%{opacity:.5;transform:scale(.35)}100%{opacity:0;transform:scale(1.9) translateY(5px)}}
+.head{transform-box:fill-box;transform-origin:35% 92%;animation:nod 3.6s ease-in-out infinite}
+@keyframes nod{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2.4deg)}}
+.tail{transform-box:fill-box;transform-origin:92% 5%;animation:wag 1.7s ease-in-out infinite}
+@keyframes wag{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
+.eyes circle{transform-box:fill-box;transform-origin:50% 60%;animation:blink 6.2s infinite}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95.4%{transform:scaleY(.08)}98%{transform:scaleY(1)}}
+
+/* ---------- ambient ---------- */
+.drift{animation-name:drift;animation-timing-function:linear;animation-iteration-count:infinite}
+@keyframes drift{from{transform:translateX(var(--from,-340px))}to{transform:translateX(var(--to))}}
+.bob{animation:bob 9s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+.sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway 5.4s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-1.4deg)}50%{transform:rotate(1.7deg)}}
+.rays{transform-box:fill-box;transform-origin:50% 50%;animation:spin 120s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.glow{transform-box:fill-box;transform-origin:50% 50%;animation:glow 5.2s ease-in-out infinite}
+@keyframes glow{0%,100%{transform:scale(1);opacity:.82}50%{transform:scale(1.1);opacity:1}}
+.flit{animation-name:flit;animation-timing-function:ease-in-out;animation-iteration-count:infinite}
+@keyframes flit{0%{transform:translate(0,0)}20%{transform:translate(66px,-48px)}45%{transform:translate(170px,10px)}70%{transform:translate(92px,-30px)}100%{transform:translate(0,0)}}
+.wl,.wr{transform-box:fill-box;animation:flap .19s ease-in-out infinite alternate}
+.wl{transform-origin:100% 60%}.wr{transform-origin:0% 60%}
+@keyframes flap{from{transform:scaleX(1)}to{transform:scaleX(.28)}}
+.mote{animation-name:mote;animation-timing-function:ease-in-out;animation-iteration-count:infinite}
+@keyframes mote{0%{transform:translate(0,0);opacity:0}18%{opacity:.85}100%{transform:translate(28px,-74px);opacity:0}}
+
+/* ---------- furniture ---------- */
+.hud{position:fixed;left:0;bottom:0;padding:clamp(14px,3vw,40px);pointer-events:none;color:#0c2f1e;max-width:min(48ch,84vw);text-shadow:0 1px 0 rgba(255,255,255,.35)}
+.kicker{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;font-weight:700;opacity:.75}
+h1{margin:.2em 0 .3em;font:400 clamp(36px,7.2vw,84px)/.92 Georgia,"Times New Roman",serif;letter-spacing:-.02em}
+h1 em{font-style:italic;color:#0a3d23}
+.rule{width:78px;height:4px;background:#0a3d23;opacity:.45;transform:skewX(-20deg);margin:0 0 14px}
+p{margin:0 0 14px;font-size:13.5px;line-height:1.6;opacity:.82;max-width:34ch}
+.tags span{display:inline-block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;padding:5px 11px;margin:0 6px 8px 0;border:1px solid rgba(12,47,30,.3);border-radius:999px;background:rgba(255,255,255,.5)}
+.hint{font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.6}
+.counter{position:fixed;top:clamp(14px,2.4vw,30px);right:clamp(14px,2.4vw,30px);pointer-events:none;color:#0d2f1e;background:rgba(255,255,255,.62);border:1px solid rgba(13,47,30,.22);border-radius:999px;padding:9px 16px;font-size:10px;letter-spacing:.24em;text-transform:uppercase;font-weight:700}
+.counter b{font-size:17px;letter-spacing:.04em;font-variant-numeric:tabular-nums;margin-left:7px;display:inline-block;transition:transform .2s cubic-bezier(.2,1.7,.4,1)}
+.counter.pop b{transform:scale(1.35)}
+@media (max-height:520px),(max-width:520px){p{display:none}h1{font-size:clamp(28px,8vw,44px)}}
+@media (prefers-reduced-motion:reduce){.drift,.rays,.flit,.mote,.sway,.bob,.glow{animation:none}}
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" role="img" aria-label="An animated pasture with a cow, a sheep, a pig and a horse bouncing in the grass">
+<defs>
+<linearGradient id="gSky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="662">
+<stop offset="0" stop-color="#4faddf"/><stop offset=".34" stop-color="#8ed1ee"/><stop offset=".72" stop-color="#c6e8f6"/><stop offset="1" stop-color="#eff9fb"/></linearGradient>
+<linearGradient id="gGrass" gradientUnits="userSpaceOnUse" x1="0" y1="648" x2="0" y2="1000">
+<stop offset="0" stop-color="#a1d478"/><stop offset=".28" stop-color="#72b957"/><stop offset="1" stop-color="#3d883c"/></linearGradient>
+<radialGradient id="gSun"><stop offset="0" stop-color="#fff9d2" stop-opacity=".95"/><stop offset=".4" stop-color="#ffe873" stop-opacity=".5"/><stop offset="1" stop-color="#ffe873" stop-opacity="0"/></radialGradient>
+<linearGradient id="gCow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdfaf2"/><stop offset="1" stop-color="#e0d8c4"/></linearGradient>
+<linearGradient id="gPig" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fcc3d0"/><stop offset="1" stop-color="#e88ba0"/></linearGradient>
+<linearGradient id="gHorse" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a76e48"/><stop offset="1" stop-color="#6b4227"/></linearGradient>
+<clipPath id="clipCow"><rect x="-108" y="-222" width="216" height="126" rx="52"/></clipPath>
+<radialGradient id="gVig" cx=".5" cy=".48" r=".74"><stop offset=".52" stop-color="#0b2a18" stop-opacity="0"/><stop offset="1" stop-color="#0b2a18" stop-opacity=".3"/></radialGradient>
+</defs>
+<g id="lySky"></g><g id="lyFar"></g><g id="lyCloud"></g><g id="lyGround"></g><g id="lyHedge"></g><g id="lyTree"></g><g id="lyAnim"></g><g id="lyFx"></g>
+<rect x="0" y="0" width="100%" height="100%" fill="url(#gVig)" pointer-events="none"/>
+</svg>
+
+<div class="hud">
+  <div class="kicker">Field study no. 04 · morning shift</div>
+  <h1>The <em>Pasture</em></h1>
+  <div class="rule"></div>
+  <p>Four friends, one meadow, and a bounce that never quite quits. Hover to greet them — click for a proper hello.</p>
+  <div class="tags"><span>cow</span><span>sheep</span><span>pig</span><span>horse</span></div>
+  <div class="hint">click the sky to grow a cloud</div>
+</div>
+<div class="counter" id="ctr">boings<b>000</b></div>
+
+<script>
+(function(){
+var NS="http://www.w3.org/2000/svg",S=document.getElementById("scene"),L=function(i){return document.getElementById(i)};
+var H=1000,W=1600;
+function C(x,y,r,f){return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+f+'"/>'}
+function Co(x,y,r,f,o){return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+f+'" opacity="'+o+'"/>'}
+function E(x,y,rx,ry,f,q){return '<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+ry+'" fill="'+f+'"'+(q?' transform="rotate('+q+' '+x+' '+y+')"':'')+'/>'}
+function R(x,y,w,h,f,r){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+(r==null?3:r)+'" fill="'+f+'"/>'}
+function P(d,f,a){return '<path d="'+d+'" fill="'+(f||"none")+'"'+(a?" "+a:"")+'/>'}
+function ST(d,c,w){return '<path d="'+d+'" fill="none" stroke="'+c+'" stroke-width="'+w+'" stroke-linecap="round"/>'}
+function G(c,i,st){return '<g class="'+c+'"'+(st?' style="'+st+'"':'')+'>'+i+'</g>'}
+function LEG(x,h,w,c,hc,hz){return R(x-w/2,-h,w,h,c,w/2)+R(x-w/2-1,-hz,w+2,hz,hc,3)}
+function seed(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ================= ANIMALS (svg primitives only) ================= */
+function cow(){var s='';
+ s+=LEG(-58,104,19,'#ddd5c2','#6d6355',17)+LEG(42,104,19,'#ddd5c2','#6d6355',17);
+ s+=G('tail',ST('M -96 -206 C -132 -186 -136 -138 -118 -106','#efe7d4',11)+C(-118,-102,12,'#2c2c31'));
+ s+='<rect x="-108" y="-222" width="216" height="126" rx="52" fill="url(#gCow)"/>';
+ s+='<g clip-path="url(#clipCow)">'+E(-72,-206,44,32,'#2c2c31')+E(4,-142,40,26,'#2c2c31')+E(80,-204,30,22,'#2c2c31')+E(-24,-106,24,17,'#2c2c31')+E(56,-164,17,12,'#2c2c31')+'</g>';
+ s+=E(0,-112,74,22,'#e7dfcc');
+ s+=E(26,-102,25,16,'#f2a0b0')+R(18,-92,7,13,'#dd7d93',3)+R(30,-92,7,13,'#dd7d93',3);
+ s+=LEG(-36,108,21,'#fbf7ee','#4a4239',19)+LEG(62,108,21,'#fbf7ee','#4a4239',19);
+ s+=G('head',E(66,-268,19,10,'#efe6d3',-26)+E(70,-266,10,5,'#d998a8',-26)
+   +E(116,-244,44,40,'url(#gCow)')
+   +P('M 92 -274 q -13 -21 1 -33 q 3 19 11 27 z','#efe4c4')+P('M 141 -276 q 15 -17 5 -31 q -7 15 -15 23 z','#efe4c4')
+   +E(162,-272,19,10,'#f6efe1',24)+E(158,-270,10,5,'#d998a8',24)
+   +E(134,-214,33,25,'#f3a3b4')+E(124,-218,5,7,'#a5566c')+E(146,-218,5,7,'#a5566c')
+   +ST('M 118 -200 Q 134 -189 150 -200','#b56a7c',4)
+   +G('eyes',C(99,-256,7,'#2c2c31')+C(135,-256,7,'#2c2c31')+C(101.4,-258.4,2.4,'#fff')+C(137.4,-258.4,2.4,'#fff')));
+ return s;}
+
+function sheep(){var s='';
+ s+=LEG(-46,80,14,'#4d4c55','#26252b',13)+LEG(38,80,14,'#4d4c55','#26252b',13);
+ s+=C(-84,-146,17,'#f7f3e9');
+ s+=E(-2,-122,84,60,'#f4f1e6');
+ var b=[[-70,-150,29,'#fdfbf5'],[-38,-172,31,'#fffefb'],[2,-178,31,'#fdfbf5'],[42,-168,28,'#fffefb'],[70,-142,25,'#fdfbf5'],[78,-108,23,'#f7f3e9'],[46,-76,26,'#fdfbf5'],[2,-70,27,'#fffefb'],[-44,-78,26,'#f7f3e9'],[-74,-112,25,'#fdfbf5']];
+ b.forEach(function(v){s+=C(v[0],v[1],v[2],v[3])});
+ var r=seed(5);for(var i=0;i<12;i++){var a=r()*6.283,rr=50+r()*30;
+   s+='<circle cx="'+(Math.cos(a)*rr).toFixed(1)+'" cy="'+(-122+Math.sin(a)*rr*.6).toFixed(1)+'" r="7" fill="none" stroke="#e5e0cf" stroke-width="2.6"/>';}
+ s+=LEG(-22,84,15,'#41404a','#1f1e24',13)+LEG(56,84,15,'#41404a','#1f1e24',13);
+ s+=G('head',E(64,-188,19,10,'#4d4c55',-30)+E(126,-186,19,10,'#4d4c55',28)
+   +E(96,-166,31,29,'#5e626c',-6)+E(104,-146,19,15,'#70757f',-4)
+   +E(98,-148,4,5,'#26252b')+E(112,-148,4,5,'#26252b')
+   +ST('M 95 -136 q 10 8 20 0','#3a3d45',3)
+   +C(80,-190,13,'#fdfbf5')+C(98,-196,14,'#fffefb')+C(116,-188,12,'#fdfbf5')
+   +G('eyes',C(86,-172,6.2,'#1e1d23')+C(112,-172,6.2,'#1e1d23')+C(88,-174,2.2,'#fff')+C(114,-174,2.2,'#fff')));
+ return s;}
+
+function pig(){var s='';
+ s+=LEG(-44,66,17,'#ea92a6','#c76b80',12)+LEG(24,66,17,'#ea92a6','#c76b80',12);
+ s+=G('tail',ST('M -84 -124 c -26 -8 -30 16 -10 20 c 16 3 14 -18 -2 -14','#f0a0b4',8));
+ s+=E(-4,-110,86,60,'url(#gPig)')+Co(-32,-142,24,'#ffd4de',.4);
+ s+=LEG(-16,70,19,'#f8abbe','#d0748a',13)+LEG(48,70,19,'#f8abbe','#d0748a',13);
+ s+=G('head',P('M 34 -176 L 46 -216 L 70 -184 Z','#ee94a8')+P('M 42 -182 L 49 -205 L 62 -187 Z','#d4718a')
+   +P('M 74 -186 L 96 -216 L 106 -174 Z','#ee94a8')+P('M 80 -186 L 93 -205 L 99 -181 Z','#d4718a')
+   +C(66,-142,46,'url(#gPig)')
+   +E(100,-136,23,18,'#e5849c')+E(93,-138,4.6,6.6,'#a74f68')+E(108,-138,4.6,6.6,'#a74f68')
+   +ST('M 88 -120 q 12 7 24 -1','#c06d84',3)
+   +Co(56,-122,11,'#f2788f',.4)
+   +G('eyes',C(60,-160,6,'#3b2530')+C(88,-160,6,'#3b2530')+C(62,-162,2.2,'#fff')+C(90,-162,2.2,'#fff')));
+ return s;}
+
+function horse(){var s='';
+ s+=LEG(-72,168,18,'#6f4830','#2c1d12',22)+LEG(40,168,18,'#6f4830','#2c1d12',22);
+ s+=G('tail',P('M -92 -238 C -148 -222 -160 -138 -132 -82 C -142 -150 -124 -204 -84 -220 Z','#3b2414')+ST('M -96 -234 C -134 -214 -144 -150 -126 -104','#54371f',5));
+ s+='<ellipse cx="-6" cy="-206" rx="100" ry="56" fill="url(#gHorse)"/>';
+ s+=Co(-72,-206,40,'#5f3a24',.32)+Co(48,-216,34,'#9a6440',.5);
+ s+=P('M 42 -244 C 62 -288 92 -316 118 -326 L 150 -292 C 122 -278 98 -250 84 -214 Z','url(#gHorse)');
+ s+=P('M 46 -250 C 68 -294 98 -322 126 -332 L 110 -350 C 78 -336 54 -300 34 -258 Z','#3b2414');
+ s+=ST('M 62 -272 q 18 6 26 -10','#54371f',4)+ST('M 84 -298 q 16 4 24 -12','#54371f',4);
+ s+=LEG(-46,172,20,'#8b5a3c','#2c1d12',24)+LEG(66,172,20,'#8b5a3c','#2c1d12',24);
+ s+=G('head',P('M 108 -348 L 102 -382 L 128 -358 Z','#8b5a3c')+P('M 112 -352 L 109 -373 L 122 -358 Z','#54371f')
+   +P('M 150 -352 L 162 -384 L 168 -350 Z','#8b5a3c')+P('M 152 -354 L 160 -375 L 164 -354 Z','#54371f')
+   +E(132,-320,32,38,'#9a6641',8)+E(136,-290,26,20,'#b98a61',4)
+   +E(127,-292,4.5,6,'#2c1d12')+E(146,-292,4.5,6,'#2c1d12')
+   +ST('M 120 -276 q 16 9 32 0','#7a5236',3.5)
+   +P('M 104 -350 C 118 -372 148 -374 164 -352 C 144 -362 122 -362 104 -350 Z','#3b2414')
+   +G('eyes',C(118,-330,6,'#241a12')+C(146,-330,6,'#241a12')+C(120,-332,2.2,'#fff')+C(148,-332,2.2,'#fff')));
+ return s;}
+
+var SP=[{n:'Cow',b:cow,s:.60,d:.94,e:-.22,w:280,h:312},
+        {n:'Sheep',b:sheep,s:.62,d:.78,e:-.55,w:192,h:212},
+        {n:'Horse',b:horse,s:.70,d:1.07,e:-.08,w:330,h:386},
+        {n:'Pig',b:pig,s:.55,d:.86,e:-.4,w:219,h:216}];
+
+function animalsHTML(){
+ var wide=W>=1000,sm=wide?Math.min(1.06,Math.max(.74,W/1250)):1;
+ var plan=wide?[[.205,832],[.40,874],[.615,808],[.818,890]]
+              :[[.27,798],[.24,926],[.74,788],[.76,940]];
+ var ord=wide?[2,0,1,3]:[0,2,1,3];
+ var mm=[.78,.80,.86,.82];
+ return ord.map(function(i){var p=SP[i],x=(plan[i][0]*W).toFixed(1),y=plan[i][1],
+  sc=(p.s*sm*(wide?1:mm[i])).toFixed(3),st='animation-duration:'+p.d+'s;animation-delay:'+p.e+'s';
+  return '<g class="animal" data-n="'+p.n+'" transform="translate('+x+','+y+') scale('+sc+')">'
+   +'<ellipse class="shade" cx="0" cy="0" rx="'+(p.w*.34).toFixed(0)+'" ry="'+(p.w*.06).toFixed(1)+'" fill="#17512a" style="'+st+'"/>'
+   +G('hop',p.b(),st)
+   +'<g transform="translate(0,'+(-p.h-16)+')">'+G('tag','<rect x="-62" y="-42" width="124" height="40" rx="13" fill="#0f3320" opacity=".87"/>'
+     +P('M -10 -4 l 10 11 l 10 -11 z','#0f3320','opacity=".87"')
+     +'<text x="0" y="-14" text-anchor="middle" font-size="19" font-weight="600" letter-spacing="3" fill="#eefaf0">'+p.n.toUpperCase()+'</text>')+'</g>'
+   +'<ellipse class="dust" cx="'+(-p.w*.26)+'" cy="-3" rx="'+(p.w*.16)+'" ry="9" fill="#eee3c2"/>'
+   +'<ellipse class="dust d2" cx="'+(p.w*.24)+'" cy="-3" rx="'+(p.w*.14)+'" ry="8" fill="#eee3c2"/>'
+   +'</g>';}).join('');}
+
+/* ================= SCENERY ================= */
+function rays(){var o='';for(var i=0;i<12;i++){var l=i%2?30:46;
+ o+='<path d="M -6 -72 L 6 -72 L 0 '+(-72-l)+' Z" fill="#ffe680" transform="rotate('+(i*30)+')" opacity="'+(i%2?.6:.95)+'"/>';}return o;}
+function skyHTML(){var s='<rect x="0" y="0" width="'+W+'" height="662" fill="url(#gSky)"/>';
+ var sx=W*.82,sy=178;
+ s+='<g transform="translate('+sx.toFixed(0)+','+sy+')">'+Co(0,0,152,'url(#gSun)',1).replace('url(#gSun)','url(#gSun)')+'</g>';
+ s+='<g transform="translate('+sx.toFixed(0)+','+sy+')">'+G('glow',Co(0,0,116,'url(#gSun)',.9))+G('rays',rays())+C(0,0,58,'#ffdf5e')+C(0,0,50,'#fff0a2')+Co(-14,-14,18,'#fff8d0',.75)+'</g>';
+ return s;}
+function cloudHTML(v){var r=seed(v|0),s='',n=4+Math.floor(r()*3);
+ s+=Co(-52,10,26,'#d9e9f3',.5)+Co(6,14,30,'#d9e9f3',.5)+Co(58,8,22,'#d9e9f3',.5);
+ for(var i=0;i<n;i++)s+=C(-66+i*(132/(n-1))+(r()-.5)*8,-6-r()*30,20+r()*20,'#ffffff');
+ return s+C(-14,-40,24,'#fbfdfe')+C(30,-32,19,'#f6fbfe');}
+function cloudWrap(x,y,sc,dur,delay,op,from){
+ return '<g transform="translate(0,'+y+')">'+G('drift',G('bob','<g transform="translate('+x+',0) scale('+sc+')">'+cloudHTML(y*3.7)+'</g>','animation-duration:'+(dur/5)+'s')
+ +'</g>','--to:'+(W+340)+'px;--from:'+from+'px;animation-duration:'+dur+'s;animation-delay:'+delay+'s')+'</g>';}
+function cloudsHTML(){var cfg=[[.9,118,1.35,.98],[2.9,196,1,.9],[4.6,96,1.62,.95],[6.9,246,1.2,.86],[9.2,152,.85,.95],[11.5,300,1.5,.8]],s='',r=seed(12);
+ cfg.forEach(function(c){var d=Math.round(c[0]*16+34);s+=cloudWrap(0,c[1],c[2],d,(-r()*d).toFixed(1),c[3],-340)});
+ s+='<g transform="translate(0,0)">'+G('drift','<g transform="translate(0,210)">'+[[0,0,1],[86,26,.8],[150,-12,.66]].map(function(b){return '<g transform="translate('+b[0]+','+b[1]+') scale('+b[2]+')">'+ST('M -14 0 q 7 -9 14 -2 q 7 -7 14 2','#5d7f95',3)+'</g>'}).join('')+'</g>','--to:'+(W+320)+'px;animation-duration:190s;animation-delay:-40s')+'</g>';
+ return s;}
+function hills(){var s='';
+ s+=P('M 0 662 L 0 604 Q '+(W*.12)+' 550 '+(W*.26)+' 600 Q '+(W*.37)+' 636 '+(W*.5)+' 594 Q '+(W*.66)+' 550 '+(W*.8)+' 602 Q '+(W*.9)+' 634 '+(W)+' 594 L '+W+' 662 Z','#a9d5ae');
+ s+=P('M 0 662 L 0 626 Q '+(W*.18)+' 588 '+(W*.34)+' 626 Q '+(W*.52)+' 660 '+(W*.7)+' 620 Q '+(W*.86)+' 586 '+W+' 628 L '+W+' 662 Z','#79bd88');
+ return s;}
+function groundHTML(){var s='<rect x="0" y="650" width="'+W+'" height="350" fill="url(#gGrass)"/>';
+ s+='<rect x="0" y="650" width="'+W+'" height="24" fill="#b7df89" opacity=".5"/>';
+ s+='<rect x="0" y="647" width="'+W+'" height="4" fill="#2f6b39" opacity=".38"/>';
+ var r=seed(7),n=Math.round(W/17);
+ for(var i=0;i<n;i++){var x=(r()*W).toFixed(0),y=(658+Math.pow(r(),.8)*336).toFixed(0),sc=(.45+((y-655)/345)*1.05).toFixed(2),
+  col=y>850?'#3a8036':'#4e9e46';
+  s+='<g transform="translate('+x+','+y+') scale('+sc+')">'+ST('M 0 0 C -3 -12 -8 -16 -13 -20',col,3)+ST('M 0 0 C 0 -14 1 -20 2 -26',col,3)+ST('M 0 0 C 4 -11 9 -15 14 -19',col,3)+'</g>';}
+ var rf=seed(31),cols=['#fdfdfd','#ffd85e','#f8a8c8','#fbeaa8'];
+ for(var j=0;j<Math.round(W/50);j++){var fx=(rf()*W).toFixed(0),fy=(700+Math.pow(rf(),.8)*290).toFixed(0),c=cols[Math.floor(rf()*4)],k=rf()<.5?5:4,pp='',fs=.8+((fy-700)/290)*.7;
+  for(var q=0;q<k;q++){var a=q*(6.283/k);pp+=C((Math.cos(a)*4.6).toFixed(1),(Math.sin(a)*4.6).toFixed(1),3.2,c)}
+  s+='<g transform="translate('+fx+','+fy+') scale('+fs.toFixed(2)+')">'+ST('M 0 1 l 0 -9','#3f8a3c',2)+pp+C(0,0,2.3,rf()<.5?'#ffe27a':'#fff')+'</g>';}
+ if(W>1050)s+='<g transform="translate('+(W*.93).toFixed(0)+',878)">'+E(0,0,88,24,'#6fbcd8')+E(0,-3,78,18,'#8fd3e8')+E(-20,-6,26,5,'#dff4fb',.6)+E(24,4,18,4,'#dff4fb',.45)+'</g>';
+ return s;}
+function hedgeHTML(){var r=seed(21),n=Math.max(4,Math.round(W/95)),s='';
+ for(var i=0;i<n;i++){var x=((i+.5)*W/n+(r()-.5)*36).toFixed(0),sc=(.45+r()*.5).toFixed(2);
+  s+='<g transform="translate('+x+',652) scale('+sc+')">'+C(-18,0,18,'#3d7a4b')+C(0,-9,22,'#458a53')+C(18,0,17,'#3d7a4b')+C(2,-18,15,'#4c9759')+Co(-6,-14,8,'#7cc484',.5)+'</g>';}
+ return s;}
+function tree(i){var s='';
+ s+=ST('M 0 -96 C -24 -112 -34 -136 -36 -158','#6c4022',10)+ST('M 2 -112 C 22 -126 34 -146 38 -166','#6c4022',9);
+ s+=P('M -15 8 C -13 -40 -11 -86 -10 -122 L 10 -122 C 12 -74 14 -30 16 8 Z','#7d4c29');
+ s+=P('M -8 8 C -7 -40 -6 -86 -5 -122 L 2 -122 C 3 -74 4 -30 5 8 Z','#95603a','opacity=".5"');
+ var leaf=[[0,-232,74,'#3d8a50'],[-58,-198,52,'#459657'],[58,-200,50,'#459657'],[-28,-254,50,'#4da061'],[30,-252,48,'#4da061'],[0,-176,58,'#377e46'],[-42,-156,38,'#3f8a51'],[44,-154,36,'#3f8a51']];
+ var inner=leaf.map(function(l){return C(l[0],l[1],l[2],l[3])}).join('');
+ inner+=[[-32,-248,26],[8,-270,22],[46,-238,18],[-56,-208,15],[26,-190,20]].map(function(l){return Co(l[0],l[1],l[2],'#7cc484',.5)}).join('');
+ inner+=[[0,-160,30],[-34,-176,20],[36,-176,18]].map(function(l){return Co(l[0],l[1],l[2],'#2b6a3c',.35)}).join('');
+ return s+G('sway',inner,'animation-delay:-'+(i*1.7).toFixed(1)+'s');}
+function treesHTML(){var w=W>=1000,t=[[w?.075:.13,742,w?.92:.6],[w?.93:.88,714,w?.78:.5],[w?.52:.5,700,w?.5:.34]];
+ return t.map(function(a,i){return '<g transform="translate('+(a[0]*W).toFixed(0)+','+a[1]+') scale('+a[2]+')">'+Co(0,8,88,'#17512a',.16)+tree(i)+'</g>'}).join('')}
+function bugsHTML(){return [[W*.3,704,17,3],[W*.68,764,22,11]].map(function(b){
+ return '<g transform="translate('+b[0].toFixed(0)+','+b[1]+')">'+G('flit','<g class="wl"><ellipse cx="-7" cy="-5" rx="9" ry="12" fill="#ffd166"/></g><g class="wr"><ellipse cx="7" cy="-5" rx="9" ry="12" fill="#ffb3c8"/></g><ellipse cx="0" cy="-4" rx="2.4" ry="10" fill="#4a3a28"/>','animation-duration:'+b[2]+'s;animation-delay:-'+b[3]+'s')+'</g>'}).join('')}
+function motesHTML(){var r=seed(55),s='';
+ for(var i=0;i<14;i++){var x=(r()*W).toFixed(0),y=(640+r()*350).toFixed(0);
+  s+='<g transform="translate('+x+','+y+')"><circle class="mote" r="'+(1.4+r()*2).toFixed(1)+'" fill="#fffbe8" opacity=".7" style="animation-duration:'+(6+r()*7).toFixed(1)+'s;animation-delay:-'+(r()*8).toFixed(1)+'s"/></g>';}
+ return s;}
+
+/* ================= RENDER / INTERACT ================= */
+var ELS={sky:L('lySky'),far:L('lyFar'),cloud:L('lyCloud'),ground:L('lyGround'),hedge:L('lyHedge'),tree:L('lyTree'),anim:L('lyAnim'),fx:L('lyFx')};
+function render(){
+ W=Math.round(H*innerWidth/innerHeight);if(W<520)W=520;
+ S.setAttribute('viewBox','0 0 '+W+' '+H);
+ ELS.sky.innerHTML=skyHTML();ELS.far.innerHTML=hills();ELS.cloud.innerHTML=cloudsHTML();
+ ELS.ground.innerHTML=groundHTML();ELS.hedge.innerHTML=hedgeHTML();ELS.tree.innerHTML=treesHTML();
+ ELS.anim.innerHTML=animalsHTML();ELS.fx.innerHTML=bugsHTML()+motesHTML();}
+render();
+var rt;addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(render,140)});
+
+var mx=0,my=0,tx=0,ty=0;
+addEventListener('mousemove',function(e){tx=e.clientX/innerWidth-.5;ty=e.clientY/innerHeight-.5});
+(function loop(){mx+=(tx-mx)*.05;my+=(ty-my)*.05;
+ ELS.far.setAttribute('transform','translate('+(mx*-11).toFixed(1)+','+(my*-4).toFixed(1)+')');
+ ELS.cloud.setAttribute('transform','translate('+(mx*-26).toFixed(1)+','+(my*-9).toFixed(1)+')');
+ ELS.tree.setAttribute('transform','translate('+(mx*-8).toFixed(1)+',0)');
+ ELS.fx.setAttribute('transform','translate('+(mx*-18).toFixed(1)+','+(my*-11).toFixed(1)+')');
+ requestAnimationFrame(loop)})();
+
+var boings=0,ctr=L('ctr');
+S.addEventListener('click',function(e){
+ var a=e.target.closest?e.target.closest('.animal'):null;
+ if(a){a.classList.remove('spook');requestAnimationFrame(function(){a.classList.add('spook')});
+  setTimeout(function(){a.classList.remove('spook')},790);
+  boings++;ctr.querySelector('b').textContent=('00'+boings).slice(-3);
+  ctr.classList.add('pop');setTimeout(function(){ctr.classList.remove('pop')},220);return;}
+ var uy=e.clientY/innerHeight*H;if(uy>630)return;
+ var ux=e.clientX/innerWidth*W;
+ var dur=52+Math.random()*46,from=-(340+ux),to=W+340-ux;
+ var p=(ux+340)/(W+680);
+ var g=document.createElementNS(NS,'g');
+ g.innerHTML='<g transform="translate(0,'+uy.toFixed(0)+')"><g class="drift" style="--from:'+from+'px;--to:'+to+'px;animation-duration:'+dur+'s;animation-delay:'+(-p*dur).toFixed(1)+'s"><g transform="scale('+(.55+Math.random()*.75).toFixed(2)+')">'+cloudHTML(Math.random()*9e5|0)+'</g></g></g>';
+ if(ELS.cloud.childElementCount>11)ELS.cloud.removeChild(ELS.cloud.firstElementChild);
+ ELS.cloud.appendChild(g);});
+})();
+</script>
+</body>
+</html>

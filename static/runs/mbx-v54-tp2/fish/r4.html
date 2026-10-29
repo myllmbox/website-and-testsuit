@@ -1,0 +1,456 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reef Drift — an SVG underwater survey</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#03141f}
+  body{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:#e2f4fc;-webkit-font-smoothing:antialiased}
+  #sea{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+  #sea text{font-family:"Futura","Avenir Next","Century Gothic","Trebuchet MS",sans-serif}
+
+  /* ---------- motion ---------- */
+  @keyframes wig{0%,100%{transform:rotate(-11deg)}50%{transform:rotate(11deg)}}
+  @keyframes flut{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(8deg)}}
+  @keyframes sway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(6deg)}}
+  @keyframes shimmer{0%{opacity:.22;transform:translateX(-14px)}100%{opacity:.5;transform:translateX(18px)}}
+  @keyframes roll{from{transform:translateX(0)}to{transform:translateX(-1600px)}}
+  @keyframes drift{0%{transform:translate(0,0);opacity:0}12%{opacity:.8}100%{transform:translate(-34px,-150px);opacity:0}}
+  @keyframes pulse{0%,100%{transform:scaleY(.9) scaleX(1.04)}50%{transform:scaleY(1.1) scaleX(.94)}}
+  @keyframes tent{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  .tail,.pec,.dor{transform-box:fill-box}
+  .tail{animation:wig var(--tw,1s) ease-in-out infinite}
+  #fishA .tail{transform-origin:100% 50%}
+  #fishB .tail{transform-origin:0% 50%}
+  .pec{animation:flut 1.5s ease-in-out infinite;transform-origin:85% 8%}
+  .dor{animation:flut 3.1s ease-in-out infinite;transform-origin:50% 100%}
+  .sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway ease-in-out infinite}
+  #rays polygon{animation:shimmer 9s ease-in-out infinite alternate}
+  #rays polygon:nth-child(2){animation-duration:12s}
+  #rays polygon:nth-child(3){animation-duration:7.5s}
+  #rays polygon:nth-child(4){animation-duration:14s}
+  #rays polygon:nth-child(5){animation-duration:10.5s}
+  #surf path{animation:roll 26s linear infinite}
+  #surf path:last-child{animation-duration:38s;animation-direction:reverse}
+  #motes circle{animation:drift linear infinite}
+  .bell{transform-box:fill-box;transform-origin:50% 0%;animation:pulse 3.6s ease-in-out infinite}
+  .ten{transform-box:fill-box;transform-origin:50% 0%;animation:tent 3.6s ease-in-out infinite}
+  .fish{cursor:pointer;transition:opacity .5s ease,filter .5s ease}
+  .fish.dim{opacity:.24}
+  .fish.spot{filter:drop-shadow(0 0 20px rgba(255,236,196,.6))}
+  .fish .tag{opacity:0;transition:opacity .35s ease}
+  .fish.spot .tag,.fish:hover .tag{opacity:1}
+  @media (prefers-reduced-motion:reduce){
+    .tail,.pec,.dor,.sway,#rays polygon,#surf path,#motes circle,.bell,.ten{animation:none}
+  }
+
+  /* ---------- hud ---------- */
+  .hud{position:fixed;inset:0;z-index:3;pointer-events:none}
+  .tag-block{position:absolute;left:clamp(20px,3.4vw,44px);top:clamp(20px,3.6vh,42px);max-width:40ch;animation:rise .9s cubic-bezier(.2,.8,.2,1) both}
+  .eyebrow{font-family:"Futura","Avenir Next","Trebuchet MS",sans-serif;font-size:10px;letter-spacing:.46em;text-transform:uppercase;color:#8fd7ef;margin:0 0 12px;display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:34px;height:1px;background:linear-gradient(90deg,#8fd7ef,transparent)}
+  h1{font-family:"Futura","Avenir Next","Century Gothic","Trebuchet MS",sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(42px,7.6vw,104px);line-height:.82;letter-spacing:.02em;margin:0;color:#f4fdff;text-shadow:0 10px 40px rgba(0,32,58,.7)}
+  h1 span{display:block;font-weight:300;font-size:.3em;letter-spacing:.42em;color:#7fd8ef;margin-top:.65em;padding-left:.35em}
+  .sub{margin:20px 0 0;font-size:15px;line-height:1.62;color:rgba(213,240,250,.72);max-width:33ch;border-left:1px solid rgba(143,215,239,.32);padding-left:14px}
+
+  .log{position:absolute;left:clamp(20px,3.4vw,44px);bottom:clamp(20px,3.4vh,38px);display:flex;gap:10px;flex-wrap:wrap;pointer-events:auto;animation:rise 1s cubic-bezier(.2,.8,.2,1) .25s both}
+  .sp{display:flex;align-items:center;gap:11px;padding:10px 16px 10px 12px;border:1px solid rgba(150,214,242,.2);background:rgba(4,34,55,.42);color:inherit;font:inherit;cursor:pointer;transition:border-color .3s,background .3s,transform .3s}
+  .sp:hover,.sp.on{border-color:rgba(190,240,255,.6);background:rgba(7,48,76,.62);transform:translateY(-3px)}
+  .sp i{width:11px;height:11px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 3px rgba(255,255,255,.08)}
+  .sp b{display:block;font-family:"Futura","Avenir Next","Trebuchet MS",sans-serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+  .sp em{display:block;font-style:normal;font-size:11px;letter-spacing:.06em;color:rgba(196,231,246,.6);margin-top:3px}
+
+  .meter{position:absolute;right:clamp(20px,3.4vw,44px);bottom:clamp(20px,3.4vh,38px);display:flex;gap:26px;font-variant-numeric:tabular-nums;animation:rise 1s cubic-bezier(.2,.8,.2,1) .4s both}
+  .meter div{text-align:right}
+  .meter span{display:block;font-family:"Futura","Avenir Next","Trebuchet MS",sans-serif;font-size:9px;letter-spacing:.34em;text-transform:uppercase;color:rgba(160,214,236,.66);margin-bottom:5px}
+  .meter b{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-size:24px;font-weight:400;color:#eafaff;letter-spacing:-.01em}
+  .meter s{text-decoration:none;font-size:11px;color:rgba(160,214,236,.6);margin-left:3px}
+  .spine{position:absolute;right:16px;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;font-family:"Futura","Avenir Next","Trebuchet MS",sans-serif;font-size:9px;letter-spacing:.42em;text-transform:uppercase;color:rgba(170,220,240,.42)}
+  .hint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font-family:"Futura","Avenir Next","Trebuchet MS",sans-serif;font-size:9.5px;letter-spacing:.34em;text-transform:uppercase;color:rgba(178,224,242,.5)}
+  @media (max-width:640px){.spine,.hint{display:none}.sub{display:none}}
+</style>
+</head>
+<body>
+
+<svg id="sea" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="sceneTitle">
+  <title id="sceneTitle">Two fish swimming above a sandy seafloor with rising bubbles and swaying seaweed</title>
+  <defs>
+    <linearGradient id="waterG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9de7f5"/><stop offset=".16" stop-color="#55b4da"/>
+      <stop offset=".42" stop-color="#1f7bb0"/><stop offset=".68" stop-color="#0d4a76"/>
+      <stop offset=".88" stop-color="#062a46"/><stop offset="1" stop-color="#03182a"/>
+    </linearGradient>
+    <linearGradient id="sandG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2e2b4"/><stop offset=".32" stop-color="#d6b97e"/>
+      <stop offset=".7" stop-color="#9d7647"/><stop offset="1" stop-color="#543a22"/>
+    </linearGradient>
+    <linearGradient id="rockG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7b6549"/><stop offset="1" stop-color="#2d2318"/>
+    </linearGradient>
+    <linearGradient id="shaftG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eafaff" stop-opacity=".5"/><stop offset=".65" stop-color="#cdefff" stop-opacity=".07"/><stop offset="1" stop-color="#cdefff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="surfG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="weedG" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#1d6b45"/><stop offset=".5" stop-color="#3aa06a"/><stop offset="1" stop-color="#8ada92"/>
+    </linearGradient>
+    <radialGradient id="bubG" cx=".34" cy=".3" r=".8">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".85"/><stop offset=".55" stop-color="#d9f4ff" stop-opacity=".22"/><stop offset="1" stop-color="#bdeafc" stop-opacity=".08"/>
+    </radialGradient>
+    <radialGradient id="bodyA" cx=".62" cy=".3" r=".85">
+      <stop offset="0" stop-color="#ffd9a0"/><stop offset=".45" stop-color="#ff9340"/><stop offset="1" stop-color="#d7480f"/>
+    </radialGradient>
+    <linearGradient id="finA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffc478"/><stop offset="1" stop-color="#ee5f1c"/>
+    </linearGradient>
+    <linearGradient id="bodyB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f2feff"/><stop offset=".42" stop-color="#7ee7dc"/><stop offset="1" stop-color="#1597b2"/>
+    </linearGradient>
+    <linearGradient id="finB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a9f2ea"/><stop offset="1" stop-color="#0f7f97"/>
+    </linearGradient>
+    <radialGradient id="jellyG" cx=".5" cy=".2" r=".9">
+      <stop offset="0" stop-color="#ffe9f5" stop-opacity=".6"/><stop offset="1" stop-color="#8fc6ff" stop-opacity=".12"/>
+    </radialGradient>
+    <radialGradient id="vigG" cx=".5" cy=".36" r=".78">
+      <stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000814" stop-opacity=".55"/>
+    </radialGradient>
+    <clipPath id="clipA"><ellipse cx="0" cy="0" rx="96" ry="60"/></clipPath>
+    <path id="bbp" d="M-84 0Q-46 -21 6 -20Q52 -18 74 0Q52 20 6 21Q-46 22 -84 0Z"/>
+    <clipPath id="clipB"><use href="#bbp"/></clipPath>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#waterG)"/>
+
+  <g id="rays" opacity=".85">
+    <polygon points="150,-80 262,-80 120,1500 -80,1500" fill="url(#shaftG)"/>
+    <polygon points="470,-80 540,-80 400,1500 300,1500" fill="url(#shaftG)"/>
+    <polygon points="760,-80 900,-80 760,1500 590,1500" fill="url(#shaftG)"/>
+    <polygon points="1120,-80 1180,-80 1060,1500 960,1500" fill="url(#shaftG)"/>
+    <polygon points="1380,-80 1510,-80 1420,1500 1250,1500" fill="url(#shaftG)"/>
+  </g>
+  <g id="surf" opacity=".3"></g>
+
+  <g id="far"></g>
+  <g id="floor"></g>
+  <g id="kelp"></g>
+  <g id="bub"></g>
+  <g id="motes"></g>
+
+  <!-- ============ FISH A : large, round, warm ============ -->
+  <g id="fishA" class="fish">
+    <g class="tail" style="--tw:1.05s">
+      <path d="M-78 0L-174 -58L-156 0L-174 58Z" fill="url(#finA)" stroke="#a4380e" stroke-width="2.4" stroke-linejoin="round"/>
+      <path d="M-152 -34L-118 0L-152 34" fill="none" stroke="#ffe3bd" stroke-width="3" opacity=".55"/>
+    </g>
+    <path class="dor" d="M-32 -46Q4 -114 68 -44Q18 -58 -32 -46Z" fill="url(#finA)" stroke="#a4380e" stroke-width="2.2"/>
+    <path class="pec" d="M-4 42Q-16 84 -48 68Q-22 50 -4 42Z" fill="url(#finA)" stroke="#a4380e" stroke-width="1.8"/>
+    <ellipse cx="0" cy="0" rx="96" ry="60" fill="url(#bodyA)" stroke="#a4380e" stroke-width="2.8"/>
+    <g clip-path="url(#clipA)" opacity=".5">
+      <ellipse cx="12" cy="32" rx="72" ry="24" fill="#ffe0b6"/>
+      <path d="M-46 -62Q-26 0 -46 62" fill="none" stroke="#c34510" stroke-width="15"/>
+      <path d="M4 -64Q24 0 4 64" fill="none" stroke="#c34510" stroke-width="13"/>
+    </g>
+    <path d="M30 -50Q42 0 30 50" fill="none" stroke="#a4380e" stroke-width="3.4" opacity=".55"/>
+    <path class="pec" d="M4 8Q-26 64 -56 42Q-20 20 4 8Z" fill="url(#finA)" stroke="#a4380e" stroke-width="2.2" opacity=".95"/>
+    <circle cx="58" cy="-16" r="16.5" fill="#fffaf0" stroke="#7c2c0c" stroke-width="2.4"/>
+    <circle cx="62" cy="-15" r="7.6" fill="#132029"/>
+    <circle cx="57" cy="-20" r="2.7" fill="#fff" opacity=".92"/>
+    <path d="M92 12Q76 30 57 21" fill="none" stroke="#8b3110" stroke-width="3.6" stroke-linecap="round"/>
+    <g class="tag">
+      <rect x="-30" y="-158" width="238" height="34" fill="#03293f" opacity=".78"/>
+      <rect x="-30" y="-158" width="3" height="34" fill="#ff9340"/>
+      <text x="-16" y="-135" font-size="15" letter-spacing="3.4" fill="#eafaff">EMPEROR ANTHIAS · 34 cm</text>
+    </g>
+  </g>
+
+  <!-- ============ FISH B : small, slender, cool ============ -->
+  <g id="fishB" class="fish">
+    <g class="tail" style="--tw:.42s">
+      <path d="M62 0L142 -40L130 0L142 40Z" fill="url(#finB)" stroke="#0b6d7d" stroke-width="2" stroke-linejoin="round"/>
+    </g>
+    <path class="dor" d="M-8 -18Q14 -54 42 -13Q14 -22 -8 -18Z" fill="url(#finB)" stroke="#0b6d7d" stroke-width="1.8"/>
+    <use href="#bbp" fill="url(#bodyB)" stroke="#0b6d7d" stroke-width="2.4"/>
+    <g clip-path="url(#clipB)" opacity=".55">
+      <path d="M-40 -22Q-32 0 -40 22" fill="none" stroke="#0e7f92" stroke-width="6"/>
+      <path d="M-4 -24Q4 0 -4 24" fill="none" stroke="#0e7f92" stroke-width="6"/>
+      <path d="M34 -22Q42 0 34 22" fill="none" stroke="#0e7f92" stroke-width="5"/>
+      <path d="M-70 -3Q0 7 66 0" fill="none" stroke="#ffffff" stroke-width="2.6" opacity=".7"/>
+    </g>
+    <path class="pec" d="M-16 6Q-36 38 -56 25Q-30 10 -16 6Z" fill="url(#finB)" stroke="#0b6d7d" stroke-width="1.8"/>
+    <circle cx="-55" cy="-4" r="9.8" fill="#f6feff" stroke="#0b5e6d" stroke-width="2"/>
+    <circle cx="-53" cy="-4" r="4.6" fill="#0f1c26"/>
+    <circle cx="-56" cy="-7" r="1.7" fill="#fff" opacity=".9"/>
+    <path d="M-82 4Q-70 13 -59 8" fill="none" stroke="#0a5464" stroke-width="2.8" stroke-linecap="round"/>
+    <g class="tag">
+      <rect x="-176" y="52" width="212" height="30" fill="#03293f" opacity=".78"/>
+      <rect x="-176" y="52" width="3" height="30" fill="#4fe0cf"/>
+      <text x="-162" y="72" font-size="14" letter-spacing="3.2" fill="#eafaff">SILVER DART · 12 cm</text>
+    </g>
+  </g>
+
+  <rect width="100%" height="100%" fill="url(#vigG)" pointer-events="none"/>
+</svg>
+
+<div class="hud">
+  <div class="tag-block">
+    <p class="eyebrow">Reef survey 04 · sunlit shelf</p>
+    <h1>Reef<span>Drift</span></h1>
+    <p class="sub">Two residents of the shelf, drawn from nothing but ellipses, triangles and strokes — the patient arithmetic of buoyancy, current and light.</p>
+  </div>
+
+  <div class="log">
+    <button class="sp" data-fish="fishA"><i style="background:#ff9340"></i><span><b>Emperor Anthias</b><em>round · slow · wide caudal</em></span></button>
+    <button class="sp" data-fish="fishB"><i style="background:#4fe0cf"></i><span><b>Silver Dart</b><em>slender · fast · forked tail</em></span></button>
+  </div>
+
+  <div class="spine">pure svg primitives · no external assets</div>
+  <div class="hint">click the water to release bubbles</div>
+
+  <div class="meter">
+    <div><span>depth</span><b id="mD">12.4</b><s>m</s></div>
+    <div><span>drift</span><b id="mS">0.62</b><s>kn</s></div>
+    <div><span>bubbles</span><b id="mB">28</b><s>up</s></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  var S=document.getElementById('sea');
+  var gFar=document.getElementById('far'),gFloor=document.getElementById('floor'),
+      gKelp=document.getElementById('kelp'),gBub=document.getElementById('bub'),
+      gMotes=document.getElementById('motes'),gSurf=document.getElementById('surf'),
+      gRays=document.getElementById('rays');
+  function mk(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e;}
+
+  var W=1600,H=900,FLOOR=790,pxH=1;
+  function fY(x){return H-H*0.035+Math.sin(x*0.0055)*H*0.018+Math.sin(x*0.0165+1.2)*H*0.009;}
+
+  /* ---- surface shimmer ---- */
+  (function(){
+    for(var t=0;t<2;t++){
+      var d='M'+(-W)+' 0';
+      for(var x=-W;x<=W*2;x+=120) d+=' Q'+(x+60)+' '+(t?16:-20)+' '+(x+120)+' 0';
+      d+=' L'+(W*2)+' -90 L'+(-W)+' -90 Z';
+      mk('path',{d:d,fill:'url(#surfG)',transform:'translate(0,'+(t?26:4)+')'},gSurf);
+    }
+  })();
+
+  /* ---- distant silhouettes + drifting jellyfish ---- */
+  var farRocks=[[.02,.55,.16],[.3,.62,.12],[.68,.6,.14],[.96,.66,.1]];
+  var jelly=mk('g',{},gFar);
+  function buildFar(){
+    gFar.textContent='';
+    farRocks.forEach(function(r){
+      mk('ellipse',{cx:r[0]*W,cy:H*(r[1]+r[2]*0.55),rx:W*0.13,ry:H*r[2],fill:'#0b3f63',opacity:.5},gFar);
+    });
+    gFar.appendChild(jelly);
+  }
+  function buildJelly(){
+    jelly.textContent='';
+    var s=H/900;
+    var b=mk('g',{'class':'bell'},jelly);
+    mk('path',{d:'M-46 0Q-46 -60 0 -60Q46 -60 46 0Q22 14 0 12Q-22 14 -46 0Z',transform:'scale('+s+')',fill:'url(#jellyG)',stroke:'#cfeaff','stroke-width':1.6,'stroke-opacity':.55},b);
+    var t=mk('g',{'class':'ten'},jelly);
+    for(var i=-2;i<=2;i++) mk('path',{d:'M'+(i*17*s)+' '+(8*s)+' q'+(i*7)+' '+(34*s)+' '+(i*4)+' '+(66*s),transform:'scale(1)',fill:'none',stroke:'#d7f0ff','stroke-width':2.2,'stroke-opacity':.42,'stroke-linecap':'round'},t);
+  }
+
+  /* ---- seafloor ---- */
+  var rocks=[[.05,.055,.035],[.16,.035,.024],[.34,.07,.04],[.5,.032,.02],[.63,.09,.05],[.8,.04,.026],[.94,.062,.036]];
+  var pebbles=[[.1,.11],[.24,.09],[.41,.13],[.56,.115],[.72,.1],[.87,.12],[.99,.08]];
+  var fans=[[.27,.05],[.48,.038],[.88,.055]];
+  function buildFloor(){
+    gFloor.textContent='';
+    var d='M0 '+H+' L0 '+fY(0).toFixed(1),tp='M0 '+fY(0).toFixed(1);
+    for(var x=20;x<=W;x+=20){var y=fY(x).toFixed(1);d+=' L'+x+' '+y;tp+=' L'+x+' '+y;}
+    d+=' L'+W+' '+H+' Z';
+    mk('path',{d:d,fill:'url(#sandG)'},gFloor);
+    mk('path',{d:tp,fill:'none',stroke:'#f8ead0','stroke-width':3,opacity:.42},gFloor);
+    rocks.forEach(function(r){
+      var cx=r[0]*W; mk('ellipse',{cx:cx,cy:fY(cx)+H*0.012,rx:W*r[1],ry:H*r[2],fill:'url(#rockG)'},gFloor);
+    });
+    pebbles.forEach(function(p){
+      var cx=p[0]*W;
+      mk('ellipse',{cx:cx,cy:fY(cx)+H*0.022,rx:W*0.018,ry:H*0.008,fill:'#c6a472',opacity:.85},gFloor);
+    });
+    fans.forEach(function(f){
+      var cx=f[0]*W,g=mk('g',{transform:'translate('+cx+' '+(fY(cx)+6)+')',opacity:.62},gFloor);
+      for(var i=-3;i<=3;i++){
+        var h=H*f[1]*8*(1-Math.abs(i)*0.13);
+        mk('path',{d:'M0 0Q'+(i*14)+' '+(-h*0.55)+' '+(i*30)+' '+(-h),fill:'none',stroke:'#e08a72','stroke-width':4,'stroke-linecap':'round'},g);
+      }
+    });
+  }
+
+  /* ---- seaweed ---- */
+  var KELP=[{fx:.09,hf:.30,w:11,d:6.2,o:0},{fx:.13,hf:.20,w:8,d:7.4,o:1.1},{fx:.29,hf:.36,w:13,d:5.6,o:.4},
+            {fx:.44,hf:.22,w:9,d:7.9,o:2.2},{fx:.58,hf:.31,w:12,d:6.7,o:1.6},{fx:.71,hf:.19,w:7,d:8.4,o:.8},
+            {fx:.84,hf:.34,w:12,d:6.0,o:2.7},{fx:.95,hf:.24,w:9,d:7.1,o:.2}];
+  function kelpD(h){
+    var d='M0 0',y=0,s=1,n=4;
+    for(var i=1;i<=n;i++){
+      var ny=-h*i/n;
+      d+=' C'+(s*36)+' '+(y-h/n*0.4).toFixed(1)+','+(s*30)+' '+(ny+h/n*0.4).toFixed(1)+','+(s*5)+' '+ny.toFixed(1);
+      y=ny;s=-s;
+    }
+    return d;
+  }
+  function buildKelp(){
+    gKelp.textContent='';
+    KELP.forEach(function(k){
+      var x=k.fx*W,h=H*k.hf;
+      var g=mk('g',{transform:'translate('+x.toFixed(1)+' '+(fY(x)+10).toFixed(1)+')'},gKelp);
+      var sw=mk('g',{'class':'sway'},g);
+      sw.style.animationDuration=k.d+'s';
+      sw.style.animationDelay=(-k.o)+'s';
+      mk('path',{d:kelpD(h),fill:'none',stroke:'url(#weedG)','stroke-width':k.w,'stroke-linecap':'round'},sw);
+      for(var j=1;j<=3;j++){
+        var t=j/4,ex=(j%2?1:-1)*h*0.06;
+        mk('ellipse',{cx:ex,cy:(-h*t).toFixed(1),rx:k.w*1.9,ry:k.w*0.62,fill:'#3fae72',opacity:.75,
+          transform:'rotate('+(j%2?32:-32)+' '+ex.toFixed(1)+' '+(-h*t).toFixed(1)+')'},sw);
+      }
+    });
+  }
+
+  /* ---- plankton motes ---- */
+  function buildMotes(){
+    gMotes.textContent='';
+    for(var i=0;i<42;i++){
+      var c=mk('circle',{cx:(Math.random()*W).toFixed(1),cy:(Math.random()*H).toFixed(1),
+        r:(0.7+Math.random()*2).toFixed(2),fill:'#dff6ff',opacity:.5},gMotes);
+      c.style.animationDuration=(14+Math.random()*26).toFixed(1)+'s';
+      c.style.animationDelay=(-Math.random()*30).toFixed(1)+'s';
+    }
+  }
+
+  /* ---- bubbles ---- */
+  var VENTS=[.07,.15,.27,.4,.52,.61,.72,.83,.93],bubbles=[];
+  function mkBub(){
+    var g=mk('g',{'class':'bub'},gBub);
+    mk('circle',{r:10,fill:'url(#bubG)',stroke:'rgba(255,255,255,.55)','stroke-width':1.1},g);
+    mk('circle',{cx:-3.4,cy:-3.8,r:2.6,fill:'#fff',opacity:.85},g);
+    return g;
+  }
+  function respawn(b,x,yf){
+    if(x===undefined){var v=VENTS[(Math.random()*VENTS.length)|0]*W;b.x=v+(Math.random()*70-35);}else b.x=x;
+    b.yf=(yf===undefined)?(FLOOR+Math.random()*H*0.035)/H:yf;
+    b.r=2.6+Math.random()*8.4;
+    b.vy=Math.max(16,86-b.r*4.4+Math.random()*26);
+    b.sw=5+Math.random()*20;b.w=.5+Math.random()*1.3;b.ph=Math.random()*6.28;
+  }
+  function buildBubbles(n){
+    bubbles.forEach(function(b){if(b.el.parentNode)b.el.parentNode.removeChild(b.el);});
+    bubbles=[];
+    for(var i=0;i<n;i++){var b={el:mkBub()};respawn(b);b.yf=Math.random();bubbles.push(b);}
+  }
+
+  /* ---- fish ---- */
+  var A=document.getElementById('fishA'),B=document.getElementById('fishB');
+  var fish=[
+    {el:A,dir:1,v:64,m:300,baseYf:.31,amp:16,wb:.55,ph:0,s:1.08},
+    {el:B,dir:-1,v:230,m:200,baseYf:.63,amp:26,wb:1.15,ph:2.1,s:.86}
+  ];
+  fish[0].x=W*0.2;fish[1].x=W*0.75;
+
+  /* ---- layout ---- */
+  function layout(){
+    var oldH=H;
+    W=1600;
+    H=Math.max(560,Math.min(1300,Math.round(1600*innerHeight/Math.max(1,innerWidth))));
+    pxH=H/900;
+    S.setAttribute('viewBox','0 0 '+W+' '+H);
+    FLOOR=H-H*0.12;
+    buildFar();buildJelly();buildFloor();buildKelp();
+    if(bubbles.length) bubbles.forEach(function(b){b.yf=b.yf*oldH/H;});
+    document.getElementById('mB').textContent=bubbles.length;
+  }
+  buildMotes();buildBubbles(28);layout();
+  addEventListener('resize',layout);
+
+  /* ---- pointer parallax + bubble bursts ---- */
+  var mx=0,my=0,tmx=0,tmy=0;
+  function toView(cx,cy){
+    var r=S.getBoundingClientRect(),sc=Math.max(r.width/W,r.height/H);
+    return [(cx-r.left-(r.width-W*sc)/2)/sc,(cy-r.top-(r.height-H*sc)/2)/sc];
+  }
+  addEventListener('mousemove',function(e){
+    tmx=(e.clientX/innerWidth-.5)*2;tmy=(e.clientY/innerHeight-.5)*2;
+  });
+  function burst(x,y,n){
+    for(var i=0;i<n;i++){
+      if(bubbles.length>74){var d=bubbles.shift();if(d.el.parentNode)d.el.parentNode.removeChild(d.el);}
+      var b={el:mkBub()};respawn(b,x+(Math.random()*60-30),y/H);
+      b.r=2+Math.random()*5.5;b.vy=60+Math.random()*50;bubbles.push(b);
+    }
+    document.getElementById('mB').textContent=bubbles.length;
+  }
+  S.addEventListener('click',function(e){var p=toView(e.clientX,e.clientY);burst(p[0],p[1],7);});
+  [A,B].forEach(function(f){
+    f.addEventListener('click',function(e){
+      e.stopPropagation();
+      var tr=f.getAttribute('transform').match(/translate\(([-\d.]+) ([-\d.]+)\)/);
+      burst(+tr[1],+tr[2]-40,9);
+    });
+  });
+
+  /* ---- legend highlight ---- */
+  var all=[A,B];
+  [].forEach.call(document.querySelectorAll('.sp'),function(btn){
+    var f=document.getElementById(btn.getAttribute('data-fish'));
+    function on(){f.classList.add('spot');all.forEach(function(o){if(o!==f)o.classList.add('dim');});btn.classList.add('on');}
+    function off(){f.classList.remove('spot');all.forEach(function(o){o.classList.remove('dim');});btn.classList.remove('on');}
+    btn.addEventListener('mouseenter',on);btn.addEventListener('mouseleave',off);
+    btn.addEventListener('focus',on);btn.addEventListener('blur',off);
+  });
+
+  /* ---- meters ---- */
+  var mD=document.getElementById('mD'),mS=document.getElementById('mS'),mt=0;
+  setInterval(function(){
+    mt+=.4;
+    mD.textContent=(11.6+Math.sin(mt*.09)*1.1).toFixed(1);
+    mS.textContent=(0.6+Math.sin(mt*.14)*0.22).toFixed(2);
+  },400);
+
+  /* ---- main loop ---- */
+  var last=performance.now(),T=0,jx=W*0.62;
+  function frame(now){
+    var dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;
+    mx+=(tmx-mx)*.05;my+=(tmy-my)*.05;
+    gRays.setAttribute('transform','translate('+(mx*22).toFixed(1)+' '+(my*10).toFixed(1)+')');
+    gFar.setAttribute('transform','translate('+(mx*-18).toFixed(1)+' '+(my*-7).toFixed(1)+')');
+
+    for(var i=0;i<fish.length;i++){
+      var f=fish[i];
+      f.x+=f.v*f.dir*dt;
+      if(f.dir>0&&f.x>W+f.m)f.x=-f.m;
+      if(f.dir<0&&f.x<-f.m)f.x=W+f.m;
+      var y=f.baseYf*H+Math.sin(T*f.wb+f.ph)*18*pxH;
+      var r=Math.cos(T*f.wb+f.ph)*2.6*f.dir;
+      var k=f.s*Math.max(.5,Math.min(1.15,H/820));
+      f.el.setAttribute('transform','translate('+f.x.toFixed(1)+' '+y.toFixed(1)+') rotate('+r.toFixed(2)+') scale('+k.toFixed(3)+' '+k.toFixed(3)+')');
+    }
+
+    for(var j=0;j<bubbles.length;j++){
+      var b=bubbles[j];
+      b.yf-=b.vy/H*dt;b.ph+=b.w*dt;
+      if(b.yf<-0.05)respawn(b);
+      b.el.setAttribute('transform','translate('+(b.x+Math.sin(b.ph)*b.sw).toFixed(1)+' '+(b.yf*H).toFixed(1)+') scale('+(b.r/10).toFixed(2)+')');
+    }
+
+    jx+=13*dt;if(jx>W+120)jx=-120;
+    jelly.setAttribute('transform','translate('+jx.toFixed(1)+' '+(H*.44+Math.sin(T*.4)*22).toFixed(1)+')');
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

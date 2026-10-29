@@ -1,0 +1,491 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>DRIFT — Pelagic Survey, Station 07</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#04202f}
+#scene{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+.hud{position:fixed;inset:0;z-index:2;pointer-events:none;color:#eaf6fb;
+  font:400 13px/1.55 ui-sans-serif,"Segoe UI",Helvetica,sans-serif}
+.hud>*{pointer-events:auto}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+/* masthead */
+.mast{position:absolute;top:clamp(14px,3.2vh,34px);left:clamp(14px,3vw,44px);max-width:min(44ch,44vw)}
+.stamp{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.26em;
+  text-transform:uppercase;color:#5fd8e8;display:flex;gap:9px;align-items:center;text-shadow:0 1px 8px rgba(2,20,34,.9)}
+.stamp::before{content:"";width:28px;height:1px;background:#5fd8e8;opacity:.65}
+.live{width:6px;height:6px;border-radius:50%;background:#ff8a3d;box-shadow:0 0 0 0 rgba(255,138,61,.7);animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,138,61,.55)}70%{box-shadow:0 0 0 9px rgba(255,138,61,0)}100%{box-shadow:0 0 0 0 rgba(255,138,61,0)}}
+h1{font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;font-weight:400;
+  font-size:clamp(44px,7.6vw,104px);line-height:.86;letter-spacing:-.025em;margin:.12em 0 .16em;
+  text-shadow:0 10px 34px rgba(2,18,32,.75)}
+h1 em{font-style:italic;color:#8ee6f4}
+.lede{margin:0;color:#9dc3d8;max-width:33ch;font-size:12.5px}
+.lede b{color:#d8f2fb;font-weight:600}
+
+/* legend */
+.legend{position:absolute;left:clamp(14px,3vw,44px);bottom:clamp(14px,3vh,34px);width:min(330px,74vw);
+  background:linear-gradient(180deg,rgba(6,38,56,.86),rgba(3,21,33,.93));
+  border:1px solid rgba(158,209,232,.24);border-left:3px solid #5fd8e8;padding:12px 13px 10px;
+  box-shadow:0 18px 46px rgba(1,12,22,.55)}
+.legend h2{margin:0 0 6px;font-family:ui-monospace,Menlo,monospace;font-size:9.5px;letter-spacing:.24em;
+  text-transform:uppercase;color:#7fb6cf;font-weight:600}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:center;width:100%;
+  background:none;border:0;border-top:1px solid rgba(158,209,232,.16);padding:9px 6px 9px 7px;
+  color:inherit;text-align:left;cursor:pointer;transition:background .25s,transform .25s}
+.row:first-of-type{border-top:0}
+.row:hover,.row:focus-visible{background:rgba(95,216,232,.12);transform:translateX(5px);outline:none}
+.row.on{background:rgba(95,216,232,.17)}
+.sw{position:relative;width:27px;height:14px;border-radius:50% 7px 7px 50%/50%}
+.sw::after{content:"";position:absolute;left:-9px;top:1px;border:6px solid transparent;border-right-color:inherit}
+.nm{font-family:Georgia,serif;font-size:15px;line-height:1.15}
+.nm i{display:block;font-size:10.5px;font-style:italic;color:#84aec6;letter-spacing:.02em}
+.st{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#5fd8e8;text-align:right;white-space:nowrap}
+.st i{display:block;color:#7fb6cf;font-style:normal}
+
+/* console */
+.console{position:absolute;right:clamp(14px,3vw,44px);bottom:clamp(14px,3vh,34px);display:flex;align-items:center;
+  gap:14px;padding:10px 14px;background:rgba(3,21,33,.9);border:1px solid rgba(158,209,232,.24);
+  box-shadow:0 18px 46px rgba(1,12,22,.5)}
+button.ctl{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:#eaf6fb;background:transparent;border:1px solid rgba(158,209,232,.45);padding:8px 13px;cursor:pointer;
+  transition:background .2s,color .2s,letter-spacing .2s}
+button.ctl:hover{background:#5fd8e8;color:#04222f;letter-spacing:.26em}
+.lbl{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:#7fb6cf}
+input[type=range]{width:112px;accent-color:#5fd8e8;cursor:pointer;background:none}
+.read{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#d8f2fb;text-align:right;min-width:96px}
+.read b{color:#f6c44a;font-weight:600;font-size:15px}
+.read span{display:block;color:#7fb6cf;font-size:9px;letter-spacing:.16em}
+
+/* depth gauge */
+.gauge{position:absolute;right:clamp(14px,3vw,44px);top:20%;height:52%;width:9px;
+  border:1px solid rgba(158,209,232,.3);background:linear-gradient(180deg,#63c9e4,#0d4266 55%,#052036)}
+.mk{position:absolute;left:-7px;width:23px;height:2px;background:#f6c44a;box-shadow:0 0 10px rgba(246,196,74,.9)}
+.gauge::after{content:"DEPTH";position:absolute;right:16px;top:50%;writing-mode:vertical-rl;
+  font-family:ui-monospace,Menlo,monospace;font-size:8.5px;letter-spacing:.3em;color:#5f8ba3}
+
+/* svg bits */
+.mote{fill:#dff4ff;animation-name:drift;animation-timing-function:linear;animation-iteration-count:infinite}
+@keyframes drift{0%{transform:translate(0,0);opacity:0}12%{opacity:.5}88%{opacity:.35}100%{transform:translate(26px,-980px);opacity:0}}
+.fish{cursor:pointer;transition:filter .35s}
+.fish.hot{filter:drop-shadow(0 0 16px rgba(126,232,255,.9))}
+.tag{opacity:0;transition:opacity .4s ease}
+.tag.on{opacity:1}
+.tag rect{fill:rgba(3,24,38,.88);stroke:rgba(158,209,232,.45)}
+.tag text{fill:#bfeeff;font-family:ui-monospace,Menlo,monospace;font-size:12px;letter-spacing:.14em}
+.tag circle{fill:#5fd8e8}
+
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.mast,.legend,.console,.gauge{animation:rise 1s cubic-bezier(.16,.8,.24,1) both}
+.legend{animation-delay:.28s}.console{animation-delay:.42s}.gauge{animation-delay:.56s}
+</style>
+</head>
+<body>
+
+<svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Animated underwater scene with two fish, bubbles and seaweed">
+<defs>
+ <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#8fdcee"/><stop offset=".22" stop-color="#37a2c9"/>
+  <stop offset=".52" stop-color="#146394"/><stop offset=".78" stop-color="#0a3a5e"/>
+  <stop offset="1" stop-color="#052036"/>
+ </linearGradient>
+ <linearGradient id="shaft" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#e6faff" stop-opacity=".8"/>
+  <stop offset=".55" stop-color="#a9e3ff" stop-opacity=".22"/>
+  <stop offset="1" stop-color="#7fc8ee" stop-opacity="0"/>
+ </linearGradient>
+ <radialGradient id="bloom" cx=".5" cy=".5" r=".5">
+  <stop offset="0" stop-color="#dff6ff" stop-opacity=".45"/><stop offset="1" stop-color="#dff6ff" stop-opacity="0"/>
+ </radialGradient>
+ <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#e3cf9c"/><stop offset=".35" stop-color="#c4a468"/>
+  <stop offset=".75" stop-color="#8e6f45"/><stop offset="1" stop-color="#5f4a2e"/>
+ </linearGradient>
+ <linearGradient id="sandFar" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#5d7f88"/><stop offset="1" stop-color="#2e4c5c"/>
+ </linearGradient>
+ <linearGradient id="kelp" x1="0" y1="1" x2="0" y2="0">
+  <stop offset="0" stop-color="#166b45"/><stop offset=".55" stop-color="#2f9d5f"/><stop offset="1" stop-color="#7fd992"/>
+ </linearGradient>
+ <linearGradient id="bodyA" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#ffd894"/><stop offset=".42" stop-color="#ff8a3d"/><stop offset="1" stop-color="#d13f27"/>
+ </linearGradient>
+ <linearGradient id="finA" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#ffb46e"/><stop offset="1" stop-color="#c33326"/>
+ </linearGradient>
+ <linearGradient id="finA2" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#ffc99c"/><stop offset="1" stop-color="#e2572f"/>
+ </linearGradient>
+ <linearGradient id="bodyB" x1="0" y1="0" x2=".35" y2="1">
+  <stop offset="0" stop-color="#ffeeb4"/><stop offset=".45" stop-color="#f3b52f"/><stop offset="1" stop-color="#bd7512"/>
+ </linearGradient>
+ <linearGradient id="finB" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#7ff0e2"/><stop offset="1" stop-color="#1a7ba2"/>
+ </linearGradient>
+ <linearGradient id="finB2" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#a5f4ec"/><stop offset="1" stop-color="#2b8fb6"/>
+ </linearGradient>
+ <radialGradient id="bub" cx=".38" cy=".34" r=".7">
+  <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+  <stop offset=".55" stop-color="#cdefff" stop-opacity=".12"/>
+  <stop offset="1" stop-color="#e9faff" stop-opacity=".3"/>
+ </radialGradient>
+ <radialGradient id="vig" cx=".5" cy=".36" r=".78">
+  <stop offset="0" stop-color="#02101c" stop-opacity="0"/>
+  <stop offset=".62" stop-color="#02101c" stop-opacity=".06"/>
+  <stop offset="1" stop-color="#010c17" stop-opacity=".58"/>
+ </radialGradient>
+ <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>
+ <filter id="soft2" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>
+ <clipPath id="clipA"><path d="M118-2C100-26 55-38 5-32-55-25-100-12-125 0c25 12 70 25 130 32 50 6 95-6 113-34Z"/></clipPath>
+ <clipPath id="clipB"><ellipse cx="0" cy="0" rx="86" ry="94"/></clipPath>
+</defs>
+
+<rect width="1600" height="900" fill="url(#water)"/>
+<ellipse cx="470" cy="-60" rx="760" ry="470" fill="url(#bloom)"/>
+
+<!-- surface shimmer -->
+<g filter="url(#soft2)">
+ <path d="M0 0H1600V44c-200 18-400-14-600 4S200 60 0 48Z" fill="rgba(228,251,255,.28)">
+  <animateTransform attributeName="transform" type="translate" values="-40 0;40 0;-40 0" dur="17s" repeatCount="indefinite"/>
+ </path>
+ <path d="M0 68c200-22 400 12 600-6s400 20 600 0 200 10 400-4" fill="none" stroke="rgba(236,253,255,.3)" stroke-width="5">
+  <animateTransform attributeName="transform" type="translate" values="30 0;-30 0;30 0" dur="12s" repeatCount="indefinite"/>
+ </path>
+</g>
+
+<!-- light shafts -->
+<g filter="url(#soft)">
+ <polygon points="150,-40 300,-40 610,940 340,940" fill="url(#shaft)" opacity=".15">
+  <animateTransform attributeName="transform" type="translate" values="-70 0;60 0;-70 0" dur="23s" repeatCount="indefinite"/>
+  <animate attributeName="opacity" values=".08;.19;.08" dur="9s" repeatCount="indefinite"/>
+ </polygon>
+ <polygon points="620,-40 700,-40 900,940 700,940" fill="url(#shaft)" opacity=".12">
+  <animateTransform attributeName="transform" type="translate" values="50 0;-80 0;50 0" dur="31s" repeatCount="indefinite"/>
+  <animate attributeName="opacity" values=".16;.06;.16" dur="7.5s" repeatCount="indefinite"/>
+ </polygon>
+ <polygon points="1120,-40 1290,-40 1520,940 1240,940" fill="url(#shaft)" opacity=".13">
+  <animateTransform attributeName="transform" type="translate" values="-50 0;70 0;-50 0" dur="27s" repeatCount="indefinite"/>
+  <animate attributeName="opacity" values=".06;.17;.06" dur="11s" repeatCount="indefinite"/>
+ </polygon>
+</g>
+
+<g id="motes"></g>
+
+<!-- distant rock ridge -->
+<path d="M0 700c150-62 300-8 440-38 160-32 290 22 440-2 160-26 300 26 450-4 110-22 200 8 270-8v152H0Z" fill="#093149" opacity=".82"/>
+<path d="M0 762c130-24 290-6 450-18 160-12 330 14 500 4 170-10 330 12 500-2 80-6 120 2 150-4v168H0Z" fill="url(#sandFar)" opacity=".85"/>
+
+<!-- background kelp -->
+<g fill="none" stroke="#1a6a4c" stroke-linecap="round" opacity=".7">
+ <g transform="translate(560 762)">
+  <path d="M0 0C16-52-12-104 6-150 20-188-4-216 2-244" stroke-width="8">
+   <animateTransform attributeName="transform" type="rotate" values="-4 0 0;4 0 0;-4 0 0" dur="8s" repeatCount="indefinite" additive="sum"/></path>
+ </g>
+ <g transform="translate(1245 756)">
+  <path d="M0 0C-14-46 10-96-4-140-14-172 4-198-2-222" stroke-width="7">
+   <animateTransform attributeName="transform" type="rotate" values="3 0 0;-5 0 0;3 0 0" dur="9.5s" repeatCount="indefinite" additive="sum"/></path>
+ </g>
+</g>
+
+<!-- fish shadows on the sand -->
+<ellipse id="sh0" cx="200" cy="806" rx="120" ry="11" fill="#04202f" opacity=".3" filter="url(#soft2)"/>
+<ellipse id="sh1" cx="1100" cy="812" rx="150" ry="13" fill="#04202f" opacity=".3" filter="url(#soft2)"/>
+
+<!-- main seafloor -->
+<path d="M0 800c150-24 300-6 460-18 160-12 310 14 480 4 170-10 320 12 490-2 90-7 135 2 170-4v124H0Z" fill="url(#sand)"/>
+<g fill="#7d6241" opacity=".8">
+ <ellipse cx="250" cy="806" rx="86" ry="26"/><ellipse cx="1120" cy="812" rx="66" ry="20"/>
+ <ellipse cx="880" cy="828" rx="40" ry="12"/><ellipse cx="1470" cy="818" rx="54" ry="16"/>
+</g>
+<g fill="#5c4830" opacity=".75">
+ <ellipse cx="300" cy="850" rx="22" ry="8"/><ellipse cx="640" cy="864" rx="16" ry="6"/>
+ <ellipse cx="1010" cy="856" rx="26" ry="9"/><ellipse cx="1330" cy="868" rx="14" ry="5"/>
+ <ellipse cx="120" cy="872" rx="19" ry="7"/>
+</g>
+<!-- bubble vents -->
+<g fill="#4b3c28">
+ <path d="M394 792q26-20 52 0z"/><path d="M834 788q22-17 44 0z"/><path d="M1304 786q28-21 56 0z"/>
+</g>
+
+<!-- seaweed clusters -->
+<g fill="none" stroke="url(#kelp)" stroke-linecap="round">
+ <g transform="translate(170 800)">
+  <path d="M0 0C22-64-14-126 8-182 26-232-6-274 10-326 18-352 8-368 2-380" stroke-width="11">
+   <animateTransform attributeName="transform" type="rotate" values="-3 0 0;4 0 0;-3 0 0" dur="6.5s" repeatCount="indefinite" additive="sum"/></path>
+  <path d="M-4-60c22-6 34-22 40-40" stroke-width="5" opacity=".85"/>
+  <path d="M4-160c-22-4-34-20-40-38" stroke-width="5" opacity=".85"/>
+ </g>
+ <g transform="translate(215 806)">
+  <path d="M0 0C-18-52 12-108-6-158-18-196 6-226-2-256" stroke-width="8">
+   <animateTransform attributeName="transform" type="rotate" values="4 0 0;-4 0 0;4 0 0" dur="8.2s" repeatCount="indefinite" additive="sum"/></path>
+ </g>
+ <g transform="translate(420 792)">
+  <path d="M0 0C16-44-10-90 4-128" stroke-width="7">
+   <animateTransform attributeName="transform" type="rotate" values="-5 0 0;3 0 0;-5 0 0" dur="5.4s" repeatCount="indefinite" additive="sum"/></path>
+ </g>
+ <g transform="translate(1330 788)">
+  <path d="M0 0C-20-58 14-118-6-172-22-214 4-250-2-288" stroke-width="10">
+   <animateTransform attributeName="transform" type="rotate" values="3.5 0 0;-4.5 0 0;3.5 0 0" dur="7.4s" repeatCount="indefinite" additive="sum"/></path>
+  <path d="M-2-90c24-4 38-20 44-38" stroke-width="4.5" opacity=".85"/>
+ </g>
+ <g transform="translate(1385 794)">
+  <path d="M0 0C18-46-8-96 6-136" stroke-width="7">
+   <animateTransform attributeName="transform" type="rotate" values="-4 0 0;5 0 0;-4 0 0" dur="6.1s" repeatCount="indefinite" additive="sum"/></path>
+ </g>
+</g>
+
+<!-- sea fan + anemone -->
+<g transform="translate(1090 790)" fill="none" stroke="#2fa389" stroke-width="4" stroke-linecap="round">
+ <g><animateTransform attributeName="transform" type="rotate" values="-2 0 0;3 0 0;-2 0 0" dur="10s" repeatCount="indefinite"/>
+ <path d="M0 0C-4-38-26-64-52-84M0 0C-2-46-12-76-24-102M0 0C2-46 12-78 26-100M0 0C6-36 28-62 54-82M0-20C-6-34-18-42-30-46M0-24C8-38 20-44 34-48"/></g>
+ <ellipse cx="0" cy="2" rx="22" ry="8" fill="#3a6d63" stroke="none"/>
+</g>
+<g transform="translate(700 796)">
+ <ellipse cx="0" cy="0" rx="28" ry="13" fill="#8b5560"/>
+ <g fill="none" stroke="#ef8a7d" stroke-width="4.5" stroke-linecap="round">
+  <g><animateTransform attributeName="transform" type="rotate" values="-3 0 0;3 0 0;-3 0 0" dur="5.8s" repeatCount="indefinite"/>
+  <path d="M-20-4C-26-22-32-30-30-44M-10-8C-14-28-16-38-12-52M0-10C0-32 2-42 0-58M10-8C14-28 18-38 20-52M20-4C26-22 32-32 34-44M-16-6C-20-18-26-26-36-32M16-6C22-18 30-24 40-30"/></g>
+ </g>
+</g>
+
+<!-- FISH -->
+<g id="fishLayer">
+ <g id="f0" class="fish">
+  <g id="t0">
+   <path d="M0 0-64-46-42 0-64 46Z" fill="url(#finA)"/>
+   <path d="M-8 0-58-40M-8 0-58 40" stroke="rgba(120,30,15,.35)" stroke-width="2" fill="none"/>
+  </g>
+  <path d="M-32 22C-18 52 12 54 26 28Z" fill="url(#finA)" opacity=".92"/>
+  <path d="M-14-28C8-66 48-70 66-30 40-34 8-33-14-28Z" fill="url(#finA)"/>
+  <path d="M118-2C100-26 55-38 5-32-55-25-100-12-125 0c25 12 70 25 130 32 50 6 95-6 113-34Z" fill="url(#bodyA)"/>
+  <g clip-path="url(#clipA)">
+   <ellipse cx="14" cy="4" rx="10" ry="38" fill="rgba(150,40,20,.22)"/>
+   <ellipse cx="-34" cy="4" rx="9" ry="31" fill="rgba(150,40,20,.2)"/>
+   <path d="M-125 6C-70 26 20 34 118 2v40h-243Z" fill="rgba(255,238,205,.28)"/>
+  </g>
+  <path d="M64-24C56-6 56 10 64 22" stroke="rgba(120,30,15,.4)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="88" cy="-10" r="12" fill="#fff8e6"/><circle cx="91" cy="-10" r="6.4" fill="#141d29"/><circle cx="86.5" cy="-14" r="2.2" fill="#fff"/>
+  <path d="M112 6c-6 6-12 6-17 2" stroke="#8f2c1c" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+  <g id="p0"><path d="M0 0C-16 22 4 40 24 26 16 12 8 4 0 0Z" fill="url(#finA2)"/></g>
+ </g>
+
+ <g id="f1" class="fish">
+  <g id="t1">
+   <path d="M0 0-76-58-46 0-76 58Z" fill="url(#finB)"/>
+   <path d="M-6 0-66-50M-6 0-66 50M-6 0-70 0" stroke="rgba(8,58,80,.3)" stroke-width="2" fill="none"/>
+  </g>
+  <path d="M-40 78C-16 124 36 118 62 74 30 86-12 88-40 78Z" fill="url(#finB)"/>
+  <path d="M-44-76C-16-136 46-132 76-72 40-86-12-88-44-76Z" fill="url(#finB)"/>
+  <path d="M62-52C96-40 118-14 124 2 114 22 92 44 58 54Z" fill="url(#bodyB)"/>
+  <ellipse cx="0" cy="0" rx="86" ry="94" fill="url(#bodyB)"/>
+  <g clip-path="url(#clipB)">
+   <rect x="-26" y="-100" width="22" height="200" fill="rgba(12,74,96,.18)"/>
+   <rect x="26" y="-100" width="17" height="200" fill="rgba(12,74,96,.13)"/>
+   <ellipse cx="-42" cy="28" rx="58" ry="48" fill="rgba(255,255,255,.13)"/>
+  </g>
+  <path d="M40-58C28-18 28 26 42 60" stroke="rgba(20,80,110,.26)" stroke-width="3.5" fill="none"/>
+  <circle cx="62" cy="-34" r="15" fill="#fff8e6"/><circle cx="66" cy="-34" r="8" fill="#141d29"/><circle cx="60" cy="-39" r="2.8" fill="#fff"/>
+  <path d="M124 2 100 13 102-7Z" fill="#7c3a18"/>
+  <path d="M124 2c-12 6-20 8-26 6" stroke="#7c3a18" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <g id="p1"><path d="M0 0C-30 26-6 58 24 42 16 20 8 8 0 0Z" fill="url(#finB2)"/></g>
+ </g>
+</g>
+
+<g id="bubbles"></g>
+
+<g id="tags" pointer-events="none">
+ <g id="tg0" class="tag"><rect x="-84" y="-26" width="168" height="30" rx="15"/><circle cx="-66" cy="-11" r="5"/><text x="-52" y="-6">EMBERFIN DARTER</text></g>
+ <g id="tg1" class="tag"><rect x="-88" y="-26" width="176" height="30" rx="15"/><circle cx="-70" cy="-11" r="5"/><text x="-56" y="-6">SUNBURST BREAM</text></g>
+</g>
+
+<rect width="1600" height="900" fill="url(#vig)" pointer-events="none"/>
+</svg>
+
+<div class="hud">
+ <header class="mast">
+  <div class="stamp"><span class="live"></span>Pelagic survey · station 07 · sector K</div>
+  <h1>Drift<em>line</em></h1>
+  <p class="lede">Two residents cross the frame at <b>very different speeds</b>. Hover the field key, click either fish, or tap the water to release a burst of bubbles.</p>
+ </header>
+
+ <aside class="legend">
+  <h2>Field key</h2>
+  <button class="row" data-f="0" aria-pressed="false">
+   <span class="sw" style="background:linear-gradient(90deg,#ffd894,#d13f27);color:#ff8a3d"></span>
+   <span class="nm">Emberfin Darter<i>Amblypterus velox</i></span>
+   <span class="st">0.92×<i>168 u/s</i></span>
+  </button>
+  <button class="row" data-f="1" aria-pressed="false">
+   <span class="sw" style="background:linear-gradient(90deg,#ffeeb4,#bd7512);color:#f6c44a"></span>
+   <span class="nm">Sunburst Bream<i>Cyclichthys solaris</i></span>
+   <span class="st">1.22×<i>52 u/s</i></span>
+  </button>
+ </aside>
+
+ <div class="console">
+  <button class="ctl" id="toggle">Pause</button>
+  <label class="lbl" for="cur">Current</label>
+  <input id="cur" type="range" min="0.2" max="2.2" step="0.05" value="1"/>
+  <div class="read"><b id="depth">28.0</b> m<span id="clock">t+00:00</span></div>
+ </div>
+
+ <div class="gauge"><div class="mk" id="mk" style="top:34%"></div></div>
+</div>
+
+<script>
+(function(){
+ var NS="http://www.w3.org/2000/svg", VW=1600, VH=900;
+ var scene=document.getElementById("scene");
+ var bubLayer=document.getElementById("bubbles");
+ var motes=document.getElementById("motes");
+ var paused=false, cur=1, t=0, last=performance.now(), elapsed=0;
+
+ /* --- drifting plankton --- */
+ for(var i=0;i<26;i++){
+  var m=document.createElementNS(NS,"circle");
+  m.setAttribute("cx",(Math.random()*VW).toFixed(0));
+  m.setAttribute("cy",(260+Math.random()*600).toFixed(0));
+  m.setAttribute("r",(0.7+Math.random()*1.9).toFixed(1));
+  m.setAttribute("class","mote");
+  m.style.animationDuration=(18+Math.random()*28).toFixed(1)+"s";
+  m.style.animationDelay=(-Math.random()*46).toFixed(1)+"s";
+  m.style.opacity=(0.08+Math.random()*0.3).toFixed(2);
+  motes.appendChild(m);
+ }
+
+ /* --- fish --- */
+ var F=[
+  {g:document.getElementById("f0"),tail:document.getElementById("t0"),fin:document.getElementById("p0"),
+   sh:document.getElementById("sh0"),tag:document.getElementById("tg0"),
+   x:240,y:318,dir:1,sp:168,s:0.92,bob:30,bf:0.55,wag:7.6,half:190,tx:-122,fx:46,fy:9,ph:0.4,top:112},
+  {g:document.getElementById("f1"),tail:document.getElementById("t1"),fin:document.getElementById("p1"),
+   sh:document.getElementById("sh1"),tag:document.getElementById("tg1"),
+   x:1180,y:560,dir:-1,sp:52,s:1.22,bob:17,bf:0.27,wag:3.1,half:225,tx:-82,fx:28,fy:24,ph:2.1,top:138}
+ ];
+ F.forEach(function(f){f.boost=1;f.hot=0;
+  f.g.addEventListener("mouseenter",function(){setHot(f.idx,true);});
+  f.g.addEventListener("mouseleave",function(){setHot(f.idx,false);});
+  f.g.addEventListener("click",function(e){e.stopPropagation();dart(f);});
+  f.idx=F.length?0:0;
+ });
+ F[0].idx=0; F[1].idx=1;
+
+ function setHot(i,on){var f=F[i];f.hot=on?1:0;f.g.classList.toggle("hot",!!on);f.tag.classList.toggle("on",!!on);}
+
+ function dart(f){f.boost=3.1;}
+
+ document.querySelectorAll(".row").forEach(function(r){
+  var i=+r.getAttribute("data-f");
+  r.addEventListener("mouseenter",function(){setHot(i,true);});
+  r.addEventListener("mouseleave",function(){setHot(i,false);});
+  r.addEventListener("focus",function(){setHot(i,true);});
+  r.addEventListener("blur",function(){setHot(i,false);});
+  r.addEventListener("click",function(){dart(F[i]);r.classList.add("on");setTimeout(function(){r.classList.remove("on");},900);});
+ });
+
+ /* --- bubbles --- */
+ var VENTS=[{x:420,w:24},{x:856,w:20},{x:1332,w:26},{x:960,w:34},{x:190,w:18}];
+ var bubbles=[];
+ function seed(b,x,y){
+  var v=VENTS[(Math.random()*VENTS.length)|0];
+  b.r=3+Math.random()*10;
+  b.bx=(x==null)?v.x+(Math.random()*2-1)*v.w:x;
+  b.x=b.bx;
+  b.y=(y==null)?792-Math.random()*8:y;
+  b.vy=96-b.r*4.3;
+  b.amp=5+Math.random()*18;
+  b.sw=0.5+Math.random()*1.2;
+  b.ph=Math.random()*6.283;
+  b.c.setAttribute("r",b.r.toFixed(1));
+  b.h.setAttribute("r",(b.r*0.3).toFixed(1));
+  b.h.setAttribute("cx",(-b.r*0.33).toFixed(1));
+  b.h.setAttribute("cy",(-b.r*0.35).toFixed(1));
+ }
+ for(i=0;i<18;i++){
+  var g=document.createElementNS(NS,"g");
+  var c=document.createElementNS(NS,"circle");
+  c.setAttribute("fill","url(#bub)"); c.setAttribute("stroke","rgba(228,250,255,.5)"); c.setAttribute("stroke-width","1");
+  var h=document.createElementNS(NS,"circle"); h.setAttribute("fill","rgba(255,255,255,.85)");
+  g.appendChild(c); g.appendChild(h); bubLayer.appendChild(g);
+  var b={el:g,c:c,h:h}; seed(b);
+  b.y=Math.random()*800; /* stagger the initial column */
+  bubbles.push(b);
+ }
+
+ /* --- click to release bubbles --- */
+ function svgPoint(cx,cy){
+  var pt=scene.createSVGPoint(); pt.x=cx; pt.y=cy;
+  var m=scene.getScreenCTM(); if(!m) return {x:cx,y:cy};
+  var p=pt.matrixTransform(m.inverse()); return {x:p.x,y:p.y};
+ }
+ scene.addEventListener("pointerdown",function(e){
+  var p=svgPoint(e.clientX,e.clientY);
+  for(var k=0;k<7;k++){
+   var b=bubbles[(Math.random()*bubbles.length)|0];
+   seed(b,p.x+(Math.random()*40-20),p.y+(Math.random()*24-12));
+   b.vy*=1.1;
+  }
+ });
+
+ /* --- controls --- */
+ var tg=document.getElementById("toggle");
+ tg.addEventListener("click",function(){paused=!paused;tg.textContent=paused?"Resume":"Pause";});
+ document.addEventListener("keydown",function(e){if(e.code==="Space"){e.preventDefault();tg.click();}});
+ var curEl=document.getElementById("cur");
+ curEl.addEventListener("input",function(){cur=parseFloat(curEl.value)||1;});
+ var depthEl=document.getElementById("depth"), clockEl=document.getElementById("clock"), mk=document.getElementById("mk");
+
+ /* --- main loop --- */
+ function frame(now){
+  var dt=Math.min(0.05,(now-last)/1000); last=now;
+  var d=paused?0:dt*cur; t+=d; elapsed+=d;
+
+  for(var i=0;i<F.length;i++){
+   var f=F[i];
+   if(f.boost>1.001) f.boost+=(1-f.boost)*Math.min(1,d*1.4); else f.boost=1;
+   f.x+=f.dir*f.sp*f.boost*d;
+   var lim=VW+f.half+90;
+   if(f.dir>0&&f.x>lim) f.x=-f.half-90;
+   if(f.dir<0&&f.x<-lim) f.x=VW+f.half+90;
+   var wob=Math.sin(t*f.bf+f.ph);
+   var y=f.y+wob*f.bob;
+   var pitch=Math.cos(t*f.bf+f.ph)*5.5;
+   var wag=Math.sin(t*f.wag*(0.7+f.boost*0.3)+f.ph)*(11+f.boost*3);
+   var finw=Math.sin(t*f.wag*0.85+1.2+f.ph)*17;
+   f.g.setAttribute("transform","translate("+f.x.toFixed(1)+" "+y.toFixed(1)+") scale("+(f.dir*f.s)+" "+f.s+") rotate("+(pitch*f.dir).toFixed(2)+")");
+   f.tail.setAttribute("transform","translate("+f.tx+" 0) rotate("+wag.toFixed(2)+")");
+   f.fin.setAttribute("transform","translate("+f.fx+" "+f.fy+") rotate("+finw.toFixed(2)+")");
+   f.sh.setAttribute("cx",f.x.toFixed(1));
+   f.sh.setAttribute("opacity",(0.34-Math.abs(y-560)/2600).toFixed(2));
+   var ty=Math.max(70,y-f.top*f.s-14);
+   f.tag.setAttribute("transform","translate("+Math.max(100,Math.min(VW-100,f.x)).toFixed(0)+" "+ty.toFixed(0)+")");
+  }
+
+  for(i=0;i<bubbles.length;i++){
+   var b=bubbles[i];
+   b.y-=b.vy*d;
+   b.x=b.bx+Math.sin(t*b.sw+b.ph)*b.amp;
+   if(b.y<-24){ seed(b); }
+   b.el.setAttribute("transform","translate("+b.x.toFixed(1)+" "+b.y.toFixed(1)+")");
+  }
+
+  var dp=28+Math.sin(t*0.08)*4.6+Math.sin(t*0.31)*0.4;
+  depthEl.textContent=dp.toFixed(1);
+  mk.style.top=(24+Math.sin(t*0.08)*11).toFixed(1)+"%";
+  var s=Math.floor(elapsed);
+  clockEl.textContent="t+"+String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+
+  requestAnimationFrame(frame);
+ }
+ requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

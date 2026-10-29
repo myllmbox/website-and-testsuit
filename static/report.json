@@ -4,6 +4,526 @@
  "box": "one DGX Spark (GB10, 128 GB unified memory) · (TP=2) = two Sparks",
  "models": [
   {
+   "id": "mbx-v54-tp2",
+   "name": "My LLM Box v5.4 (TP=2)",
+   "model": "Qwen3.8-Flash-Next FP4-Local",
+   "hf": "https://huggingface.co/nvidia/Qwen3.8-Flash-Next-FP4-Local",
+   "stack": "vLLM 0.32 · MTP 1–12 · 2× DGX Spark",
+   "image": "myllmbox/qwen38-flash-next-cluster-vllm:v5.4",
+   "link": "https://github.com/myllmbox/qwen38-flash-next-cluster-recipe",
+   "spec": {
+    "max_context": 409600,
+    "kv_pool": 2156606,
+    "kv_dtype": "bf16",
+    "kv_shared": true,
+    "seats": 32,
+    "notes": {
+     "kv_pool": "bf16 sparse-attention KV, shared by all running requests",
+     "model": "two DGX Sparks, tensor parallel over the ConnectX link: NVIDIA's FP4-Local weights as shipped, n-gram table resident on the GPUs"
+    }
+   },
+   "gauntlet": {
+    "thinking_tps": 74.5,
+    "code_tps": 111.8,
+    "peak_tps": 153.8,
+    "avg_tps": 83.6,
+    "runs": 12,
+    "avg_thinking_tokens": 25257,
+    "avg_code_tokens": 11329
+   },
+   "quality": {
+    "pasture": [
+     {
+      "tokens": {
+       "thinking": 38855,
+       "code": 11993
+      },
+      "verdict": "anomaly",
+      "note": "composition error"
+     },
+     {
+      "tokens": {
+       "thinking": 39950,
+       "code": 11456
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 15181,
+       "code": 13992
+      },
+      "verdict": "fixed",
+      "fix": {
+       "chars": 5,
+       "what": "scale('+s+',s) → scale('+s+','+s+')"
+      },
+      "orig": true
+     },
+     {
+      "tokens": {
+       "thinking": 49370,
+       "code": 14494
+      },
+      "verdict": "anomaly",
+      "note": "composition error"
+     },
+     {
+      "tokens": {
+       "thinking": 31478,
+       "code": 13818
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 31278,
+       "code": 12545
+      },
+      "verdict": "clean"
+     }
+    ],
+    "fish": [
+     {
+      "tokens": {
+       "thinking": 17814,
+       "code": 11318
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 19556,
+       "code": 9660
+      },
+      "verdict": "fixed",
+      "fix": {
+       "chars": 30,
+       "what": "importNode copy loop never removed the node (page froze) → d.removeChild(d.firstChild)"
+      },
+      "orig": true
+     },
+     {
+      "tokens": {
+       "thinking": 17107,
+       "code": 8475
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 14976,
+       "code": 10054
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 12385,
+       "code": 9767
+      },
+      "verdict": "fixed",
+      "fix": {
+       "chars": 2,
+       "what": "stroke-opacity: → \"stroke-opacity\":"
+      },
+      "orig": true
+     },
+     {
+      "tokens": {
+       "thinking": 15130,
+       "code": 8378
+      },
+      "verdict": "broken",
+      "note": "three errors: an empty attribute name and an element built without a parent stop the script; the fish are created with scale 0 and shifted bob values, so the orange fish is invisible and both jump"
+     }
+    ]
+   },
+   "speed": {
+    "1": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       77.8,
+       81.3,
+       77.2
+      ],
+      "peak": 108.7,
+      "tps": 78.8
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       64.9,
+       63.7,
+       71.7
+      ],
+      "peak": 115.4,
+      "tps": 66.8
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       113.9,
+       131.9,
+       113.7
+      ],
+      "peak": 158.2,
+      "tps": 119.8
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       107.3,
+       109.9,
+       107.5
+      ],
+      "peak": 119.5,
+      "tps": 108.2
+     }
+    },
+    "2": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       121.6,
+       120.0,
+       129.1
+      ],
+      "peak": 180.2,
+      "tps": 123.6
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       104.1,
+       103.9,
+       106.6
+      ],
+      "peak": 109.5,
+      "tps": 104.9
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       199.5,
+       180.4,
+       197.6
+      ],
+      "peak": 219.6,
+      "tps": 192.5
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       182.6,
+       173.8,
+       177.7
+      ],
+      "peak": 200.9,
+      "tps": 178.0
+     }
+    },
+    "4": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       196.0,
+       192.0,
+       195.1
+      ],
+      "peak": 269.9,
+      "tps": 194.4
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       168.5,
+       167.7,
+       167.0
+      ],
+      "peak": 186.2,
+      "tps": 167.7
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       276.9,
+       276.5,
+       297.7
+      ],
+      "peak": 313.7,
+      "tps": 283.7
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       261.6,
+       266.7,
+       263.4
+      ],
+      "peak": 281.6,
+      "tps": 263.9
+     }
+    },
+    "6": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       242.5,
+       243.7,
+       242.5
+      ],
+      "peak": 329.1,
+      "tps": 242.9
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       212.1,
+       211.8,
+       210.1
+      ],
+      "peak": 220.5,
+      "tps": 211.3
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       355.5,
+       356.4,
+       345.0
+      ],
+      "peak": 387.1,
+      "tps": 352.3
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       330.9,
+       341.3,
+       337.6
+      ],
+      "peak": 356.7,
+      "tps": 336.6
+     }
+    },
+    "8": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       288.0,
+       297.5,
+       287.7
+      ],
+      "peak": 411.6,
+      "tps": 291.1
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       255.1,
+       254.0,
+       250.4
+      ],
+      "peak": 264.9,
+      "tps": 253.2
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       397.1,
+       395.3,
+       410.7
+      ],
+      "peak": 439.3,
+      "tps": 401.0
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       392.4,
+       394.9,
+       393.5
+      ],
+      "peak": 416.6,
+      "tps": 393.6
+     }
+    },
+    "12": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       364.3,
+       368.6,
+       361.9
+      ],
+      "peak": 510.6,
+      "tps": 364.9
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       309.0,
+       313.9,
+       312.2
+      ],
+      "peak": 326.9,
+      "tps": 311.7
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       481.5,
+       477.7,
+       494.7
+      ],
+      "peak": 532.3,
+      "tps": 484.6
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       491.7,
+       486.8,
+       485.3
+      ],
+      "peak": 517.9,
+      "tps": 487.9
+     }
+    },
+    "16": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       440.4,
+       435.1,
+       438.5
+      ],
+      "peak": 572.2,
+      "tps": 438.0
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       363.7,
+       367.6,
+       369.7
+      ],
+      "peak": 381.5,
+      "tps": 367.0
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       552.1,
+       550.0,
+       541.0
+      ],
+      "peak": 634.5,
+      "tps": 547.7
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       538.4,
+       540.9,
+       536.0
+      ],
+      "peak": 562.3,
+      "tps": 538.4
+     }
+    },
+    "24": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       554.3,
+       566.9,
+       558.6
+      ],
+      "peak": 700.2,
+      "tps": 559.9
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       446.6,
+       447.4,
+       445.1
+      ],
+      "peak": 472.5,
+      "tps": 446.4
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       652.3,
+       652.1,
+       642.1
+      ],
+      "peak": 759.2,
+      "tps": 648.8
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       638.2,
+       637.1,
+       643.4
+      ],
+      "peak": 737.0,
+      "tps": 639.6
+     }
+    },
+    "32": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       653.2,
+       661.2,
+       650.5
+      ],
+      "peak": 813.5,
+      "tps": 655.0
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       508.1,
+       509.5,
+       507.4
+      ],
+      "peak": 536.3,
+      "tps": 508.3
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       741.8,
+       730.0
+      ],
+      "peak": 883.7,
+      "tps": 735.9
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       726.7,
+       734.1,
+       726.4
+      ],
+      "peak": 862.3,
+      "tps": 729.1
+     }
+    }
+   },
+   "logo": "assets/logos/myllmbox.png",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
+  },
+  {
    "id": "mbx-v54",
    "name": "My LLM Box v5.4 (TP=1)",
    "model": "Qwen3.8-Flash-Next FP4-Local",
