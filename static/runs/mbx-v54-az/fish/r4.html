@@ -1,0 +1,448 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Animated Underwater Scene</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #001322;
+    }
+
+    svg {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <svg id="scene" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#9fe7ff" />
+        <stop offset="35%" stop-color="#359fd8" />
+        <stop offset="70%" stop-color="#0e5f96" />
+        <stop offset="100%" stop-color="#001d3b" />
+      </linearGradient>
+
+      <linearGradient id="sandGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#d8c087" />
+        <stop offset="55%" stop-color="#a9864b" />
+        <stop offset="100%" stop-color="#5c3f20" />
+      </linearGradient>
+
+      <linearGradient id="rockGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#8d714b" />
+        <stop offset="100%" stop-color="#44301d" />
+      </linearGradient>
+
+      <radialGradient id="bubbleGrad" cx="35%" cy="30%" r="70%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+        <stop offset="28%" stop-color="#e1f8ff" stop-opacity="0.55" />
+        <stop offset="100%" stop-color="#aae1ff" stop-opacity="0.12" />
+      </radialGradient>
+
+      <linearGradient id="bodyAGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#ffca70" />
+        <stop offset="55%" stop-color="#ff8b2d" />
+        <stop offset="100%" stop-color="#d35400" />
+      </linearGradient>
+
+      <linearGradient id="finAGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#ffd28a" />
+        <stop offset="100%" stop-color="#e6761f" />
+      </linearGradient>
+
+      <linearGradient id="tailAGrad" x1="1" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#ffab4d" />
+        <stop offset="100%" stop-color="#d35400" />
+      </linearGradient>
+
+      <linearGradient id="bodyBGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#aef8ff" />
+        <stop offset="50%" stop-color="#31c6e8" />
+        <stop offset="100%" stop-color="#0b74a8" />
+      </linearGradient>
+
+      <linearGradient id="finBGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#b7f6ff" />
+        <stop offset="100%" stop-color="#25a9cf" />
+      </linearGradient>
+
+      <linearGradient id="tailBGrad" x1="1" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#86e7ff" />
+        <stop offset="100%" stop-color="#0d73a7" />
+      </linearGradient>
+    </defs>
+
+    <rect id="bg" x="0" y="0" width="100%" height="100%" fill="url(#waterGrad)"></rect>
+
+    <g id="plants"></g>
+    <g id="floor"></g>
+    <g id="bubbles"></g>
+
+    <g id="fishA" transform="translate(120 300)">
+      <polygon
+        points="-62,0 -106,-35 -106,35"
+        fill="url(#tailAGrad)"
+        stroke="#b34100"
+        stroke-width="4"
+        stroke-linejoin="round" />
+
+      <polygon
+        points="-14,-42 14,-88 42,-38"
+        fill="url(#finAGrad)"
+        stroke="#b34100"
+        stroke-width="3"
+        stroke-linejoin="round" />
+
+      <polygon
+        points="8,4 -12,32 30,22"
+        fill="url(#finAGrad)"
+        stroke="#b34100"
+        stroke-width="3"
+        stroke-linejoin="round" />
+
+      <ellipse
+        cx="0" cy="0" rx="62" ry="44"
+        fill="url(#bodyAGrad)"
+        stroke="#b34100"
+        stroke-width="4" />
+
+      <circle cx="38" cy="-10" r="11" fill="#fffef8" />
+      <circle cx="40" cy="-10" r="5.5" fill="#08131c" />
+
+      <path
+        d="M58 8 Q50 17 40 15"
+        fill="none"
+        stroke="#7a1f00"
+        stroke-width="3"
+        stroke-linecap="round" />
+    </g>
+
+    <g id="fishB" transform="translate(700 420)">
+      <polygon
+        points="-78,0 -118,-27 -118,27"
+        fill="url(#tailBGrad)"
+        stroke="#0a557f"
+        stroke-width="4"
+        stroke-linejoin="round" />
+
+      <polygon
+        points="-16,-20 -2,-54 28,-17"
+        fill="url(#finBGrad)"
+        stroke="#0a557f"
+        stroke-width="3"
+        stroke-linejoin="round" />
+
+      <polygon
+        points="8,1 -8,23 26,15"
+        fill="url(#finBGrad)"
+        stroke="#0a557f"
+        stroke-width="3"
+        stroke-linejoin="round" />
+
+      <ellipse
+        cx="0" cy="0" rx="78" ry="22"
+        fill="url(#bodyBGrad)"
+        stroke="#0a557f"
+        stroke-width="4" />
+
+      <circle cx="54" cy="-4" r="8" fill="#fffef8" />
+      <circle cx="56" cy="-4" r="4" fill="#08131c" />
+
+      <path
+        d="M74 3 Q68 10 60 8"
+        fill="none"
+        stroke="#05283a"
+        stroke-width="2.5"
+        stroke-linecap="round" />
+    </g>
+  </svg>
+
+  <script>
+    const svgNS = "http://www.w3.org/2000/svg";
+
+    const floorG = document.getElementById("floor");
+    const plantsG = document.getElementById("plants");
+    const bubblesG = document.getElementById("bubbles");
+
+    let W = window.innerWidth || 800;
+    let H = window.innerHeight || 600;
+    let floorY = H * 0.88;
+    let bubbles = [];
+
+    function create(tag, attrs) {
+      const node = document.createElementNS(svgNS, tag);
+      for (const key in attrs) {
+        node.setAttribute(key, attrs[key]);
+      }
+      return node;
+    }
+
+    function buildFloor() {
+      floorG.innerHTML = "";
+
+      const steps = Math.max(8, Math.round(W / 110));
+      let d = "M 0 " + H + " L 0 " + (floorY + 12).toFixed(1);
+
+      for (let i = 0; i <= steps; i++) {
+        const x = (i / steps) * W;
+        const y =
+          floorY +
+          Math.sin(i * 0.9 + 1.7) * 10 +
+          Math.sin(i * 0.37 + 0.4) * 6;
+
+        d += " L " + x.toFixed(1) + " " + y.toFixed(1);
+      }
+
+      d += " L " + W + " " + H + " Z";
+
+      floorG.appendChild(
+        create("path", {
+          d: d,
+          fill: "url(#sandGrad)",
+          stroke: "#573a1d",
+          "stroke-width": 2,
+          "stroke-linejoin": "round"
+        })
+      );
+
+      const rocks = Math.max(4, Math.round(W / 260));
+
+      for (let i = 0; i < rocks; i++) {
+        const cx = ((i + 0.5) / rocks) * W + Math.sin(i * 2.4) * 18;
+        const rx = Math.max(14, W / (rocks * 8) + Math.sin(i * 1.7) * 10);
+        const ry = Math.max(7, rx * 0.38);
+        const cy = H - Math.max(18, H * 0.035) + Math.sin(i * 3.1) * 6;
+
+        floorG.appendChild(
+          create("ellipse", {
+            cx: cx.toFixed(1),
+            cy: cy.toFixed(1),
+            rx: rx.toFixed(1),
+            ry: ry.toFixed(1),
+            fill: "url(#rockGrad)",
+            stroke: "#372515",
+            "stroke-width": 2
+          })
+        );
+      }
+    }
+
+    function buildPlants() {
+      plantsG.innerHTML = "";
+
+      const xs = [0.10, 0.28, 0.54, 0.72, 0.90];
+      const greens = ["#158652", "#1f9b59", "#27b169", "#137447", "#28a35c"];
+
+      for (let i = 0; i < xs.length; i++) {
+        const x = W * xs[i] + Math.sin(i * 2.7) * 12;
+        const baseY = floorY + 14;
+        const height = H * (0.23 + (i % 3) * 0.035);
+        const amp = Math.max(10, W * 0.02 + Math.sin(i) * 4);
+        const segs = 5;
+
+        let px = x;
+        let py = baseY + 10;
+        let d = "M " + px.toFixed(1) + " " + py.toFixed(1);
+
+        for (let s = 1; s <= segs; s++) {
+          const t = s / segs;
+          const nx = x + Math.sin(t * 5 + i * 1.4) * amp * t;
+          const ny = baseY + 10 - height * t;
+          const cx = (px + nx) / 2 + Math.sin(t * 7 + i) * amp * 0.8;
+          const cy = (py + ny) / 2;
+
+          d +=
+            " Q " +
+            cx.toFixed(1) +
+            " " +
+            cy.toFixed(1) +
+            " " +
+            nx.toFixed(1) +
+            " " +
+            ny.toFixed(1);
+
+          px = nx;
+          py = ny;
+        }
+
+        plantsG.appendChild(
+          create("path", {
+            d: d,
+            fill: "none",
+            stroke: greens[i % greens.length],
+            "stroke-width": Math.max(6, Math.min(13, H * 0.016)),
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round"
+          })
+        );
+      }
+    }
+
+    function initBubbles() {
+      bubblesG.innerHTML = "";
+      bubbles = [];
+
+      const count = Math.max(8, Math.round(W / 160));
+
+      for (let i = 0; i < count; i++) {
+        const r = 3 + Math.random() * 11;
+        const x = Math.random() * W;
+        const y =
+          floorY +
+          r * 0.35 +
+          Math.random() * Math.max(8, H * 0.035);
+        const speed = (110 + Math.random() * 60) / r;
+        const drift = (Math.random() - 0.5) * 22;
+        const phase = Math.random() * 6.283;
+
+        const bubble = {
+          x: x,
+          y: y,
+          r: r,
+          speed: speed,
+          drift: drift,
+          phase: phase
+        };
+
+        bubble.el = create("circle", {
+          cx: x.toFixed(1),
+          cy: y.toFixed(1),
+          r: r.toFixed(1),
+          fill: "url(#bubbleGrad)",
+          stroke: "rgba(255,255,255,0.45)",
+          "stroke-width": 1.2
+        });
+
+        bubblesG.appendChild(bubble.el);
+        bubbles.push(bubble);
+      }
+    }
+
+    const fishAEl = document.getElementById("fishA");
+    const fishBEl = document.getElementById("fishB");
+
+    const fishes = [
+      {
+        el: fishAEl,
+        scale: 1.34,
+        vx: 68,
+        x: null,
+        lane: 0.36,
+        bob: 15,
+        freq: 0.72,
+        phase: 0.3
+      },
+      {
+        el: fishBEl,
+        scale: 0.68,
+        vx: -148,
+        x: null,
+        lane: 0.63,
+        bob: 22,
+        freq: 1.25,
+        phase: 2.4
+      }
+    ];
+
+    function wrapFish(f) {
+      const margin = Math.max(120, f.scale * 180);
+      const span = W + margin * 2;
+      f.x = (((f.x + margin) % span) + span) % span - margin;
+    }
+
+    function initFish() {
+      for (const f of fishes) {
+        if (f.x === null || f.x === undefined || Number.isNaN(f.x)) {
+          f.x = Math.random() * W;
+        }
+        wrapFish(f);
+      }
+    }
+
+    function resize() {
+      W = window.innerWidth || 800;
+      H = window.innerHeight || 600;
+      floorY = Math.round(H * 0.88);
+
+      buildFloor();
+      buildPlants();
+      initBubbles();
+      initFish();
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+
+    let last = performance.now();
+
+    function frame(now) {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const t = now / 1000;
+
+      for (const f of fishes) {
+        f.x += f.vx * dt;
+        wrapFish(f);
+
+        const dir = f.vx >= 0 ? 1 : -1;
+        const y = f.lane * H + Math.sin(t * f.freq + f.phase) * f.bob;
+        const sx = (dir * f.scale).toFixed(3);
+        const sy = f.scale.toFixed(3);
+
+        f.el.setAttribute(
+          "transform",
+          "translate(" +
+            f.x.toFixed(2) +
+            " " +
+            y.toFixed(2) +
+            ") scale(" +
+            sx +
+            " " +
+            sy +
+            ")"
+        );
+      }
+
+      for (const b of bubbles) {
+        b.y -= b.speed * dt;
+        b.x += Math.sin(t * 0.9 + b.phase) * b.drift * dt;
+
+        if (b.x < -b.r * 2) {
+          b.x = W + b.r * 2;
+        } else if (b.x > W + b.r * 2) {
+          b.x = -b.r * 2;
+        }
+
+        if (b.y + b.r < -5) {
+          b.y =
+            floorY +
+            b.r * 0.35 +
+            Math.random() * Math.max(8, H * 0.035);
+          b.x = Math.random() * W;
+        }
+
+        b.el.setAttribute("cx", b.x.toFixed(2));
+        b.el.setAttribute("cy", b.y.toFixed(2));
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

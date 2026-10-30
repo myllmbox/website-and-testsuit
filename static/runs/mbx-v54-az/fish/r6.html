@@ -1,0 +1,371 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Underwater</title>
+<style>
+html, body { margin:0; height:100%; overflow:hidden; background:#04203b; }
+svg { display:block; width:100vw; height:100vh; }
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#73c8f0"/>
+      <stop offset="1" stop-color="#05223d"/>
+    </linearGradient>
+
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9bd8a"/>
+      <stop offset="1" stop-color="#8b6b40"/>
+    </linearGradient>
+
+    <linearGradient id="rock" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7a5b35"/>
+      <stop offset="1" stop-color="#4a341f"/>
+    </linearGradient>
+
+    <linearGradient id="fishABody" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe98a"/>
+      <stop offset="0.6" stop-color="#ffb54a"/>
+      <stop offset="1" stop-color="#f06a2a"/>
+    </linearGradient>
+
+    <linearGradient id="fishATail" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff9c5a"/>
+      <stop offset="1" stop-color="#d73f24"/>
+    </linearGradient>
+
+    <linearGradient id="fishAfin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff8a4c"/>
+      <stop offset="1" stop-color="#c3371d"/>
+    </linearGradient>
+
+    <linearGradient id="fishBBody" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9ff7ff"/>
+      <stop offset="0.55" stop-color="#3fc8e8"/>
+      <stop offset="1" stop-color="#146d9e"/>
+    </linearGradient>
+
+    <linearGradient id="fishBTail" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6fe0f2"/>
+      <stop offset="1" stop-color="#16649a"/>
+    </linearGradient>
+
+    <linearGradient id="fishBfin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#57c7df"/>
+      <stop offset="1" stop-color="#115d86"/>
+    </linearGradient>
+
+    <radialGradient id="bubbleGrad" cx="0.35" cy="0.35" r="0.65">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.8"/>
+      <stop offset="0.35" stop-color="#cdefff" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#76c8ff" stop-opacity="0.07"/>
+    </radialGradient>
+  </defs>
+
+  <g id="backgroundLayer">
+    <rect x="0" y="0" width="100%" height="100%" fill="url(#water)"/>
+  </g>
+
+  <g id="floorLayer">
+    <rect id="floor" x="0" y="87.5%" width="100%" height="12.5%" fill="url(#sand)"/>
+    <g id="floorDecor"></g>
+  </g>
+
+  <g id="kelpLayer"></g>
+  <g id="bubbleLayer"></g>
+
+  <g id="fishLayer">
+    <g id="fish1" class="fish" transform="translate(120,220)">
+      <polygon points="-52,0 -135,-50 -135,50" fill="url(#fishATail)"/>
+      <ellipse cx="0" cy="0" rx="72" ry="50" fill="url(#fishABody)"/>
+      <polygon points="-12,-46 22,-82 58,-42" fill="url(#fishAfin)"/>
+      <polygon points="2,24 44,52 28,14" fill="url(#fishAfin)"/>
+      <circle cx="47" cy="-14" r="11" fill="#ffffff"/>
+      <circle cx="50" cy="-14" r="5" fill="#12283f"/>
+      <path d="M60,8 Q74,18 80,8" stroke="#6f260e" stroke-width="5" stroke-linecap="round" fill="none"/>
+    </g>
+
+    <g id="fish2" class="fish" transform="translate(420,340) scale(-0.58,0.58)">
+      <polygon points="-60,0 -138,-38 -138,38" fill="url(#fishBTail)"/>
+      <ellipse cx="0" cy="0" rx="88" ry="22" fill="url(#fishBBody)"/>
+      <polygon points="-6,-20 26,-44 54,-18" fill="url(#fishBfin)"/>
+      <polygon points="6,10 34,28 20,2" fill="url(#fishBfin)"/>
+      <circle cx="66" cy="-5" r="8" fill="#ffffff"/>
+      <circle cx="68" cy="-5" r="3.6" fill="#0d2c42"/>
+      <path d="M78,3 Q89,11 93,4" stroke="#083a58" stroke-width="4" stroke-linecap="round" fill="none"/>
+    </g>
+  </g>
+</svg>
+
+<script>
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  var floorDecor = document.getElementById("floorDecor");
+  var kelpLayer = document.getElementById("kelpLayer");
+  var bubbleLayer = document.getElementById("bubbleLayer");
+
+  var W = window.innerWidth || document.documentElement.clientWidth || 1;
+  var H = window.innerHeight || document.documentElement.clientHeight || 1;
+  var floorY = H * 0.875;
+
+  var kelpArr = [];
+  var bubbleArr = [];
+
+  var fishes = [
+    {
+      g: document.getElementById("fish1"),
+      dir: 1,
+      halfLocal: 160,
+      baseY: 0.35,
+      phase: Math.random() * 6.283,
+      speed: 30
+    },
+    {
+      g: document.getElementById("fish2"),
+      dir: -1,
+      halfLocal: 165,
+      baseY: 0.60,
+      phase: Math.random() * 6.283,
+      speed: 108
+    }
+  ];
+
+  function el(tag, attrs, parent) {
+    var n = document.createElementNS(NS, tag);
+    for (var k in attrs) {
+      if (Object.prototype.hasOwnProperty.call(attrs, k)) {
+        n.setAttribute(k, attrs[k]);
+      }
+    }
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+
+  function addFloorDecor() {
+    var f = floorY;
+    el("path", {
+      d: "M0," + (f + 12) +
+         " L" + (W * 0.11) + "," + (f + 3) +
+         " L" + (W * 0.24) + "," + (f + 14) +
+         " L" + (W * 0.38) + "," + (f + 4) +
+         " L" + (W * 0.53) + "," + (f + 16) +
+         " L" + (W * 0.69) + "," + (f + 5) +
+         " L" + (W * 0.84) + "," + (f + 13) +
+         " L" + W + "," + (f + 6) +
+         " L" + W + "," + H +
+         " L0," + H + " Z",
+      fill: "url(#rock)",
+      opacity: "0.42"
+    }, floorDecor);
+
+    el("polygon", {
+      points: (W * 0.17) + "," + (f + 15) + " " +
+              (W * 0.205) + "," + (f - 7) + " " +
+              (W * 0.24) + "," + (f + 14),
+      fill: "#6d5132",
+      opacity: "0.85"
+    }, floorDecor);
+
+    el("polygon", {
+      points: (W * 0.62) + "," + (f + 14) + " " +
+              (W * 0.655) + "," + (f - 9) + " " +
+              (W * 0.69) + "," + (f + 13),
+      fill: "#59401f",
+      opacity: "0.85"
+    }, floorDecor);
+  }
+
+  function makeSeaweed(x, height, color, amp, speed, phase) {
+    var g = el("g", {
+      class: "seaweed",
+      transform: "translate(" + x + "," + (floorY + 5) + ")"
+    }, kelpLayer);
+
+    var inner = el("g", {}, g);
+
+    for (var i = 0; i < 4; i++) {
+      var sign = (i % 2) ? 1 : -1;
+      var h = height * (0.55 + Math.random() * 0.5);
+      var b1 = sign * (18 + Math.random() * 24);
+      var b2 = -sign * (10 + Math.random() * 24);
+      var ex = sign * (5 + Math.random() * 17);
+
+      el("path", {
+        d: "M0,0 C" + b1 + "," + (-h * 0.32) +
+           " " + b2 + "," + (-h * 0.64) +
+           " " + ex + "," + (-h),
+        stroke: color,
+        "stroke-width": (8 + Math.random() * 5).toFixed(1),
+        "stroke-linecap": "round",
+        fill: "none"
+      }, inner);
+    }
+
+    kelpArr.push({ inner: inner, amp: amp, speed: speed, phase: phase });
+  }
+
+  function spawnBubble(b) {
+    b.r = 3 + Math.random() * 11;
+    b.speed = 16 + (14 - b.r) * 2.4 + Math.random() * 8;
+    b.baseX = Math.random() * W;
+    b.phase = Math.random() * 6.283;
+    b.sway = 5 + Math.random() * 9;
+    b.swaySpeed = 0.5 + Math.random() * 1.1;
+
+    var range = Math.max(15, Math.min(80, floorY * 0.08));
+    b.y = Math.max(5, floorY - b.r - Math.random() * range);
+
+    if (b.circle) {
+      b.circle.setAttribute("r", b.r);
+      b.circle.setAttribute("stroke-width", Math.max(1, b.r * 0.1));
+    }
+  }
+
+  function makeBubble() {
+    var g = el("g", { class: "bubble" }, bubbleLayer);
+    var circle = el("circle", {
+      cx: 0,
+      cy: 0,
+      r: 5,
+      fill: "url(#bubbleGrad)",
+      stroke: "#e8fbff",
+      "stroke-opacity": 0.45,
+      "stroke-width": 1
+    }, g);
+
+    var b = { g: g, circle: circle };
+    spawnBubble(b);
+    return b;
+  }
+
+  function updateFishes(reset) {
+    var speedScale = Math.max(0.65, Math.min(1.35, W / 1200));
+    var baseScale = Math.max(0.65, Math.min(1.2, Math.min(W / 1100, H / 620)));
+    var scales = [baseScale, baseScale * 0.58];
+
+    for (var i = 0; i < fishes.length; i++) {
+      var f = fishes[i];
+      if (!f.g) continue;
+
+      f.scale = scales[i];
+      f.half = f.halfLocal * f.scale + 12;
+      f.y = H * f.baseY;
+      f.speed = (i === 0 ? 30 : 108) * speedScale;
+
+      if (reset || f.x === undefined) {
+        f.x = Math.random() * W;
+      }
+    }
+  }
+
+  function setup(reset) {
+    W = window.innerWidth || document.documentElement.clientWidth || 1;
+    H = window.innerHeight || document.documentElement.clientHeight || 1;
+    floorY = H * 0.875;
+
+    floorDecor.textContent = "";
+    kelpLayer.textContent = "";
+    bubbleLayer.textContent = "";
+
+    kelpArr.length = 0;
+    bubbleArr.length = 0;
+
+    addFloorDecor();
+
+    var hs = Math.max(50, H * 0.22);
+    makeSeaweed(W * 0.13, hs, "#1b8c39", 2.4, 0.85, 0.2);
+    makeSeaweed(W * 0.36, hs * 0.82, "#27a548", 2.1, 1.15, 1.7);
+    makeSeaweed(W * 0.68, hs * 1.05, "#147631", 2.7, 0.7, 3.4);
+    makeSeaweed(W * 0.89, hs * 0.9, "#2fb552", 2.2, 1.0, 4.8);
+
+    for (var i = 0; i < 7; i++) {
+      bubbleArr.push(makeBubble());
+    }
+
+    updateFishes(reset);
+  }
+
+  var raf =
+    window.requestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    function (cb) {
+      return window.setTimeout(function () {
+        cb(Date.now());
+      }, 16);
+    };
+
+  var last = -1;
+
+  function loop(now) {
+    if (typeof now !== "number") now = Date.now();
+    if (last < 0) last = now;
+
+    var dt = (now - last) / 1000;
+    if (dt < 0) dt = 0;
+    if (dt > 0.05) dt = 0.05;
+    last = now;
+
+    var i, f, b, x, a, sx, sy;
+
+    for (i = 0; i < fishes.length; i++) {
+      f = fishes[i];
+      if (!f.g) continue;
+
+      f.x += f.dir * f.speed * dt;
+
+      if (f.x - f.half > W) {
+        f.x = -f.half;
+      } else if (f.x + f.half < 0) {
+        f.x = W + f.half;
+      }
+
+      sx = (f.dir * f.scale).toFixed(3);
+      sy = f.scale.toFixed(3);
+      f.g.setAttribute("transform", "translate(" + f.x + "," + f.y + ") scale(" + sx + "," + sy + ")");
+    }
+
+    for (i = 0; i < bubbleArr.length; i++) {
+      b = bubbleArr[i];
+
+      b.y -= b.speed * dt;
+      x = b.baseX + Math.sin(now * 0.001 * b.swaySpeed + b.phase) * b.sway;
+
+      if (x + b.r < 0) {
+        b.baseX = W + b.r;
+        x = b.baseX + Math.sin(now * 0.001 * b.swaySpeed + b.phase) * b.sway;
+      } else if (x - b.r > W) {
+        b.baseX = -b.r;
+        x = b.baseX + Math.sin(now * 0.001 * b.swaySpeed + b.phase) * b.sway;
+      }
+
+      if (b.y + b.r < -5) {
+        spawnBubble(b);
+      }
+
+      b.g.setAttribute("transform", "translate(" + x + "," + b.y + ")");
+    }
+
+    for (i = 0; i < kelpArr.length; i++) {
+      a = Math.sin(now * 0.0012 * kelpArr[i].speed + kelpArr[i].phase) * kelpArr[i].amp;
+      kelpArr[i].inner.setAttribute("transform", "rotate(" + a.toFixed(2) + " 0 0)");
+    }
+
+    raf(loop);
+  }
+
+  window.addEventListener("resize", function () {
+    setup(false);
+  });
+
+  setup(true);
+  raf(loop);
+})();
+</script>
+</body>
+</html>

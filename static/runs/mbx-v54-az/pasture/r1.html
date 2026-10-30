@@ -1,0 +1,210 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animated Pasture</title>
+<style>
+html, body { margin: 0; height: 100%; overflow: hidden; background: #dff2ff; }
+svg { display: block; width: 100vw; height: 100vh; }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1600 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="animated pasture scene">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#7ec8ff"/>
+<stop offset="1" stop-color="#e9f8ff"/>
+</linearGradient>
+<linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#7fc966"/>
+<stop offset="1" stop-color="#3d9330"/>
+</linearGradient>
+</defs>
+
+<rect x="0" y="0" width="1600" height="586" fill="url(#sky)"/>
+<rect x="0" y="585" width="1600" height="315" fill="url(#grass)"/>
+<line x1="0" y1="585" x2="1600" y2="585" stroke="#2e6d22" stroke-width="3"/>
+
+<g id="sun">
+<circle cx="170" cy="150" r="92" fill="#fff28a" opacity="0.35"/>
+<g stroke="#ffdf66" stroke-width="8" stroke-linecap="round">
+<line x1="170" y1="80" x2="170" y2="36"/>
+<line x1="170" y1="80" x2="170" y2="36" transform="rotate(45 170 150)"/>
+<line x1="170" y1="80" x2="170" y2="36" transform="rotate(90 170 150)"/>
+<line x1="170" y1="80" x2="170" y2="36" transform="rotate(135 170 150)"/>
+<line x1="170" y1="80" x2="170" y2="36" transform="rotate(180 170 150)"/>
+<line x1="170" y1="80" x2="170" y2="36" transform="rotate(225 170 150)"/>
+<line x1="170" y1="80" x2="170" y2="36" transform="rotate(270 170 150)"/>
+<line x1="170" y1="80" x2="170" y2="36" transform="rotate(315 170 150)"/>
+</g>
+<circle cx="170" cy="150" r="60" fill="#ffd93d" stroke="#f0b800" stroke-width="3"/>
+</g>
+
+<g fill="#ffffff" opacity="0.95">
+<g transform="translate(0,80)">
+<g>
+<animateTransform attributeName="transform" type="translate" values="-260 0;1900 0" dur="78s" begin="-18s" repeatCount="indefinite" calcMode="linear"/>
+<ellipse cx="35" cy="38" rx="36" ry="18"/>
+<ellipse cx="82" cy="22" rx="46" ry="26"/>
+<ellipse cx="128" cy="36" rx="34" ry="20"/>
+<ellipse cx="82" cy="48" rx="74" ry="18"/>
+</g>
+</g>
+
+<g transform="translate(0,165)">
+<g>
+<animateTransform attributeName="transform" type="translate" values="-260 0;1900 0" dur="96s" begin="-63s" repeatCount="indefinite" calcMode="linear"/>
+<ellipse cx="38" cy="36" rx="32" ry="17"/>
+<ellipse cx="82" cy="20" rx="42" ry="25"/>
+<ellipse cx="124" cy="34" rx="30" ry="19"/>
+<ellipse cx="80" cy="46" rx="64" ry="17"/>
+</g>
+</g>
+
+<g transform="translate(0,118)">
+<g>
+<animateTransform attributeName="transform" type="translate" values="-260 0;1900 0" dur="84s" begin="-47s" repeatCount="indefinite" calcMode="linear"/>
+<ellipse cx="42" cy="40" rx="34" ry="17"/>
+<ellipse cx="88" cy="24" rx="44" ry="24"/>
+<ellipse cx="134" cy="38" rx="32" ry="18"/>
+<ellipse cx="88" cy="52" rx="70" ry="17"/>
+</g>
+</g>
+</g>
+
+<g transform="translate(72,664)">
+<g>
+<animateTransform attributeName="transform" type="rotate" values="0 0 0;-1.7 0 0;0 0 0;1.7 0 0;0 0 0" keyTimes="0;0.25;0.5;0.75;1" dur="7s" repeatCount="indefinite" calcMode="linear"/>
+<path d="M-12 0 L-19 -118 L19 -118 L12 0 Z" fill="#6b3f24" stroke="#43270f" stroke-width="2"/>
+<ellipse cx="0" cy="1" rx="38" ry="8" fill="#2f6f27" opacity="0.45"/>
+<ellipse cx="0" cy="-168" rx="70" ry="50" fill="#2e8b38" stroke="#1e5c28" stroke-width="2"/>
+<circle cx="-54" cy="-146" r="40" fill="#3aa34b" stroke="#1e5c28" stroke-width="2"/>
+<circle cx="54" cy="-148" r="39" fill="#3aa34b" stroke="#1e5c28" stroke-width="2"/>
+<circle cx="-22" cy="-196" r="35" fill="#43b356" stroke="#1e5c28" stroke-width="2"/>
+<circle cx="24" cy="-198" r="34" fill="#43b356" stroke="#1e5c28" stroke-width="2"/>
+<circle cx="0" cy="-138" r="44" fill="#369a44" stroke="#1e5c28" stroke-width="2"/>
+</g>
+</g>
+
+<g transform="translate(1460,675) scale(0.85)">
+<g>
+<animateTransform attributeName="transform" type="rotate" values="0 0 0;-1.4 0 0;0 0 0;1.4 0 0;0 0 0" keyTimes="0;0.25;0.5;0.75;1" dur="8.5s" begin="-3.7s" repeatCount="indefinite" calcMode="linear"/>
+<path d="M-12 0 L-19 -118 L19 -118 L12 0 Z" fill="#6b3f24" stroke="#43270f" stroke-width="2"/>
+<ellipse cx="0" cy="1" rx="38" ry="8" fill="#2f6f27" opacity="0.45"/>
+<ellipse cx="0" cy="-168" rx="70" ry="50" fill="#2e8b38" stroke="#1e5c28" stroke-width="2"/>
+<circle cx="-54" cy="-146" r="40" fill="#3aa34b" stroke="#1e5c28" stroke-width="2"/>
+<circle cx="54" cy="-148" r="39" fill="#3aa34b" stroke="#1e5c28" stroke-width="2"/>
+<circle cx="-22" cy="-196" r="35" fill="#43b356" stroke="#1e5c28" stroke-width="2"/>
+<circle cx="24" cy="-198" r="34" fill="#43b356" stroke="#1e5c28" stroke-width="2"/>
+<circle cx="0" cy="-138" r="44" fill="#369a44" stroke="#1e5c28" stroke-width="2"/>
+</g>
+</g>
+
+<g class="animal cow" transform="translate(835,765)">
+<ellipse cx="0" cy="4" rx="110" ry="12" fill="#123f0e" opacity="0.22"/>
+<g>
+<animateTransform attributeName="transform" type="translate" values="0 0;0 -16;0 0" keyTimes="0;0.5;1" dur="0.86s" begin="-0.52s" repeatCount="indefinite" calcMode="linear"/>
+<g class="legs">
+<rect class="leg" x="-82" y="-55" width="17" height="55" rx="7" fill="#fffdf6" stroke="#1f1f1f" stroke-width="2"/>
+<rect class="leg" x="-45" y="-55" width="17" height="55" rx="7" fill="#fffdf6" stroke="#1f1f1f" stroke-width="2"/>
+<rect class="leg" x="28" y="-55" width="17" height="55" rx="7" fill="#fffdf6" stroke="#1f1f1f" stroke-width="2"/>
+<rect class="leg" x="65" y="-55" width="17" height="55" rx="7" fill="#fffdf6" stroke="#1f1f1f" stroke-width="2"/>
+</g>
+<ellipse cx="0" cy="-92" rx="112" ry="42" fill="#fffdf6" stroke="#1f1f1f" stroke-width="2"/>
+<ellipse cx="-52" cy="-105" rx="24" ry="14" fill="#111"/>
+<ellipse cx="-8" cy="-86" rx="19" ry="22" fill="#111"/>
+<ellipse cx="54" cy="-100" rx="27" ry="15" fill="#111"/>
+<ellipse cx="132" cy="-122" rx="36" ry="30" fill="#fffdf6" stroke="#1f1f1f" stroke-width="2"/>
+<ellipse cx="100" cy="-138" rx="13" ry="7" fill="#fffdf6" stroke="#1f1f1f" stroke-width="2" transform="rotate(-25 100 -138)"/>
+<ellipse cx="164" cy="-138" rx="13" ry="7" fill="#fffdf6" stroke="#1f1f1f" stroke-width="2" transform="rotate(25 164 -138)"/>
+<path d="M116 -151 q-9 -16 -19 -9" fill="none" stroke="#c9a227" stroke-width="7" stroke-linecap="round"/>
+<path d="M148 -151 q9 -16 19 -9" fill="none" stroke="#c9a227" stroke-width="7" stroke-linecap="round"/>
+<circle cx="117" cy="-122" r="4.2" fill="#000"/>
+<circle cx="147" cy="-122" r="4.2" fill="#000"/>
+<ellipse cx="132" cy="-102" rx="20" ry="14" fill="#ff9fb2" stroke="#cf536f" stroke-width="2"/>
+<circle cx="125" cy="-102" r="2.2" fill="#8c2740"/>
+<circle cx="139" cy="-102" r="2.2" fill="#8c2740"/>
+</g>
+</g>
+
+<g class="animal pig" transform="translate(320,800)">
+<ellipse cx="-2" cy="3" rx="82" ry="10" fill="#123f0e" opacity="0.22"/>
+<g>
+<animateTransform attributeName="transform" type="translate" values="0 0;0 -13;0 0" keyTimes="0;0.5;1" dur="0.92s" begin="-0.06s" repeatCount="indefinite" calcMode="linear"/>
+<path d="M-64 -54 C-92 -72 -98 -38 -76 -32" fill="none" stroke="#ef98ac" stroke-width="6" stroke-linecap="round"/>
+<g class="legs">
+<rect class="leg" x="-46" y="-32" width="13" height="32" rx="5" fill="#f6a6b8" stroke="#b84b65" stroke-width="2"/>
+<rect class="leg" x="-19" y="-32" width="13" height="32" rx="5" fill="#f6a6b8" stroke="#b84b65" stroke-width="2"/>
+<rect class="leg" x="15" y="-32" width="13" height="32" rx="5" fill="#f6a6b8" stroke="#b84b65" stroke-width="2"/>
+<rect class="leg" x="40" y="-32" width="13" height="32" rx="5" fill="#f6a6b8" stroke="#b84b65" stroke-width="2"/>
+</g>
+<ellipse cx="-2" cy="-55" rx="64" ry="41" fill="#f8b7c6" stroke="#b84b65" stroke-width="2"/>
+<circle cx="56" cy="-56" r="34" fill="#f9c1cf" stroke="#b84b65" stroke-width="2"/>
+<path d="M40 -81 L53 -63 L34 -58 Z" fill="#dd8da3" stroke="#a84d64" stroke-width="2"/>
+<path d="M72 -81 L59 -63 L78 -58 Z" fill="#dd8da3" stroke="#a84d64" stroke-width="2"/>
+<circle cx="46" cy="-65" r="4" fill="#111"/>
+<circle cx="68" cy="-65" r="4" fill="#111"/>
+<ellipse cx="56" cy="-45" rx="18" ry="13" fill="#ef98ac" stroke="#a84d64" stroke-width="2"/>
+<circle cx="50" cy="-45" r="2.3" fill="#7c2f43"/>
+<circle cx="62" cy="-45" r="2.3" fill="#7c2f43"/>
+</g>
+</g>
+
+<g class="animal sheep" transform="translate(545,785)">
+<ellipse cx="12" cy="3" rx="92" ry="10" fill="#123f0e" opacity="0.22"/>
+<g>
+<animateTransform attributeName="transform" type="translate" values="0 0;0 -14;0 0" keyTimes="0;0.5;1" dur="0.78s" begin="-0.31s" repeatCount="indefinite" calcMode="linear"/>
+<g class="legs">
+<rect class="leg" x="-50" y="-42" width="13" height="42" rx="5" fill="#26262b"/>
+<rect class="leg" x="-21" y="-42" width="13" height="42" rx="5" fill="#26262b"/>
+<rect class="leg" x="10" y="-42" width="13" height="42" rx="5" fill="#26262b"/>
+<rect class="leg" x="40" y="-42" width="13" height="42" rx="5" fill="#26262b"/>
+</g>
+<ellipse cx="0" cy="-70" rx="62" ry="36" fill="#fbfbf7" stroke="#444" stroke-width="2"/>
+<circle cx="-48" cy="-85" r="22" fill="#fffef8" stroke="#444" stroke-width="2"/>
+<circle cx="-16" cy="-98" r="24" fill="#fffef8" stroke="#444" stroke-width="2"/>
+<circle cx="18" cy="-93" r="22" fill="#fffef8" stroke="#444" stroke-width="2"/>
+<circle cx="47" cy="-78" r="20" fill="#fffef8" stroke="#444" stroke-width="2"/>
+<circle cx="-38" cy="-52" r="19" fill="#fffef8" stroke="#444" stroke-width="2"/>
+<circle cx="4" cy="-48" r="18" fill="#fffef8" stroke="#444" stroke-width="2"/>
+<circle cx="34" cy="-52" r="19" fill="#fffef8" stroke="#444" stroke-width="2"/>
+<ellipse cx="74" cy="-72" rx="28" ry="31" fill="#3a3a44" stroke="#1e1e24" stroke-width="2"/>
+<ellipse cx="50" cy="-82" rx="12" ry="7" fill="#2b2b33" transform="rotate(-22 50 -82)"/>
+<ellipse cx="98" cy="-82" rx="12" ry="7" fill="#2b2b33" transform="rotate(22 98 -82)"/>
+<circle cx="65" cy="-72" r="5" fill="#fff"/>
+<circle cx="83" cy="-72" r="5" fill="#fff"/>
+<circle cx="65" cy="-72" r="2.5" fill="#000"/>
+<circle cx="83" cy="-72" r="2.5" fill="#000"/>
+<ellipse cx="74" cy="-56" rx="13" ry="10" fill="#585866"/>
+</g>
+</g>
+
+<g class="animal horse" transform="translate(1155,755)">
+<ellipse cx="-2" cy="5" rx="126" ry="12" fill="#123f0e" opacity="0.22"/>
+<g>
+<animateTransform attributeName="transform" type="translate" values="0 0;0 -18;0 0" keyTimes="0;0.5;1" dur="0.98s" begin="-0.46s" repeatCount="indefinite" calcMode="linear"/>
+<path d="M-104 -110 C-138 -106 -146 -64 -120 -48" fill="none" stroke="#4f321e" stroke-width="12" stroke-linecap="round"/>
+<g class="legs">
+<rect class="leg" x="-78" y="-62" width="18" height="62" rx="7" fill="#8b5a3c" stroke="#3f250f" stroke-width="2"/>
+<rect class="leg" x="-45" y="-62" width="18" height="62" rx="7" fill="#8b5a3c" stroke="#3f250f" stroke-width="2"/>
+<rect class="leg" x="32" y="-62" width="18" height="62" rx="7" fill="#8b5a3c" stroke="#3f250f" stroke-width="2"/>
+<rect class="leg" x="66" y="-62" width="18" height="62" rx="7" fill="#8b5a3c" stroke="#3f250f" stroke-width="2"/>
+</g>
+<ellipse cx="-8" cy="-102" rx="110" ry="42" fill="#a9714b" stroke="#5a361d" stroke-width="2"/>
+<path d="M68 -108 L92 -174 L128 -178 L116 -100 Z" fill="#a9714b" stroke="#5a361d" stroke-width="2"/>
+<path d="M72 -118 L86 -162 L106 -180 L124 -186" fill="none" stroke="#4f321e" stroke-width="11" stroke-linecap="round"/>
+<ellipse cx="132" cy="-188" rx="31" ry="24" fill="#a9714b" stroke="#5a361d" stroke-width="2"/>
+<path d="M118 -209 L125 -190 L112 -192 Z" fill="#8b5a3c" stroke="#5a361d" stroke-width="2"/>
+<path d="M146 -209 L139 -190 L152 -192 Z" fill="#8b5a3c" stroke="#5a361d" stroke-width="2"/>
+<circle cx="122" cy="-188" r="4" fill="#111"/>
+<circle cx="143" cy="-188" r="4" fill="#111"/>
+<ellipse cx="155" cy="-180" rx="13" ry="10" fill="#8b5a3c" stroke="#5a361d" stroke-width="2"/>
+</g>
+</g>
+
+</svg>
+</body>
+</html>

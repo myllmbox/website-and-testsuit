@@ -1,0 +1,396 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animated Underwater Scene</title>
+<style>
+html, body { margin: 0; height: 100%; overflow: hidden; background: #01203a; }
+svg { display: block; width: 100vw; height: 100vh; }
+</style>
+</head>
+<body>
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" role="img" aria-label="Animated underwater scene">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#bdefff"/>
+      <stop offset="45%" stop-color="#2689d2"/>
+      <stop offset="100%" stop-color="#031d38"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f1dcab"/>
+      <stop offset="55%" stop-color="#c99b63"/>
+      <stop offset="100%" stop-color="#7d5933"/>
+    </linearGradient>
+  </defs>
+  <g id="world"></g>
+</svg>
+<script>
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  var scene = document.getElementById("scene");
+  var world = document.getElementById("world");
+  var W = 800, H = 600, sandY = 500, floorH = 80, bubbleScale = 1;
+  var bubbles = [], fishList = [];
+
+  function now() {
+    return (window.performance && performance.now) ? performance.now() : Date.now();
+  }
+
+  var rAF = window.requestAnimationFrame || function (cb) {
+    return setTimeout(function () { cb(now()); }, 16);
+  };
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) {
+      if (Object.prototype.hasOwnProperty.call(attrs, k)) e.setAttribute(k, attrs[k]);
+    }
+    return e;
+  }
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function clear(node) {
+    while (node.firstChild) node.removeChild(node.firstChild);
+  }
+
+  function makeFish1() {
+    var g = el("g", { "data-fish": "true" });
+    g.appendChild(el("polygon", {
+      points: "-118,0 -194,-72 -194,72",
+      fill: "#ef6c00",
+      stroke: "#bf360c",
+      "stroke-width": 4
+    }));
+    g.appendChild(el("ellipse", {
+      cx: 0, cy: 0, rx: 120, ry: 82,
+      fill: "#ff9237",
+      stroke: "#bf360c",
+      "stroke-width": 4
+    }));
+    g.appendChild(el("path", {
+      d: "M-32,-55 Q18,-138 56,-48 Z",
+      fill: "#fb8c00",
+      stroke: "#bf360c",
+      "stroke-width": 4
+    }));
+    g.appendChild(el("ellipse", {
+      cx: 24, cy: 30, rx: 44, ry: 19,
+      fill: "#ffb74d",
+      stroke: "#bf360c",
+      "stroke-width": 3,
+      transform: "rotate(20 24 30)"
+    }));
+    g.appendChild(el("circle", {
+      cx: 76, cy: -18, r: 20,
+      fill: "#ffffff",
+      stroke: "#222222",
+      "stroke-width": 2
+    }));
+    g.appendChild(el("circle", {
+      cx: 79, cy: -18, r: 8,
+      fill: "#111111"
+    }));
+    g.appendChild(el("path", {
+      d: "M104,18 Q116,30 130,16",
+      fill: "none",
+      stroke: "#5d2000",
+      "stroke-width": 4,
+      "stroke-linecap": "round"
+    }));
+    return g;
+  }
+
+  function makeFish2() {
+    var g = el("g", { "data-fish": "true" });
+    g.appendChild(el("polygon", {
+      points: "78,0 140,-28 140,28",
+      fill: "#0089a5",
+      stroke: "#01579b",
+      "stroke-width": 4
+    }));
+    g.appendChild(el("ellipse", {
+      cx: 0, cy: 0, rx: 106, ry: 36,
+      fill: "#26c6da",
+      stroke: "#01579b",
+      "stroke-width": 4
+    }));
+    g.appendChild(el("path", {
+      d: "M8,-22 Q-26,-78 -48,-16 Z",
+      fill: "#00acc1",
+      stroke: "#01579b",
+      "stroke-width": 4
+    }));
+    g.appendChild(el("ellipse", {
+      cx: -22, cy: 13, rx: 28, ry: 11,
+      fill: "#4dd0e1",
+      stroke: "#01579b",
+      "stroke-width": 3,
+      transform: "rotate(-20 -22 13)"
+    }));
+    g.appendChild(el("circle", {
+      cx: -62, cy: -8, r: 12,
+      fill: "#ffffff",
+      stroke: "#222222",
+      "stroke-width": 2
+    }));
+    g.appendChild(el("circle", {
+      cx: -65, cy: -8, r: 5,
+      fill: "#111111"
+    }));
+    g.appendChild(el("path", {
+      d: "M-84,6 Q-94,15 -102,4",
+      fill: "none",
+      stroke: "#00363a",
+      "stroke-width": 3,
+      "stroke-linecap": "round"
+    }));
+    return g;
+  }
+
+  function addWeed(x, y, h, side, delay, dur) {
+    var outer = el("g", {
+      transform: "translate(" + x + " " + y + ")",
+      "data-plant": "true"
+    });
+    var inner = el("g");
+    var s = side * rand(18, 34);
+
+    inner.appendChild(el("path", {
+      d: "M0 0 C " + (-s) + " " + (-h * 0.25) + ", " + s + " " + (-h * 0.45) + ", " + (-s * 0.45) + " " + (-h * 0.65) + " C " + (s * 0.8) + " " + (-h * 0.83) + ", " + (-s * 0.3) + " " + (-h * 0.92) + ", " + (s * 0.2) + " " + (-h),
+      stroke: "#2f9e44",
+      fill: "none",
+      "stroke-width": 11,
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round"
+    }));
+    inner.appendChild(el("path", {
+      d: "M" + (-s * 0.25) + " " + (-h * 0.5) + " Q" + (-s * 0.85) + " " + (-h * 0.62) + ", " + (-s * 0.35) + " " + (-h * 0.72),
+      stroke: "#43a047",
+      fill: "none",
+      "stroke-width": 7,
+      "stroke-linecap": "round"
+    }));
+    inner.appendChild(el("path", {
+      d: "M" + (s * 0.55) + " " + (-h * 0.3) + " Q" + (s * 0.95) + " " + (-h * 0.22) + ", " + (s * 0.35) + " " + (-h * 0.18),
+      stroke: "#66bb6a",
+      fill: "none",
+      "stroke-width": 7,
+      "stroke-linecap": "round"
+    }));
+    inner.appendChild(el("animateTransform", {
+      attributeName: "transform",
+      type: "rotate",
+      values: "-4;4;-4",
+      keyTimes: "0;0.5;1",
+      dur: dur,
+      repeatCount: "indefinite",
+      begin: delay
+    }));
+
+    outer.appendChild(inner);
+    world.appendChild(outer);
+  }
+
+  function buildSeaweed() {
+    var spots = [0.16, 0.44, 0.81];
+    for (var i = 0; i < spots.length; i++) {
+      addWeed(
+        W * spots[i] + rand(-14, 14),
+        sandY + floorH * 0.55,
+        H * rand(0.16, 0.26),
+        (i % 2 ? -1 : 1),
+        "-" + (1.2 * i).toFixed(1) + "s",
+        (5.2 + i * 1.3).toFixed(1) + "s"
+      );
+    }
+  }
+
+  function buildBubbles() {
+    var layer = el("g", { id: "bubbles" });
+    world.appendChild(layer);
+    bubbleScale = Math.max(0.65, Math.min(1.35, H / 900));
+    bubbles = [];
+
+    for (var i = 0; i < 18; i++) {
+      var localR = rand(2.2, 11.5);
+      var r = localR * bubbleScale;
+      var baseX = rand(12, W - 12);
+      var y = sandY - rand(0, Math.max(12, floorH * 0.18));
+
+      var b = {
+        baseX: baseX,
+        x: baseX,
+        y: y,
+        r: r,
+        vy: -(34 + (13.5 - localR) * 4.5) * Math.max(0.75, bubbleScale),
+        wob: rand(4, 12) * bubbleScale,
+        phase: rand(0, 6.28),
+        el: el("circle", {
+          cx: baseX,
+          cy: y,
+          r: r,
+          fill: "#d9f7ff",
+          "fill-opacity": "0.65",
+          stroke: "#ffffff",
+          "stroke-opacity": "0.8",
+          "stroke-width": 1.5,
+          "data-bubble": "true"
+        })
+      };
+
+      bubbles.push(b);
+      layer.appendChild(b.el);
+    }
+  }
+
+  function buildFishes() {
+    var layer = el("g", { id: "fishLayer" });
+    world.appendChild(layer);
+
+    var baseScale = Math.max(0.38, Math.min(1.12, Math.min(W / 1600, H / 900)));
+    var s1 = baseScale;
+    var s2 = baseScale * 0.74;
+
+    var f1 = {
+      el: makeFish1(),
+      x: W * 0.15,
+      baseY: H * 0.34,
+      vx: 105,
+      scale: s1,
+      half: 205 * s1,
+      amp: 22 * s1,
+      bobSpeed: 1.2,
+      phase: 0.2
+    };
+
+    var f2 = {
+      el: makeFish2(),
+      x: W * 0.82,
+      baseY: H * 0.60,
+      vx: -215,
+      scale: s2,
+      half: 150 * s2,
+      amp: 16 * s2,
+      bobSpeed: 1.9,
+      phase: 2.1
+    };
+
+    fishList.push(f1, f2);
+    layer.appendChild(f1.el);
+    layer.appendChild(f2.el);
+  }
+
+  function updateBubbles(dt, t) {
+    for (var i = 0; i < bubbles.length; i++) {
+      var b = bubbles[i];
+      b.y += b.vy * dt;
+      b.x = b.baseX + Math.sin(t * 0.0015 + b.phase) * b.wob;
+
+      if (b.y + b.r < -12) {
+        var localR = rand(2.2, 11.5);
+        b.baseX = rand(12, W - 12);
+        b.y = sandY - rand(0, Math.max(12, floorH * 0.18));
+        b.r = localR * bubbleScale;
+        b.vy = -(34 + (13.5 - localR) * 4.5) * Math.max(0.75, bubbleScale);
+        b.el.setAttribute("r", b.r);
+      }
+
+      b.el.setAttribute("cx", b.x);
+      b.el.setAttribute("cy", b.y);
+    }
+  }
+
+  function updateFish(dt, t) {
+    for (var i = 0; i < fishList.length; i++) {
+      var f = fishList[i];
+      f.x += f.vx * f.scale * dt;
+
+      if (f.vx > 0) {
+        if (f.x - f.half > W) f.x = -f.half;
+      } else {
+        if (f.x + f.half < 0) f.x = W + f.half;
+      }
+
+      var y = f.baseY + Math.sin(t * 0.001 * f.bobSpeed + f.phase) * f.amp;
+      f.el.setAttribute("transform", "translate(" + f.x + " " + y + ") scale(" + f.scale + ")");
+    }
+  }
+
+  function build() {
+    W = Math.max(320, window.innerWidth || 1280);
+    H = Math.max(240, window.innerHeight || 720);
+    scene.setAttribute("viewBox", "0 0 " + W + " " + H);
+    clear(world);
+
+    world.appendChild(el("rect", {
+      x: 0, y: 0, width: W, height: H,
+      fill: "url(#water)"
+    }));
+
+    floorH = Math.max(36, H * 0.12);
+    sandY = H - floorH;
+
+    var d =
+      "M0 " + H +
+      " L0 " + (sandY + 12) +
+      " C " + (W * 0.18) + " " + (sandY - 10) +
+      ", " + (W * 0.34) + " " + (sandY + 24) +
+      ", " + (W * 0.52) + " " + (sandY + 6) +
+      " C " + (W * 0.72) + " " + (sandY - 14) +
+      ", " + (W * 0.86) + " " + (sandY + 22) +
+      ", " + W + " " + (sandY + 2) +
+      " L " + W + " " + H +
+      " Z";
+
+    world.appendChild(el("path", {
+      d: d,
+      fill: "url(#sand)"
+    }));
+
+    for (var r = 0; r < 6; r++) {
+      world.appendChild(el("ellipse", {
+        cx: rand(0, W),
+        cy: sandY + rand(floorH * 0.2, floorH * 0.8),
+        rx: rand(24, 110),
+        ry: rand(8, 24),
+        fill: "#9a744a",
+        opacity: rand(0.18, 0.45)
+      }));
+    }
+
+    buildSeaweed();
+    buildBubbles();
+    buildFishes();
+  }
+
+  var last = now();
+
+  function loop(ts) {
+    var current = ts || now();
+    var dt = (current - last) / 1000;
+    if (!isFinite(dt) || dt < 0) dt = 0;
+    if (dt > 0.1) dt = 0.1;
+    last = current;
+
+    updateBubbles(dt, current);
+    updateFish(dt, current);
+    rAF(loop);
+  }
+
+  build();
+
+  var rt;
+  window.addEventListener("resize", function () {
+    clearTimeout(rt);
+    rt = setTimeout(build, 150);
+  });
+
+  rAF(loop);
+})();
+</script>
+</body>
+</html>

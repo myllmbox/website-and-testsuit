@@ -1,0 +1,179 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Underwater Scene</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#04284a}
+svg{position:fixed;left:0;top:0;display:block;width:100vw;height:100vh;border:0}
+</style>
+</head>
+<body>
+<svg id="sea" viewBox="0 0 1000 600" preserveAspectRatio="none" role="img" aria-label="Animated underwater scene">
+<defs>
+<linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#79d7ff"/>
+<stop offset=".35" stop-color="#1586ca"/>
+<stop offset="1" stop-color="#032141"/>
+</linearGradient>
+<linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#e1d0aa"/>
+<stop offset="1" stop-color="#6b5234"/>
+</linearGradient>
+<radialGradient id="bubble" cx=".34" cy=".3" r=".78">
+<stop offset="0" stop-color="#ffffff" stop-opacity=".85"/>
+<stop offset=".3" stop-color="#e8fbff" stop-opacity=".35"/>
+<stop offset="1" stop-color="#d1efff" stop-opacity=".08"/>
+</radialGradient>
+<linearGradient id="f1" x1="0" y1="0" x2=".9" y2="1">
+<stop offset="0" stop-color="#ffca85"/>
+<stop offset="1" stop-color="#e45d12"/>
+</linearGradient>
+<linearGradient id="f2" x1="0" y1="0" x2=".8" y2="1">
+<stop offset="0" stop-color="#a7f2ff"/>
+<stop offset="1" stop-color="#0b68a6"/>
+</linearGradient>
+</defs>
+
+<rect x="0" y="0" width="1000" height="600" fill="url(#water)"/>
+<polygon points="120 0 220 0 105 600 -20 600" fill="#ffffff" opacity=".035"/>
+<polygon points="620 0 700 0 615 600 530 600" fill="#ffffff" opacity=".025"/>
+
+<path d="M0 540 C150 508 255 578 400 542 C550 506 655 582 800 542 C900 514 960 566 1000 544 L1000 600 L0 600 Z" fill="url(#sand)"/>
+<ellipse cx="170" cy="566" rx="48" ry="17" fill="#7b623d" opacity=".75"/>
+<ellipse cx="645" cy="558" rx="42" ry="14" fill="#8b6f48" opacity=".7"/>
+<ellipse cx="905" cy="566" rx="36" ry="12" fill="#684f2f" opacity=".75"/>
+
+<g id="plants">
+<g class="weed" data-x="210" data-y="572">
+<path d="M0 0 C10 -20 -8 -38 7 -58 C16 -76 -6 -94 8 -112" fill="none" stroke="#2f8f4a" stroke-width="10" stroke-linecap="round"/>
+<path d="M2 -2 C14 -22 -2 -42 12 -64 C22 -82 -2 -102 10 -124" fill="none" stroke="#37a955" stroke-width="7" stroke-linecap="round"/>
+<path d="M-3 -4 C7 -26 -14 -48 -1 -70" fill="none" stroke="#1d6b31" stroke-width="6" stroke-linecap="round"/>
+</g>
+<g class="weed" data-x="770" data-y="556">
+<path d="M0 0 C-10 -20 10 -40 -6 -60 C-18 -78 8 -98 -8 -120" fill="none" stroke="#2f8f4a" stroke-width="10" stroke-linecap="round"/>
+<path d="M-2 -2 C12 -24 -6 -46 10 -68 C22 -86 -4 -106 10 -128" fill="none" stroke="#37a955" stroke-width="7" stroke-linecap="round"/>
+<path d="M3 -4 C-8 -26 12 -48 -3 -72" fill="none" stroke="#1d6b31" stroke-width="6" stroke-linecap="round"/>
+</g>
+</g>
+
+<g id="fish1" transform="translate(140 250) scale(1 1)">
+<polygon points="-58 -34 -58 34 -138 0" fill="#c84918"/>
+<ellipse cx="0" cy="0" rx="62" ry="45" fill="url(#f1)" stroke="#7f2506" stroke-width="2"/>
+<polygon points="-16 -41 10 -82 42 -39" fill="#ef7331" stroke="#92350c" stroke-width="1.5"/>
+<polygon points="18 22 -14 64 42 44" fill="#f4873e" stroke="#9d3e10" stroke-width="1.5"/>
+<circle cx="39" cy="-10" r="11" fill="#ffffff" stroke="#321308" stroke-width="1.5"/>
+<circle cx="42" cy="-11" r="4.8" fill="#181818"/>
+<path d="M60 10 Q48 24 36 15" fill="none" stroke="#7c2305" stroke-width="4" stroke-linecap="round"/>
+</g>
+
+<g id="fish2" transform="translate(860 415) scale(-1 1)">
+<polygon points="-42 -22 -42 22 -110 0" fill="#0b4f80"/>
+<ellipse cx="0" cy="0" rx="48" ry="18" fill="url(#f2)" stroke="#06385c" stroke-width="2"/>
+<polygon points="-14 -16 4 -44 26 -15" fill="#0e7cbf" stroke="#063f61" stroke-width="1.2"/>
+<polygon points="14 8 -6 32 32 21" fill="#44c8ef" stroke="#0c5d8c" stroke-width="1.2"/>
+<circle cx="33" cy="-5" r="7.6" fill="#ffffff" stroke="#07304f" stroke-width="1.2"/>
+<circle cx="35" cy="-6" r="3.4" fill="#111111"/>
+<path d="M45 5 Q36 15 28 9" fill="none" stroke="#042e4d" stroke-width="3" stroke-linecap="round"/>
+</g>
+
+<g id="bubbles"></g>
+</svg>
+
+<script>
+(function(){
+var NS="http://www.w3.org/2000/svg";
+var W=1000,H=600;
+var fish1=document.getElementById("fish1");
+var fish2=document.getElementById("fish2");
+var bubbleLayer=document.getElementById("bubbles");
+
+var weeds=[];
+var weedEls=document.querySelectorAll(".weed");
+for(var i=0;i<weedEls.length;i++){
+  var e=weedEls[i];
+  weeds.push({el:e,x:Number(e.getAttribute("data-x")),y:Number(e.getAttribute("data-y")),phase:i*1.7});
+}
+
+var bubbles=[];
+function addBubble(initial){
+  var g=document.createElementNS(NS,"g");
+  var r=4+Math.random()*11;
+  var c=document.createElementNS(NS,"circle");
+  c.setAttribute("r",r);
+  c.setAttribute("fill","url(#bubble)");
+  c.setAttribute("stroke","#ffffff");
+  c.setAttribute("stroke-opacity","0.5");
+  c.setAttribute("stroke-width","1");
+  g.appendChild(c);
+
+  var h=document.createElementNS(NS,"circle");
+  var hr=Math.max(1,r*0.24);
+  h.setAttribute("cx",-r*0.32);
+  h.setAttribute("cy",-r*0.34);
+  h.setAttribute("r",hr);
+  h.setAttribute("fill","#ffffff");
+  h.setAttribute("opacity","0.55");
+  g.appendChild(h);
+
+  var x=45+Math.random()*910;
+  var y=initial ? 550+Math.random()*48 : 565+Math.random()*35;
+  var v=20+(16-r)*3.4;
+  bubbles.push({el:g,x:x,y:y,r:r,v:v});
+  bubbleLayer.appendChild(g);
+}
+
+for(var b=0;b<10;b++) addBubble(true);
+
+var x1=140,y1=250,m1=170,v1=52;
+var x2=860,y2=415,m2=130,v2=124;
+var last=performance.now();
+
+function tick(now){
+  var dt=(now-last)/1000;
+  if(dt<0)dt=0;
+  if(dt>0.08)dt=0.08;
+  last=now;
+
+  x1 += v1*dt;
+  if(x1-m1 > W) x1=-m1;
+  fish1.setAttribute("transform","translate("+x1+" "+y1+") scale(1 1)");
+
+  x2 -= v2*dt;
+  if(x2+m2 < 0) x2=W+m2;
+  fish2.setAttribute("transform","translate("+x2+" "+y2+") scale(-1 1)");
+
+  for(var i=0;i<bubbles.length;i++){
+    var bb=bubbles[i];
+    bb.y -= bb.v*dt;
+    if(bb.y + bb.r < 0){
+      bb.x=45+Math.random()*910;
+      bb.y=565+Math.random()*35;
+      bb.r=4+Math.random()*11;
+      bb.v=20+(16-bb.r)*3.4;
+      var nodes=bb.el.childNodes;
+      nodes[0].setAttribute("r",bb.r);
+      nodes[1].setAttribute("r",Math.max(1,bb.r*0.24));
+      nodes[1].setAttribute("cx",-bb.r*0.32);
+      nodes[1].setAttribute("cy",-bb.r*0.34);
+    }
+    bb.el.setAttribute("transform","translate("+bb.x+" "+bb.y+")");
+  }
+
+  for(var j=0;j<weeds.length;j++){
+    var ww=weeds[j];
+    var a=Math.sin(now/900+ww.phase)*6 + Math.sin(now/1700+ww.phase*1.3)*2.5;
+    ww.el.setAttribute("transform","translate("+ww.x+" "+ww.y+") rotate("+a+")");
+  }
+
+  requestAnimationFrame(tick);
+}
+
+requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

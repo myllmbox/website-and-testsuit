@@ -4,6 +4,427 @@
  "box": "one DGX Spark (GB10, 128 GB unified memory) · (TP=2) = two Sparks",
  "models": [
   {
+   "id": "mbx-v54-az",
+   "name": "My LLM Box v5.4 (TP=1) · AZ",
+   "model": "Qwen3.8-Flash-Next FP4-Local-AZ",
+   "hf": "https://huggingface.co/azampatti/Qwen3.8-Flash-Next-FP4-Local-AZ",
+   "stack": "vLLM 0.32 · MTP 1–12",
+   "image": "myllmbox/qwen38-flash-next-vllm:v5.4",
+   "link": "https://github.com/myllmbox/qwen38-flash-next-recipe",
+   "spec": {
+    "max_context": 409600,
+    "kv_pool": 750933,
+    "kv_dtype": "bf16",
+    "kv_shared": true,
+    "seats": 16,
+    "notes": {
+     "kv_pool": "bf16 sparse-attention KV, shared by all running requests",
+     "model": "one DGX Spark: NVIDIA's FP4-Local routed at 5 of 512 experts with a re-trained wider shared expert (azampatti); every other tensor as NVIDIA ships it"
+    }
+   },
+   "gauntlet": {
+    "thinking_tps": 56.5,
+    "code_tps": 102.8,
+    "peak_tps": 130.4,
+    "avg_tps": 59.8,
+    "runs": 12,
+    "avg_thinking_tokens": 39426,
+    "avg_code_tokens": 5700
+   },
+   "quality": {
+    "pasture": [
+     {
+      "tokens": {
+       "thinking": 38014,
+       "code": 5642
+      },
+      "verdict": "anomaly",
+      "note": "composition error"
+     },
+     {
+      "tokens": {
+       "thinking": 41159,
+       "code": 5117
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 55498,
+       "code": 4922
+      },
+      "verdict": "anomaly",
+      "note": "horse deformed"
+     },
+     {
+      "tokens": {
+       "thinking": 49420,
+       "code": 5127
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 44556,
+       "code": 9039
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 41621,
+       "code": 12353
+      },
+      "verdict": "clean"
+     }
+    ],
+    "fish": [
+     {
+      "tokens": {
+       "thinking": 19125,
+       "code": 2906
+      },
+      "verdict": "anomaly",
+      "note": "tail reversed"
+     },
+     {
+      "tokens": {
+       "thinking": 40105,
+       "code": 4246
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 24020,
+       "code": 7448
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 22682,
+       "code": 4310
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 48600,
+       "code": 2933
+      },
+      "verdict": "clean"
+     },
+     {
+      "tokens": {
+       "thinking": 48306,
+       "code": 4361
+      },
+      "verdict": "clean"
+     }
+    ]
+   },
+   "speed": {
+    "1": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       60.8,
+       59.5,
+       61.1
+      ],
+      "peak": 87.7,
+      "tps": 60.5
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       46.8,
+       46.7,
+       46.2
+      ],
+      "peak": 50.8,
+      "tps": 46.6
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       84.6,
+       90.2,
+       85.8
+      ],
+      "peak": 110.5,
+      "tps": 86.9
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       76.7,
+       78.0,
+       79.9
+      ],
+      "peak": 87.5,
+      "tps": 78.2
+     }
+    },
+    "2": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       99.0,
+       103.4,
+       96.2
+      ],
+      "peak": 140.2,
+      "tps": 99.5
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       78.6,
+       78.3,
+       77.7
+      ],
+      "peak": 84.9,
+      "tps": 78.2
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       145.8,
+       138.7,
+       139.6
+      ],
+      "peak": 167.5,
+      "tps": 141.4
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       131.4,
+       126.8,
+       131.2
+      ],
+      "peak": 148.4,
+      "tps": 129.8
+     }
+    },
+    "4": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       140.8,
+       146.6,
+       147.8
+      ],
+      "peak": 215.2,
+      "tps": 145.1
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       126.1,
+       126.2,
+       127.0
+      ],
+      "peak": 134.7,
+      "tps": 126.4
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       217.7,
+       216.5,
+       198.8
+      ],
+      "peak": 233.2,
+      "tps": 211.0
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       193.8,
+       195.0,
+       195.0
+      ],
+      "peak": 210.5,
+      "tps": 194.6
+     }
+    },
+    "6": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       187.6,
+       189.2,
+       190.7
+      ],
+      "peak": 250.8,
+      "tps": 189.2
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       163.3,
+       163.7,
+       163.4
+      ],
+      "peak": 172.0,
+      "tps": 163.5
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       251.4,
+       247.7,
+       254.7
+      ],
+      "peak": 284.0,
+      "tps": 251.3
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       237.9,
+       242.7,
+       238.0
+      ],
+      "peak": 267.6,
+      "tps": 239.5
+     }
+    },
+    "8": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       226.7,
+       232.3,
+       220.2
+      ],
+      "peak": 295.5,
+      "tps": 226.4
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       191.4,
+       191.9,
+       191.9
+      ],
+      "peak": 205.0,
+      "tps": 191.7
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       304.1,
+       295.8,
+       302.1
+      ],
+      "peak": 336.4,
+      "tps": 300.7
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       280.8,
+       282.0,
+       292.3
+      ],
+      "peak": 317.6,
+      "tps": 285.0
+     }
+    },
+    "12": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       300.3,
+       296.7,
+       299.1
+      ],
+      "peak": 376.8,
+      "tps": 298.7
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       219.5,
+       217.0,
+       218.5
+      ],
+      "peak": 229.8,
+      "tps": 218.3
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       348.6,
+       353.4,
+       345.8
+      ],
+      "peak": 405.2,
+      "tps": 349.3
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       342.2,
+       345.2,
+       346.1
+      ],
+      "peak": 366.3,
+      "tps": 344.5
+     }
+    },
+    "16": {
+     "mixed": {
+      "status": "measured",
+      "runs": [
+       354.0,
+       361.2,
+       353.5
+      ],
+      "peak": 434.5,
+      "tps": 356.2
+     },
+     "prose": {
+      "status": "measured",
+      "runs": [
+       260.3,
+       258.9,
+       257.4
+      ],
+      "peak": 273.6,
+      "tps": 258.9
+     },
+     "code": {
+      "status": "measured",
+      "runs": [
+       398.3,
+       398.1
+      ],
+      "peak": 472.4,
+      "tps": 398.2
+     },
+     "structured": {
+      "status": "measured",
+      "runs": [
+       385.0,
+       391.7,
+       390.9
+      ],
+      "peak": 449.4,
+      "tps": 389.2
+     }
+    }
+   },
+   "logo": "assets/logos/myllmbox.png",
+   "measured_by": {
+    "name": "My LLM Box"
+   }
+  },
+  {
    "id": "mbx-v54-tp2",
    "name": "My LLM Box v5.4 (TP=2)",
    "model": "Qwen3.8-Flash-Next FP4-Local",
